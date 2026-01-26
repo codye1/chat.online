@@ -1,0 +1,31 @@
+.input {
+  color: var(--c-default);
+
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-2) 0;
+
+  font-size: var(--text-xl);
+
+}
+
+.input input {
+  color: var(--c-default);
+  font-size: var(--text-2xl);
+  padding: var(--space-4);
+  background-color: var(--c-light);
+  border-radius: var(--radius-sm);
+
+  border: none;
+  box-shadow: var(--shadow-s);
+}
+
+.input input:-webkit-autofill,
+.input input:-webkit-autofill:hover,
+.input input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--c-default);
+
+  transition: background-color 5000s ease-in-out 0s;
+
+  box-shadow: inset 0 0 0 1000px var(--c-light), var(--shadow-s);
+}

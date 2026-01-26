@@ -1,0 +1,21 @@
+.errors-list{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: var(--text-base);
+  font-weight: 200;
+  color: var(--c-error);
+
+}
+
+.error-icon{
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+
+}
