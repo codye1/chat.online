@@ -4,12 +4,12 @@ import {
   type Action,
   type ThunkDispatch,
 } from "@reduxjs/toolkit";
-import { counterSlice } from "./counterSlice";
 import api from "../api/api";
+import auth from "./auth";
+import { listenerMiddleware } from "@api/listenerMiddleware";
 
 export const rootReducer = combineReducers({
-  counter: counterSlice.reducer,
-  // auth: authSlice.reducer,
+  auth: auth.reducer,
   [api.reducerPath]: api.reducer,
 });
 
@@ -20,5 +20,8 @@ export type AppDispatch = ThunkDispatch<RootState, undefined, Action>;
 export default configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+    getDefaultMiddleware().concat(
+      listenerMiddleware.middleware,
+      api.middleware,
+    ),
 });

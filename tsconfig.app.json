@@ -8,7 +8,6 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
-
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],
@@ -19,7 +18,6 @@
       "@redux/*": ["src/redux/*"],
       "@api/*": ["src/api/*"]
     },
-
 
     /* Bundler mode */
     "moduleResolution": "bundler",
