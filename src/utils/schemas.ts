@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type loginFormState =
+export type LoginFormState =
   | {
       errors?: {
         email?: string[];
@@ -26,7 +26,7 @@ export const loginFormSchema = z.object({
     .trim(),
 });
 
-export type registerFormState =
+export type RegisterFormState =
   | {
       errors?: {
         nickname?: string[];

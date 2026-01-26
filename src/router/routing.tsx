@@ -6,8 +6,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import Auth from "../pages/Auth/Auth.tsx";
-import { routPages } from "./routPages.ts";
 import { useAppSelector } from "@hooks/hooks.ts";
+import routePages from "./routePages.ts";
 
 const Routing = () => {
   const isAuth = useAppSelector((state) => state.auth.isAuth);
@@ -18,7 +18,7 @@ const Routing = () => {
   )}`;
 
   const isKnownAppPath = (pathname: string) =>
-    routPages.some((route) =>
+    routePages.some((route) =>
       matchPath({ path: route.path, end: true }, pathname),
     );
 
@@ -55,8 +55,6 @@ const Routing = () => {
     return target;
   })();
 
-  console.log(isAuth);
-
   return (
     <Routes>
       <Route
@@ -66,7 +64,7 @@ const Routing = () => {
         }
       />
 
-      {routPages.map((route, index) => (
+      {routePages.map((route, index) => (
         <Route
           key={index}
           path={route.path}

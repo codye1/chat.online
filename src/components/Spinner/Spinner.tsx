@@ -1,6 +1,6 @@
 import "./Spinner.css";
 
-const Spiner = () => {
+const Spinner = () => {
   return (
     <div className="flex justify-center">
       <svg
@@ -27,4 +27,4 @@ const Spiner = () => {
   );
 };
 
-export default Spiner;
+export default Spinner;

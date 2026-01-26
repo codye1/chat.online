@@ -41,8 +41,6 @@ export const addAuthListeners = (startAppListening: AppStartListening) => {
   startAppListening({
     matcher: authSlice.endpoints.refresh.matchFulfilled,
     effect: async (action, api) => {
-      console.log(action.payload);
-
       handleAuthSuccess(action.payload as AuthResponse, api);
     },
   });

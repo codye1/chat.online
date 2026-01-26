@@ -2,7 +2,7 @@ import register from "@actions/register";
 import Button from "@components/Button/Button";
 import ErrorsList from "@components/ErrorsList/ErrorsList";
 import Input from "@components/Input/Input";
-import { startTransition, useActionState } from "react";
+import { startTransition, useActionState, type FormEvent } from "react";
 import GoogleButton from "./GoogleButton";
 
 interface IRegister {
@@ -12,7 +12,7 @@ interface IRegister {
 const Register = ({ onHaveAccount }: IRegister) => {
   const [state, action, isPending] = useActionState(register, undefined);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     startTransition(() => {

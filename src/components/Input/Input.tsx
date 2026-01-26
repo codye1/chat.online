@@ -1,4 +1,6 @@
+import ErrorsList from "@components/ErrorsList/ErrorsList";
 import "./Input.css";
+import type { ChangeEvent } from "react";
 
 interface IInput {
   label?: string;
@@ -6,7 +8,7 @@ interface IInput {
   type: "text" | "password" | "email";
   trackValue?: {
     value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   };
   isLoading?: boolean;
   errors?: string[];
@@ -34,15 +36,7 @@ const Input = ({
         placeholder={placeholder}
         disabled={isLoading}
       />
-      {errors && (
-        <ul>
-          {errors.map((error) => (
-            <li key={error} className="input__error">
-              {error}
-            </li>
-          ))}
-        </ul>
-      )}
+      {errors && <ErrorsList errors={errors} />}
     </label>
   );
 };

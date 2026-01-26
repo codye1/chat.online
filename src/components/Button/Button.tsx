@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import "./Button.css";
-import Spiner from "@components/Spinner/Spinner";
+import Spinner from "@components/Spinner/Spinner";
 
 interface IButton {
   children: ReactNode;
@@ -17,7 +17,7 @@ const Button = ({
 }: IButton) => {
   return (
     <button className="btn" onClick={onClick} type={type}>
-      {isLoading ? <Spiner /> : children}
+      {isLoading ? <Spinner /> : children}
     </button>
   );
 };

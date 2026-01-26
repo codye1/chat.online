@@ -1,6 +1,6 @@
 import authSlice from "@api/slices/authSlice";
 import store from "@redux/store";
-import { registerFormSchema, type registerFormState } from "@utils/schemas";
+import { registerFormSchema, type RegisterFormState } from "@utils/schemas";
 
 type apiError = {
   data: {
@@ -10,7 +10,7 @@ type apiError = {
   };
 };
 
-const register = async (_state: registerFormState, formData: FormData) => {
+const register = async (_state: RegisterFormState, formData: FormData) => {
   const validatedFields = registerFormSchema.safeParse({
     nickname: formData.get("nickname"),
     email: formData.get("email"),

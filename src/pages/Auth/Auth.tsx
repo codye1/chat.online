@@ -7,7 +7,7 @@ const Auth = () => {
   const [haveAccount, setHaveAccount] = useState<boolean>(true);
 
   return (
-    <menu className="auth-menu">
+    <main className="auth-menu">
       {haveAccount ? (
         <Login
           onHaveAccount={() => {
@@ -21,7 +21,7 @@ const Auth = () => {
           }}
         />
       )}
-    </menu>
+    </main>
   );
 };
 

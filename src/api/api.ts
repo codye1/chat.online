@@ -5,8 +5,7 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import type { AuthResponse } from "./slices/authSlice";
-
+import authSlice from "./slices/authSlice";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -39,22 +38,8 @@ const baseQueryWithReauth: BaseQueryFn<
           401));
 
   if (isUnauthorized) {
-    const AuthResult = await baseQuery(
-      {
-        url: "auth/Auth",
-        method: "POST",
-      },
-      api,
-      extraOptions,
-    );
-
-    if (AuthResult.data) {
-      const data = AuthResult.data as AuthResponse;
-      localStorage.setItem("token", data.accessToken);
-      result = await baseQuery(args, api, extraOptions);
-    } else {
-      localStorage.removeItem("token");
-    }
+    await api.dispatch(authSlice.endpoints.refresh.initiate());
+    result = await baseQuery(args, api, extraOptions);
   }
   return result;
 };
@@ -66,9 +51,13 @@ const api = createApi({
     getUsers: build.query<{ message: string }, void>({
       query: () => `health`,
     }),
+
+    getProtected: build.query<{ message: string }, void>({
+      query: () => `protected`,
+    }),
   }),
 });
 
-export const { useGetUsersQuery } = api;
+export const { useGetUsersQuery, useGetProtectedQuery } = api;
 
 export default api;
