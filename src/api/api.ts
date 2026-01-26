@@ -29,13 +29,13 @@ const baseQueryWithReauth: BaseQueryFn<
   let result = await baseQuery(args, api, extraOptions);
 
   const error = result.error;
+  const data =
+    typeof error?.data === "object" && error.data !== null
+      ? (error.data as Record<string, unknown>)
+      : undefined;
+
   const isUnauthorized =
-    !!error &&
-    ((typeof error.status === "number" &&
-      (error.status === 401 || error.status === 403)) ||
-      (error.status === "PARSING_ERROR" &&
-        (error as unknown as { originalStatus?: number }).originalStatus ===
-          401));
+    "code" in (data || {}) && data!.code === "UNAUTHORIZED";
 
   if (isUnauthorized) {
     await api.dispatch(authSlice.endpoints.refresh.initiate());
