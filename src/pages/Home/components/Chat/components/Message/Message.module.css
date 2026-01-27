@@ -1,0 +1,35 @@
+.message {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  width: fit-content;
+  font-size: var(--text-xl);
+  background-color: var(--c-foreground);
+  display: flex;
+  box-shadow: var(--shadow-s);
+}
+
+.sentByCurrentUser {
+  background-color: var(--c-light);
+  margin-left: auto;
+}
+
+.check {
+  align-self: flex-end;
+  width: 20px;
+  height: 20px;
+  fill: var(--c-muted);
+  margin-left: 5px;
+}
+
+.read {
+  fill: var(--c-default);
+}
+
+.createdAt {
+  align-self: flex-end;
+  font-size: var(--text-sm);
+  color: var(--c-muted);
+  margin-top: 2px;
+  margin-left: 5px;
+}

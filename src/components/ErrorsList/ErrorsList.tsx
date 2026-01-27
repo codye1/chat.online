@@ -1,4 +1,4 @@
-import "./ErrorsList.css";
+import styles from "./ErrorsList.module.css";
 import errorIcon from "@assets/error.svg";
 interface IErrorsList {
   errors: string[];
@@ -6,10 +6,10 @@ interface IErrorsList {
 
 const ErrorsList = ({ errors }: IErrorsList) => {
   return (
-    <ul className="errors-list">
+    <ul className={styles.errorsList}>
       {errors.map((error, index) => (
         <li key={index + error}>
-          <img src={errorIcon} alt="Error icon" className="error-icon" />
+          <img src={errorIcon} alt="Error icon" className={styles.errorIcon} />
           {error}
         </li>
       ))}

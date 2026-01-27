@@ -1,0 +1,4 @@
+.chatsList {
+  background-color: var(--c-foreground);
+  border: 1px solid var(--c-border);
+}

@@ -1,4 +1,4 @@
-.errors-list{
+.errorsList {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -9,13 +9,11 @@
   font-size: var(--text-base);
   font-weight: 200;
   color: var(--c-error);
-
 }
 
-.error-icon{
+.errorIcon {
   width: 16px;
   height: 16px;
   margin-right: 8px;
   vertical-align: middle;
-
 }

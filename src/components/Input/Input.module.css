@@ -7,9 +7,10 @@
 
   font-size: var(--text-xl);
 
+  width: 100%;
 }
 
-.input input {
+.inputField {
   color: var(--c-default);
   font-size: var(--text-2xl);
   padding: var(--space-4);
@@ -20,12 +21,14 @@
   box-shadow: var(--shadow-s);
 }
 
-.input input:-webkit-autofill,
-.input input:-webkit-autofill:hover,
-.input input:-webkit-autofill:focus {
+.inputField:-webkit-autofill,
+.inputField:-webkit-autofill:hover,
+.inputField:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--c-default);
 
   transition: background-color 5000s ease-in-out 0s;
 
-  box-shadow: inset 0 0 0 1000px var(--c-light), var(--shadow-s);
+  box-shadow:
+    inset 0 0 0 1000px var(--c-light),
+    var(--shadow-s);
 }

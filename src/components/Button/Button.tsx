@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import "./Button.css";
+import styles from "./Button.module.css";
 import Spinner from "@components/Spinner/Spinner";
+import clsx from "clsx";
 
 interface IButton {
   children: ReactNode;
@@ -16,7 +17,12 @@ const Button = ({
   isLoading = false,
 }: IButton) => {
   return (
-    <button className="btn" onClick={onClick} type={type}>
+    <button
+      className={clsx(styles.btn, isLoading && styles.loading)}
+      onClick={onClick}
+      type={type}
+      disabled={isLoading}
+    >
       {isLoading ? <Spinner /> : children}
     </button>
   );

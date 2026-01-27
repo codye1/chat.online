@@ -13,9 +13,13 @@
   font-weight: 700;
 
   margin: var(--space-2) 0;
+
+  &:hover {
+    background-color: var(--c-hover);
+  }
 }
 
-
-.btn:hover {
-  background-color: var(--c-hover);
+.loading {
+  cursor: wait;
+  opacity: 0.8;
 }

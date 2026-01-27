@@ -21,6 +21,24 @@ const baseQuery = fetchBaseQuery({
   credentials: "include",
 });
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const getErrorCode = (
+  error: FetchBaseQueryError | undefined,
+): string | undefined => {
+  if (!error || !isRecord(error)) return undefined;
+
+  const data = (error as FetchBaseQueryError).data;
+  if (!isRecord(data)) return undefined;
+
+  const nestedError = data.error;
+  if (!isRecord(nestedError)) return undefined;
+
+  const code = nestedError.code;
+  return typeof code === "string" ? code : undefined;
+};
+
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -28,14 +46,9 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  const error = result.error;
-  const data =
-    typeof error?.data === "object" && error.data !== null
-      ? (error.data as Record<string, unknown>)
-      : undefined;
-
+  const code = getErrorCode(result.error);
   const isUnauthorized =
-    "code" in (data || {}) && data!.code === "UNAUTHORIZED";
+    code === "UNAUTHORIZED" && result.error?.status === 401;
 
   if (isUnauthorized) {
     await api.dispatch(authSlice.endpoints.refresh.initiate());

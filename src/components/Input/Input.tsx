@@ -1,5 +1,5 @@
 import ErrorsList from "@components/ErrorsList/ErrorsList";
-import "./Input.css";
+import styles from "./Input.module.css";
 import type { ChangeEvent } from "react";
 
 interface IInput {
@@ -25,9 +25,10 @@ const Input = ({
   isLoading,
 }: IInput) => {
   return (
-    <label htmlFor={name} className="input">
+    <label htmlFor={name} className={styles.input}>
       {label}
       <input
+        className={styles.inputField}
         type={type}
         value={trackValue?.value}
         onChange={trackValue?.onChange}
