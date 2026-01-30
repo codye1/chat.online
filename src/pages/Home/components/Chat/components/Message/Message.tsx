@@ -6,7 +6,7 @@ export interface IMessage {
   text: string;
   isSentByCurrentUser: boolean;
   read: boolean;
-  createdAt: Date;
+  createdAt: string;
   id: string;
   ref?: (node: HTMLElement | null) => void;
 }
@@ -30,7 +30,7 @@ const Message = ({
     >
       <span>{text}</span>
       <span className={styles.createdAt}>
-        {createdAt.toLocaleTimeString(undefined, {
+        {new Date(createdAt).toLocaleString(undefined, {
           hour: "2-digit",
           minute: "2-digit",
         })}

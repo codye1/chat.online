@@ -1,7 +1,14 @@
+import { useAppSelector } from "@hooks/hooks";
 import styles from "./Sidebar.module.css";
 
 const Sidebar = () => {
-  return <section className={styles.sidebar}>Sidebar</section>;
+  const user = useAppSelector((state) => state.auth.user);
+
+  return (
+    <section className={styles.sidebar}>
+      {user && <div>{user.nickname}</div>}
+    </section>
+  );
 };
 
 export default Sidebar;

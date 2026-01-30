@@ -1,5 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "@utils/definitions";
+
+import socket from "@utils/socket";
+import type { User } from "@utils/types";
 
 interface AuthState {
   isAuth: boolean;
@@ -18,10 +20,12 @@ export const authSlice = createSlice({
     authUser(state, action: PayloadAction<User>) {
       state.isAuth = true;
       state.user = action.payload;
+      socket.connect();
     },
     logoutUser(state) {
       state.isAuth = false;
       state.user = { email: "", nickname: "", id: "" };
+      socket.disconnect();
     },
   },
 });

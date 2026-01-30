@@ -1,0 +1,16 @@
+.conversationsList {
+  background-color: var(--c-foreground);
+  border: 1px solid var(--c-border);
+}
+
+.searchInput {
+  padding: 0 var(--space-4);
+}
+
+.globalResults {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+  color: var(--c-muted);
+  background-color: var(--c-light);
+}

@@ -23,3 +23,8 @@
   cursor: wait;
   opacity: 0.8;
 }
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

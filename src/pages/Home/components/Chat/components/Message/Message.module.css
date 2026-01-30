@@ -7,6 +7,13 @@
   background-color: var(--c-foreground);
   display: flex;
   box-shadow: var(--shadow-s);
+
+  max-width: 50%;
+  object-fit: cover;
+
+  & :first-child {
+    overflow-wrap: anywhere;
+  }
 }
 
 .sentByCurrentUser {

@@ -8,6 +8,7 @@ interface IButton {
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const Button = ({
@@ -15,13 +16,17 @@ const Button = ({
   onClick,
   type = "button",
   isLoading = false,
+  disabled = false,
 }: IButton) => {
   return (
     <button
-      className={clsx(styles.btn, isLoading && styles.loading)}
+      className={clsx(styles.btn, {
+        [styles.disabled]: disabled,
+        [styles.loading]: isLoading,
+      })}
       onClick={onClick}
       type={type}
-      disabled={isLoading}
+      disabled={isLoading || disabled}
     >
       {isLoading ? <Spinner /> : children}
     </button>

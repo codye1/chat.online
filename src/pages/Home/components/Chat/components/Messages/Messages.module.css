@@ -1,12 +1,13 @@
 .messages {
-    position: relative;
-    display: flex;
-    flex-direction: column;
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
 
-    overflow-y: auto;
-    max-height: 100%;
-    padding: 0 var(--space-5);
+  overflow-y: auto;
+  height: 100%;
+  max-height: 100%;
+  padding: 0 var(--space-5);
 
-    scrollbar-width: thin;
-    scrollbar-color: var(--c-border) transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
 }

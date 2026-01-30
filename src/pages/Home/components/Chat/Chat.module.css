@@ -1,13 +1,18 @@
 .chat {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-    height: 100%;
-    max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  flex: 1 1 0%;
+  height: 100%;
+  max-height: 100vh;
 }
 
-.inputWrapper {
-    display: flex;
-    width: 100%;
-    padding: 0 var(--space-5);
+.noConversation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 0%;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+
 }

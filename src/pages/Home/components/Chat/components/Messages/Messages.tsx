@@ -1,83 +1,53 @@
 import { useAppSelector } from "@hooks/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import ScrollToBottom from "../ScrollToBottom/ScrollToBottom";
-import useObserver from "@hooks/useObserver";
-import { messagesData } from "../../constants";
 import styles from "./Messages.module.css";
 import Message from "../Message/Message";
+import useObserver from "@hooks/useObserver";
+import { markMessageAsRead } from "@utils/socket";
+import type { Message as MessageType } from "@utils/types";
 
-export interface Message {
-  id: string;
-  text: string;
-  userId: string;
-  read: boolean;
-  createdAt: Date;
-}
-
-const Messages = () => {
+const Messages = ({
+  messages,
+  conversationId,
+}: {
+  messages: MessageType[];
+  conversationId: string;
+}) => {
   const user = useAppSelector((state) => state.auth.user);
   const messagesRef = useRef<HTMLDivElement | null>(null);
-  const [messages, setMessages] = useState<Message[]>(messagesData);
-  const didInitialScrollRef = useRef(false);
+
   const { setRef } = useObserver((entry: IntersectionObserverEntry) => {
-    console.log("Message is visible", entry.target.id);
-    setMessages((prevMessages) =>
-      prevMessages.map((message) =>
-        message.id === entry.target.id
-          ? {
-              ...message,
-              read: true,
-            }
-          : message,
-      ),
-    );
+    markMessageAsRead(conversationId, entry.target.id, user.id);
   });
 
-  useEffect(() => {
-    if (didInitialScrollRef.current) return;
-    if (!user?.id) return;
-
-    const firstUnreadIndex = messages.findIndex(
-      (message) => !message.read && message.userId !== user.id,
-    );
-
-    if (firstUnreadIndex !== -1) {
-      const firstUnreadMessage = document.getElementById(
-        messages[firstUnreadIndex].id,
-      );
-      firstUnreadMessage?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    } else {
-      const messagesEl = messagesRef.current;
-      messagesEl?.scrollTo(0, messagesEl.scrollHeight);
-    }
-
-    didInitialScrollRef.current = true;
-  }, [messages, user?.id]);
+  if (!messages) {
+    return <div>Loading messages...</div>;
+  }
 
   return (
     <div ref={messagesRef} className={styles.messages}>
-      {messages.map((message) => (
-        <Message
-          ref={!message.read && message.userId !== user.id ? setRef : undefined}
-          id={message.id}
-          key={message.id}
-          text={message.text}
-          isSentByCurrentUser={message.userId === user.id}
-          read={message.read}
-          createdAt={message.createdAt}
-        />
-      ))}
       <ScrollToBottom
         componentRef={messagesRef}
         unreadCount={
           messages.filter(
-            (message) => !message.read && message.userId !== user.id,
+            (message) => !message.read && message.senderId !== user.id,
           ).length
         }
       />
+      {messages.map((message) => (
+        <Message
+          ref={
+            !message.read && message.senderId !== user.id ? setRef : undefined
+          }
+          id={message.id}
+          key={message.id}
+          text={message.text}
+          isSentByCurrentUser={message.senderId === user.id}
+          read={message.read}
+          createdAt={message.createdAt}
+        />
+      ))}
     </div>
   );
 };

@@ -17,13 +17,12 @@ const ScrollToBottom = ({ componentRef, unreadCount }: IScrollToBottom) => {
     const onScroll = (event: Event) => {
       const el = event.currentTarget;
       if (!(el instanceof HTMLElement)) return;
-      const maxScrollTop = el.scrollHeight - el.clientHeight;
 
-      if (!isScrollToBottomVisible && maxScrollTop - el.scrollTop > 100) {
+      if (!isScrollToBottomVisible && el.scrollTop < -100) {
         setScrollToBottomVisible(true);
       }
 
-      if (isScrollToBottomVisible && maxScrollTop - el.scrollTop <= 100) {
+      if (isScrollToBottomVisible && el.scrollTop > -100) {
         setScrollToBottomVisible(false);
       }
     };

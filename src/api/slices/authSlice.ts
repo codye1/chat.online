@@ -1,5 +1,5 @@
 import api from "@api/api";
-import type { User } from "@utils/definitions";
+import type { User } from "@utils/types";
 
 export interface AuthResponse {
   accessToken: string;
