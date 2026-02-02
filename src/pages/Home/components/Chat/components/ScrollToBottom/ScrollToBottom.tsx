@@ -37,16 +37,18 @@ const ScrollToBottom = ({ componentRef, unreadCount }: IScrollToBottom) => {
     component?.scrollTo({ top: component.scrollHeight, behavior: "smooth" });
   };
   return (
-    <div
-      onClick={scrollToBottom}
-      className={clsx(styles.scrollToBottom, {
-        [styles.show]: isScrollToBottomVisible,
-      })}
-    >
-      {unreadCount > 0 && (
-        <span className={styles.unreadCount}>{unreadCount}</span>
-      )}
-      <img src={chevron} alt="Scroll to bottom" />
+    <div className={styles.scrollAnchor}>
+      <div
+        onClick={scrollToBottom}
+        className={clsx(styles.scrollToBottom, {
+          [styles.show]: isScrollToBottomVisible,
+        })}
+      >
+        {unreadCount > 0 && (
+          <span className={styles.unreadCount}>{unreadCount}</span>
+        )}
+        <img src={chevron} alt="Scroll to bottom" />
+      </div>
     </div>
   );
 };

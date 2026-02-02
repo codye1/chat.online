@@ -7,10 +7,15 @@
   padding: 0 var(--space-4);
 }
 
-.globalResults {
+.searchWrapper{
   display: flex;
-  align-items: center;
-  padding: var(--space-3);
-  color: var(--c-muted);
-  background-color: var(--c-light);
+}
+
+.closeButton {
+  margin-right: var(--space-4);
+
+  & img {
+    width: 40px;
+    height: 40px;
+  }
 }

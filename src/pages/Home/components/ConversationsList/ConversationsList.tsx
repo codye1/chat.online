@@ -4,17 +4,15 @@ import styles from "./ConversationsList.module.css";
 import Input from "@components/Input/Input";
 import { useEffect, useState } from "react";
 import AllConversations from "./components/AllConversations/AllConversations";
-import PreviewItem from "./components/PreviewItem/PreviewItem";
-import { connectToConversation } from "@utils/socket";
-import { useAppDispatch, useAppSelector } from "@hooks/hooks";
-import { setConversation, setRecipient } from "@redux/global";
 import { useSearchQuery } from "@api/slices/chatSclice";
+import Button from "@components/Button/Button";
+import closeIcon from "@assets/close.svg";
+import SearchMenu from "./components/SearchMenu/SearchMenu";
 
 const ConversationsList = () => {
   const [searchFocus, setSearchFocus] = useState(false);
   const [search, setSearch] = useState("");
-  const dispatch = useAppDispatch();
-  const { conversationId } = useAppSelector((state) => state.global);
+
   const { data: searchResults, refetch } = useSearchQuery(
     { query: search },
     { skip: search.trim().length === 0, refetchOnMountOrArgChange: true },
@@ -30,64 +28,29 @@ const ConversationsList = () => {
       maxWidth={vwToPx(65)}
       className={styles.conversationsList}
     >
-      <Input
-        className={styles.searchInput}
-        placeholder="Search conversations..."
-        type="text"
-        name="search"
-        onFocusChange={(isFocused) => {
-          setSearchFocus(isFocused);
-          setSearch("");
-        }}
-        trackValue={{
-          value: search,
-          onChange: (e) => setSearch(e.target.value),
-        }}
-      />
-      {searchFocus && searchResults && (
-        <>
-          {searchResults.conversations.map((item) => {
-            return (
-              <PreviewItem
-                key={item.id}
-                avatarUrl={item.avatarUrl}
-                tile={item.title}
-                description={item.lastMessage?.text ?? ""}
-                meta={{
-                  lastMessageTime: item.lastMessage?.createdAt.toString() || "",
-                  unreadMessages: item.unreadMessages,
-                }}
-                onMouseDown={() => {
-                  connectToConversation(item.id, conversationId);
-                  dispatch(setConversation({ conversationId: item.id }));
-                }}
-              />
-            );
-          })}
+      <span className={styles.searchWrapper}>
+        <Input
+          className={styles.searchInput}
+          placeholder="Search conversations..."
+          type="text"
+          name="search"
+          onFocusChange={(isFocused) => {
+            setSearchFocus(isFocused);
+            setSearch("");
+          }}
+          trackValue={{
+            value: search,
+            onChange: (e) => setSearch(e.target.value),
+          }}
+        />
+        {searchFocus && (
+          <Button className={styles.closeButton}>
+            <img src={closeIcon} alt="Close" />
+          </Button>
+        )}
+      </span>
 
-          {searchResults.global.length > 0 && (
-            <>
-              <div className={styles.globalResults}>Global</div>
-              {searchResults.global.map((global) => {
-                if (global.type === "user") {
-                  return (
-                    <PreviewItem
-                      key={global.id}
-                      avatarUrl={global.avatarUrl}
-                      tile={global.nickname}
-                      description={"@" + global.nickname}
-                      onMouseDown={() => {
-                        dispatch(setRecipient({ recipientId: global.id }));
-                      }}
-                    />
-                  );
-                }
-                return;
-              })}
-            </>
-          )}
-        </>
-      )}
+      {searchFocus && <SearchMenu searchResults={searchResults} />}
       {!searchFocus && <AllConversations />}
     </ResizebleSection>
   );

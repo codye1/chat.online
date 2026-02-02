@@ -21,7 +21,6 @@ interface Conversation {
   participants: User[];
   lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
-  messages: Message[];
 }
 
 interface Global {

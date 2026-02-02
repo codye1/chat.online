@@ -25,12 +25,13 @@
   align-self: flex-end;
   width: 20px;
   height: 20px;
-  fill: var(--c-muted);
+  opacity: 0.5;
+  fill: red;
   margin-left: 5px;
 }
 
 .read {
-  fill: var(--c-default);
+  opacity: 1;
 }
 
 .createdAt {

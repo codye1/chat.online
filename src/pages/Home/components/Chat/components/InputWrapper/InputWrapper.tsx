@@ -2,7 +2,7 @@ import Input from "@components/Input/Input";
 import styles from "./InputWrapper.module.css";
 import Button from "@components/Button/Button";
 import { sendMessage } from "@utils/socket";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import sendIcon from "@assets/send.svg";
 import { useAppSelector } from "@hooks/hooks";
 
@@ -11,6 +11,19 @@ const InputWrapper = () => {
   const { conversationId, recipientId } = useAppSelector(
     (state) => state.global,
   );
+
+  useEffect(() => {
+    const handleEnterKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && message.trim()) {
+        sendMessage({ conversationId, recipientId, text: message });
+        setMessage("");
+      }
+    };
+    window.addEventListener("keydown", handleEnterKey);
+    return () => {
+      window.removeEventListener("keydown", handleEnterKey);
+    };
+  }, [conversationId, recipientId, message]);
 
   return (
     <span className={styles.inputWrapper}>

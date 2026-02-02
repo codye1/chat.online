@@ -1,0 +1,8 @@
+
+.globalResults {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3);
+  color: var(--c-muted);
+  background-color: var(--c-light);
+}

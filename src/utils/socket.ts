@@ -40,15 +40,40 @@ export const sendMessage = ({
 };
 
 export const connectToConversation = (
-  conversationId: string | null,
+  conversationId: string[] | null,
   oldConversationId: string | null,
 ) => {
   socket.emit("conversation:join", { conversationId, oldConversationId });
 };
 
+// i use @id @default(cuid()) so message ids are strings and sortable
+const emitMessageReadDebounced = (() => {
+  const timeouts: Record<string, number | undefined> = {};
+  const maxIds: Record<string, string> = {};
+
+  return (conversationId: string, lastReadMessageId: string) => {
+    if (!maxIds[conversationId] || lastReadMessageId > maxIds[conversationId]) {
+      maxIds[conversationId] = lastReadMessageId;
+    }
+
+    if (timeouts[conversationId]) {
+      clearTimeout(timeouts[conversationId]);
+    }
+
+    timeouts[conversationId] = window.setTimeout(() => {
+      const maxId = maxIds[conversationId];
+      console.log("last read " + maxId);
+      socket.emit("message:read", { conversationId, lastReadMessageId: maxId });
+
+      delete maxIds[conversationId];
+      delete timeouts[conversationId];
+    }, 500);
+  };
+})();
+
 export const markMessageAsRead = (
   conversationId: string,
-  messageId: string,
+  lastReadMessageId: string,
   userId: string,
 ) => {
   // Update messages cache to mark message as read
@@ -60,7 +85,7 @@ export const markMessageAsRead = (
       "getMessages",
       { conversationId },
       (draft) => {
-        const msg = draft.find((m) => m.id === messageId);
+        const msg = draft.find((m) => m.id === lastReadMessageId);
         if (msg) msg.read = true;
         unreadMessagesCount = draft.filter(
           (m) => !m.read && m.senderId !== userId,
@@ -77,6 +102,8 @@ export const markMessageAsRead = (
       }
     }),
   );
+
+  emitMessageReadDebounced(conversationId, lastReadMessageId);
 };
 
 export default socket;

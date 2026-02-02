@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import styles from "./Message.module.css";
-import Check from "@assets/check.svg?react";
+import Check from "@assets/check.svg";
 
 export interface IMessage {
   text: string;
@@ -36,10 +36,10 @@ const Message = ({
         })}
       </span>
       {isSentByCurrentUser && (
-        <Check
-          className={clsx(styles.check, {
-            [styles.read]: read,
-          })}
+        <img
+          className={clsx(styles.check, { [styles.read]: read })}
+          src={Check}
+          alt=""
         />
       )}
     </div>

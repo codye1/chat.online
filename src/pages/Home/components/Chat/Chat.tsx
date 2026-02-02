@@ -13,7 +13,6 @@ const Chat = () => {
     { recipientId, conversationId },
     { skip: !conversationId && !recipientId },
   );
-  console.log(conversationId, recipientId);
 
   useEffect(() => {
     if (conversationId || recipientId) {
@@ -28,7 +27,7 @@ const Chat = () => {
   }
   return (
     <section className={styles.chat}>
-      {data && <Messages conversationId={data.id} messages={data.messages} />}
+      {data && <Messages conversationId={data.id} />}
       <InputWrapper />
     </section>
   );

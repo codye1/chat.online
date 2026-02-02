@@ -12,7 +12,7 @@ interface IResizebleSection {
 const ResizebleSection = ({
   children,
   maxWidth = vwToPx(100),
-  minWidth = vwToPx(10),
+  minWidth = vwToPx(20),
   className,
 }: IResizebleSection) => {
   const [width, setWidth] = useState<number>(vwToPx(50));

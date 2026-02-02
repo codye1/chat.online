@@ -1,4 +1,5 @@
 import api from "@api/api";
+import type { RootState } from "@redux/store";
 import socket, {
   connectToConversation,
   syncSocketAuthorizationFromStorage,
@@ -27,36 +28,11 @@ const chatSlice = api.injectEndpoints({
 
       async onCacheEntryAdded(
         arg,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved, dispatch },
+        { cacheDataLoaded, cacheEntryRemoved, dispatch },
       ) {
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
-
-        const onNewMessage = (message: Message) => {
-          updateCachedData((draft) => {
-            if (!draft) return;
-            if (draft.id === message.conversationId) {
-              draft.messages.unshift(message);
-            }
-          });
-          dispatch(
-            chatSlice.util.updateQueryData(
-              "getConversations",
-              undefined,
-              (draft) => {
-                const convo = draft.find(
-                  (c) => c.id === message.conversationId,
-                );
-                if (convo) {
-                  convo.lastMessage = message;
-                  convo.unreadMessages += 1;
-                }
-              },
-            ),
-          );
-        };
-
         const onUpdateConversation = (conversation: Conversation) => {
           // Це спрацює, коли ми створили/знайшли чат з recipientId
           // Оновлюємо кеш для запиту по recipientId
@@ -84,7 +60,6 @@ const chatSlice = api.injectEndpoints({
               undefined,
               (draft) => {
                 const index = draft.findIndex((c) => c.id === conversation.id);
-                console.log(conversation);
 
                 if (index !== -1) {
                   draft[index] = conversation;
@@ -96,12 +71,10 @@ const chatSlice = api.injectEndpoints({
           );
         };
 
-        socket.on("message:new", onNewMessage);
         socket.on("conversation:update", onUpdateConversation);
 
         await cacheEntryRemoved;
 
-        socket.off("message:new", onNewMessage);
         socket.off("conversation:update", onUpdateConversation);
       },
     }),
@@ -110,15 +83,49 @@ const chatSlice = api.injectEndpoints({
       query: () => `chat/conversations`,
 
       async onCacheEntryAdded(
-        arg,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
+        _arg,
+        {
+          updateCachedData,
+          cacheDataLoaded,
+          cacheEntryRemoved,
+          dispatch,
+          getState,
+        },
       ) {
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
+        updateCachedData((draft) => {
+          const convoIds = draft.map((c) => c.id);
+          connectToConversation(convoIds, null);
+        });
+        const onNewMessage = (message: Message) => {
+          const state = getState() as RootState;
+
+          updateCachedData((draft) => {
+            const convo = draft.find((c) => c.id === message.conversationId);
+            if (convo) {
+              convo.lastMessage = message;
+
+              if (state.auth.user.id !== message.senderId) {
+                convo.unreadMessages += 1;
+              }
+            }
+          });
+
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId: message.conversationId },
+              (messagesDraft) => {
+                messagesDraft.unshift(message);
+              },
+            ),
+          );
+        };
 
         const onNewConversation = (conversation: Conversation) => {
-          connectToConversation(conversation.id, null);
+          connectToConversation([conversation.id], null);
           updateCachedData((draft) => {
             const exists = draft.find((c) => c.id === conversation.id);
             if (!exists) {
@@ -128,15 +135,46 @@ const chatSlice = api.injectEndpoints({
         };
 
         socket.on("conversation:new", onNewConversation);
+        socket.on("message:new", onNewMessage);
 
         await cacheEntryRemoved;
 
+        socket.off("message:new", onNewMessage);
         socket.off("conversation:new", onNewConversation);
       },
     }),
     getMessages: builder.query<Message[], { conversationId: string }>({
       query: ({ conversationId }) =>
         `chat/conversations/${conversationId}/messages`,
+
+      async onCacheEntryAdded(
+        arg,
+        { cacheDataLoaded, cacheEntryRemoved, updateCachedData },
+      ) {
+        await cacheDataLoaded;
+
+        syncSocketAuthorizationFromStorage();
+
+        const onMessageRead = (data: {
+          conversationId: string;
+          lastReadMessageId: string;
+        }) => {
+          if (data.conversationId !== arg.conversationId) return;
+          updateCachedData((draft) => {
+            draft.forEach((message) => {
+              if (message.id <= data.lastReadMessageId) {
+                message.read = true;
+              }
+            });
+          });
+        };
+
+        socket.on("message:read", onMessageRead);
+
+        await cacheEntryRemoved;
+
+        socket.off("message:read", onMessageRead);
+      },
     }),
   }),
 });

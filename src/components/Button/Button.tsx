@@ -9,6 +9,7 @@ interface IButton {
   type?: "button" | "submit" | "reset";
   isLoading?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 const Button = ({
@@ -17,10 +18,11 @@ const Button = ({
   type = "button",
   isLoading = false,
   disabled = false,
+  className,
 }: IButton) => {
   return (
     <button
-      className={clsx(styles.btn, {
+      className={clsx(styles.btn, className, {
         [styles.disabled]: disabled,
         [styles.loading]: isLoading,
       })}
