@@ -18,7 +18,9 @@
 
   opacity: 0;
   transform: translateY(20px) scale(0.9);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 
   background-color: var(--c-foreground);
   box-shadow: var(--shadow-m);
@@ -31,7 +33,6 @@
   opacity: 1;
   transform: translateY(0) scale(1);
 }
-
 
 .unreadCount {
   position: absolute;

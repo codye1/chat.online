@@ -18,9 +18,9 @@
     background-color: var(--c-hover);
   }
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading {

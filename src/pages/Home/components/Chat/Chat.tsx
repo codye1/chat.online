@@ -4,6 +4,7 @@ import InputWrapper from "./components/InputWrapper/InputWrapper";
 import { useEffect } from "react";
 import { useGetConversationQuery } from "@api/slices/chatSclice";
 import { useAppSelector } from "@hooks/hooks";
+import Header from "./components/Header/Header";
 
 const Chat = () => {
   const { conversationId, recipientId } = useAppSelector(
@@ -27,7 +28,8 @@ const Chat = () => {
   }
   return (
     <section className={styles.chat}>
-      {data && <Messages conversationId={data.id} />}
+      {data && <Header conversation={data} />}
+      {data && <Messages conversation={data} />}
       <InputWrapper />
     </section>
   );

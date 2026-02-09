@@ -104,6 +104,8 @@ const chatSlice = api.injectEndpoints({
 
           updateCachedData((draft) => {
             const convo = draft.find((c) => c.id === message.conversationId);
+            console.log(convo?.unreadMessages);
+
             if (convo) {
               convo.lastMessage = message;
 
@@ -118,7 +120,7 @@ const chatSlice = api.injectEndpoints({
               "getMessages",
               { conversationId: message.conversationId },
               (messagesDraft) => {
-                messagesDraft.unshift(message);
+                messagesDraft.items.unshift(message);
               },
             ),
           );
@@ -143,10 +145,66 @@ const chatSlice = api.injectEndpoints({
         socket.off("conversation:new", onNewConversation);
       },
     }),
-    getMessages: builder.query<Message[], { conversationId: string }>({
-      query: ({ conversationId }) =>
-        `chat/conversations/${conversationId}/messages`,
+    getMessages: builder.query<
+      { items: Message[]; hasMoreUp: boolean; hasMoreDown: boolean },
+      {
+        conversationId: string;
+        cursor?: string;
+        direction?: "UP" | "DOWN";
+        jumpToLatest?: boolean;
+      }
+    >({
+      query: ({ conversationId, cursor, direction, jumpToLatest }) => ({
+        url: `chat/conversations/${conversationId}/messages`,
+        method: "GET",
+        params: {
+          cursor,
+          direction,
+          jumpToLatest,
+        },
+      }),
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        return `${endpointName}-${queryArgs.conversationId}`;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        if (typeof newItems.hasMoreUp !== "undefined") {
+          currentCache.hasMoreUp = newItems.hasMoreUp;
+        }
 
+        if (typeof newItems.hasMoreDown !== "undefined") {
+          currentCache.hasMoreDown = newItems.hasMoreDown;
+        }
+
+        if (arg.jumpToLatest) {
+          currentCache.items = newItems.items;
+          return;
+        }
+
+        if (arg.direction === "UP") {
+          currentCache.items.push(...newItems.items);
+        }
+
+        if (arg.direction === "DOWN") {
+          currentCache.items.unshift(...newItems.items);
+        }
+      },
+
+      forceRefetch({ currentArg, previousArg }) {
+        if (!currentArg) {
+          return false;
+        }
+
+        if (!previousArg) {
+          return true;
+        }
+
+        return (
+          currentArg.conversationId !== previousArg.conversationId ||
+          currentArg.cursor !== previousArg.cursor ||
+          currentArg.direction !== previousArg.direction ||
+          currentArg.jumpToLatest !== previousArg.jumpToLatest
+        );
+      },
       async onCacheEntryAdded(
         arg,
         { cacheDataLoaded, cacheEntryRemoved, updateCachedData },
@@ -161,7 +219,7 @@ const chatSlice = api.injectEndpoints({
         }) => {
           if (data.conversationId !== arg.conversationId) return;
           updateCachedData((draft) => {
-            draft.forEach((message) => {
+            draft.items.forEach((message) => {
               if (message.id <= data.lastReadMessageId) {
                 message.read = true;
               }

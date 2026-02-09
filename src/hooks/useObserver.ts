@@ -1,28 +1,47 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-const useObserver = (callback: (entry: IntersectionObserverEntry) => void) => {
-  const observer = useMemo(() => {
-    return new IntersectionObserver(
-      (entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            callback(entry);
-            obs.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 1 },
-    );
+const useObserver = <T>(
+  callback: (entry: IntersectionObserverEntry) => void,
+  options?: IntersectionObserverInit,
+  follow?: T,
+) => {
+  const callbackRef = useRef(callback);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const elementsRef = useRef<Set<HTMLElement>>(new Set());
+
+  useEffect(() => {
+    callbackRef.current = callback;
   }, [callback]);
 
-  const setRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (node !== null) {
-        observer.observe(node);
-      }
-    },
-    [observer],
-  );
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          callbackRef.current(entry);
+        }
+      });
+    }, options);
+
+    elementsRef.current.forEach((element) => {
+      observerRef.current?.observe(element);
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [options, follow]);
+
+  const setRef = useCallback((node: HTMLElement | null) => {
+    if (!node) return;
+
+    elementsRef.current.add(node);
+
+    observerRef.current?.observe(node);
+  }, []);
 
   return { setRef };
 };

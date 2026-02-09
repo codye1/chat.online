@@ -74,33 +74,25 @@ const emitMessageReadDebounced = (() => {
 export const markMessageAsRead = (
   conversationId: string,
   lastReadMessageId: string,
-  userId: string,
 ) => {
-  // Update messages cache to mark message as read
-  // unreadMessagesCount because with convo.unreadMessages = convo.unreadMessages - 1 it sometimes goes more than was readed
-
-  let unreadMessagesCount = 0;
-  store.dispatch(
-    chatSlice.util.updateQueryData(
-      "getMessages",
-      { conversationId },
-      (draft) => {
-        const msg = draft.find((m) => m.id === lastReadMessageId);
-        if (msg) msg.read = true;
-        unreadMessagesCount = draft.filter(
-          (m) => !m.read && m.senderId !== userId,
-        ).length;
-      },
-    ),
-  );
-
   store.dispatch(
     chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
       const convo = draft.find((c) => c.id === conversationId);
       if (convo) {
-        convo.unreadMessages = unreadMessagesCount;
+        convo.unreadMessages -= 1;
       }
     }),
+  );
+
+  store.dispatch(
+    chatSlice.util.updateQueryData(
+      "getConversation",
+      { conversationId, recipientId: null },
+      (draft) => {
+        draft.unreadMessages -= 1;
+        draft.lastReadMessageId = lastReadMessageId;
+      },
+    ),
   );
 
   emitMessageReadDebounced(conversationId, lastReadMessageId);

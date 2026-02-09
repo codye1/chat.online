@@ -4,21 +4,27 @@ import chevron from "@assets/chevron.svg";
 import styles from "./ScrollToBottom.module.css";
 
 interface IScrollToBottom {
-  componentRef: React.RefObject<HTMLElement | null>;
+  component: HTMLDivElement | null;
   unreadCount: number;
+  onClick: () => void;
 }
 
-const ScrollToBottom = ({ componentRef, unreadCount }: IScrollToBottom) => {
+const ScrollToBottom = ({
+  component,
+  unreadCount,
+  onClick,
+}: IScrollToBottom) => {
   const [isScrollToBottomVisible, setScrollToBottomVisible] = useState(false);
-
   useEffect(() => {
-    const component = componentRef.current;
     if (!component) return;
     const onScroll = (event: Event) => {
       const el = event.currentTarget;
       if (!(el instanceof HTMLElement)) return;
 
-      if (!isScrollToBottomVisible && el.scrollTop < -100) {
+      if (
+        !isScrollToBottomVisible &&
+        (el.scrollTop < -100 || unreadCount > 0)
+      ) {
         setScrollToBottomVisible(true);
       }
 
@@ -30,16 +36,12 @@ const ScrollToBottom = ({ componentRef, unreadCount }: IScrollToBottom) => {
     return () => {
       component.removeEventListener("scroll", onScroll);
     };
-  }, [componentRef, isScrollToBottomVisible]);
+  }, [component, isScrollToBottomVisible]);
 
-  const scrollToBottom = () => {
-    const component = componentRef.current;
-    component?.scrollTo({ top: component.scrollHeight, behavior: "smooth" });
-  };
   return (
     <div className={styles.scrollAnchor}>
       <div
-        onClick={scrollToBottom}
+        onClick={onClick}
         className={clsx(styles.scrollToBottom, {
           [styles.show]: isScrollToBottomVisible,
         })}

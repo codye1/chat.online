@@ -30,7 +30,7 @@ const AllConversations = () => {
             }}
             isActive={conversationId === conversation.id}
             onClick={() => {
-              connectToConversation(conversation.id, conversationId);
+              connectToConversation([conversation.id], conversationId);
               dispatch(setConversation({ conversationId: conversation.id }));
             }}
           />

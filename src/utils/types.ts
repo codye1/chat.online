@@ -18,9 +18,9 @@ interface Conversation {
   avatarUrl: string | null;
   title: string;
   type: "DIRECT" | "GROUP";
-  participants: User[];
   lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
+  lastReadMessageId: string;
 }
 
 interface Global {

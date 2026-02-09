@@ -1,67 +1,103 @@
 import { useAppSelector } from "@hooks/hooks";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import ScrollToBottom from "../ScrollToBottom/ScrollToBottom";
 import styles from "./Messages.module.css";
 import Message from "../Message/Message";
-import useObserver from "@hooks/useObserver";
 import { useGetMessagesQuery } from "@api/slices/chatSclice";
-import type { Message as MessageType } from "@utils/types";
-import { markMessageAsRead } from "@utils/socket";
+import type { Conversation } from "@utils/types";
+import usePagination from "./hook/usePagination";
+import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
+import useControlScroll from "./hook/useControlScroll";
 
-const Messages = ({ conversationId }: { conversationId: string }) => {
+const Messages = ({ conversation }: { conversation: Conversation }) => {
   const user = useAppSelector((state) => state.auth.user);
-  const messagesRef = useRef<HTMLDivElement | null>(null);
-  const { data: messages } = useGetMessagesQuery({ conversationId });
-  const initialScrollDone = useRef(false);
-  const firstUnreadMessageId = useRef<HTMLElement | null>(null);
-  const { setRef } = useObserver((entry: IntersectionObserverEntry) => {
-    if (initialScrollDone.current) {
-      console.log("Read " + entry.target.id);
-      markMessageAsRead(conversationId, entry.target.id, user.id);
-    }
+  const [rootNode, setRootNode] = useState<HTMLDivElement | null>(null);
+  const [queryParams, setQueryParams] = useState<{
+    cursor?: string;
+    direction?: "UP" | "DOWN";
+    jumpToLatest?: boolean;
+  }>({});
+
+  const { data: messages, isFetching } = useGetMessagesQuery({
+    conversationId: conversation.id,
+    ...queryParams,
   });
 
-  useEffect(() => {
-    if (firstUnreadMessageId.current && !initialScrollDone.current) {
-      firstUnreadMessageId.current.scrollIntoView({ block: "center" });
-      firstUnreadMessageId.current = null;
-      initialScrollDone.current = true;
-    }
-  }, [messages]);
+  const { onScroll, scrollToBottom } = useControlScroll({
+    messages,
+    rootNode,
+    queryParams,
+    setQueryParams,
+    conversation,
+  });
 
-  const handleMessageRef = (node: HTMLElement | null, message: MessageType) => {
-    if (node !== null && !message.read && message.senderId !== user.id) {
-      setRef(node);
-      // messages has column-reverse, so the first unread message is the last one in the messages data
-      firstUnreadMessageId.current = node;
-    }
-  };
+  const { setSentinelRef } = usePagination({
+    rootNode,
+    messages: messages,
+    setQueryParams,
+  });
+
+  const { handleMessageRef } = useHandleUnreadMessages({ conversation, user });
 
   if (!messages) {
     return <div>Loading messages...</div>;
   }
 
   return (
-    <div ref={messagesRef} className={styles.messages}>
+    <div
+      ref={(node) => setRootNode(node)}
+      className={styles.messages}
+      onScroll={onScroll}
+    >
       <ScrollToBottom
-        componentRef={messagesRef}
-        unreadCount={
-          messages.filter(
-            (message) => !message.read && message.senderId !== user.id,
-          ).length
-        }
+        component={rootNode}
+        unreadCount={conversation.unreadMessages}
+        onClick={scrollToBottom}
       />
-      {messages.map((message) => (
+
+      {messages.hasMoreDown && rootNode && !isFetching && (
+        <div
+          id="DOWN"
+          ref={setSentinelRef}
+          onClick={() => {
+            setQueryParams({
+              cursor: messages?.items.length ? messages.items[0].id : undefined,
+              direction: "DOWN",
+            });
+          }}
+        >
+          (Newer)
+        </div>
+      )}
+
+      {messages.items.map((message) => (
         <Message
           ref={(node) => handleMessageRef(node, message)}
           id={message.id}
           key={message.id}
           text={message.text}
           isSentByCurrentUser={message.senderId === user.id}
-          read={message.read}
+          read={message.id >= conversation.lastReadMessageId}
           createdAt={message.createdAt}
         />
       ))}
+
+      {messages.hasMoreUp && rootNode && !isFetching && (
+        <div
+          id="UP"
+          ref={setSentinelRef}
+          onClick={() => {
+            setQueryParams({
+              cursor: messages?.items.length
+                ? messages.items[messages.items.length - 1].id
+                : undefined,
+              direction: "UP",
+            });
+          }}
+        >
+          (Older)
+        </div>
+      )}
     </div>
   );
 };
