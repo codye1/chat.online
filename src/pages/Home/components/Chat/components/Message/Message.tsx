@@ -8,7 +8,9 @@ export interface IMessage {
   read: boolean;
   createdAt: string;
   id: string;
-  ref?: (node: HTMLElement | null) => void;
+  ref: (node: Element | null | undefined) => void;
+  "data-index": number;
+  style?: React.CSSProperties;
 }
 
 const Message = ({
@@ -18,30 +20,38 @@ const Message = ({
   createdAt,
   id,
   ref,
+  "data-index": dataIndex,
+  style,
 }: IMessage) => {
   return (
     <div
       id={id}
-      className={clsx(styles.message, {
-        [styles.sentByCurrentUser]: isSentByCurrentUser,
-      })}
+      className={styles.messageWrapper}
       role="message"
       ref={ref}
+      data-index={dataIndex}
+      style={style}
     >
-      <span>{text}</span>
-      <span className={styles.createdAt}>
-        {new Date(createdAt).toLocaleString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
+      <div
+        className={clsx(styles.message, {
+          [styles.sentByCurrentUser]: isSentByCurrentUser,
         })}
-      </span>
-      {isSentByCurrentUser && (
-        <img
-          className={clsx(styles.check, { [styles.read]: read })}
-          src={Check}
-          alt=""
-        />
-      )}
+      >
+        <span>{text}</span>
+        <span className={styles.createdAt}>
+          {new Date(createdAt).toLocaleString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+        {isSentByCurrentUser && (
+          <img
+            className={clsx(styles.check, { [styles.read]: read })}
+            src={Check}
+            alt=""
+          />
+        )}
+      </div>
     </div>
   );
 };

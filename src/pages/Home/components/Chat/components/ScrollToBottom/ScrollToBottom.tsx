@@ -14,21 +14,25 @@ const ScrollToBottom = ({
   unreadCount,
   onClick,
 }: IScrollToBottom) => {
-  const [isScrollToBottomVisible, setScrollToBottomVisible] = useState(false);
+  const [isScrollToBottomVisible, setScrollToBottomVisible] = useState(true);
   useEffect(() => {
     if (!component) return;
     const onScroll = (event: Event) => {
       const el = event.currentTarget;
       if (!(el instanceof HTMLElement)) return;
 
-      if (
-        !isScrollToBottomVisible &&
-        (el.scrollTop < -100 || unreadCount > 0)
-      ) {
+      // Вычисляем сколько осталось до низа
+      const scrolledFromBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight;
+
+      // Показываем кнопку, если отскроллено от низа больше чем на 100px или есть непрочитанные
+      if (scrolledFromBottom > 100 || unreadCount > 0) {
         setScrollToBottomVisible(true);
+      } else {
+        setScrollToBottomVisible(false);
       }
 
-      if (isScrollToBottomVisible && el.scrollTop > -100) {
+      if (scrolledFromBottom < 100) {
         setScrollToBottomVisible(false);
       }
     };
@@ -36,21 +40,19 @@ const ScrollToBottom = ({
     return () => {
       component.removeEventListener("scroll", onScroll);
     };
-  }, [component, isScrollToBottomVisible]);
+  }, [component, unreadCount]);
 
   return (
-    <div className={styles.scrollAnchor}>
-      <div
-        onClick={onClick}
-        className={clsx(styles.scrollToBottom, {
-          [styles.show]: isScrollToBottomVisible,
-        })}
-      >
-        {unreadCount > 0 && (
-          <span className={styles.unreadCount}>{unreadCount}</span>
-        )}
-        <img src={chevron} alt="Scroll to bottom" />
-      </div>
+    <div
+      onClick={onClick}
+      className={clsx(styles.scrollToBottom, {
+        [styles.show]: isScrollToBottomVisible,
+      })}
+    >
+      {unreadCount > 0 && (
+        <span className={styles.unreadCount}>{unreadCount}</span>
+      )}
+      <img src={chevron} alt="Scroll to bottom" />
     </div>
   );
 };

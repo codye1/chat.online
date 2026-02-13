@@ -1,9 +1,7 @@
 .messages {
   position: relative;
   display: flex;
-  flex-direction: column-reverse;
-
-  overflow-anchor: auto;
+  flex-direction: column;
 
   overflow-y: auto;
   height: 100%;

@@ -1,65 +1,85 @@
-import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
-import type { Conversation, Message } from "@utils/types";
-import { useLayoutEffect, useRef, type UIEvent } from "react";
+import type { MessagesResponse } from "@api/slices/chatSclice";
+import type { Virtualizer } from "@tanstack/react-virtual";
+import type { Conversation } from "@utils/types";
+import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
-interface IUseControlScroll {
-  messages?: {
-    items: Message[];
-    hasMoreUp: boolean;
-    hasMoreDown: boolean;
-  };
-  rootNode: HTMLDivElement | null;
-  queryParams: {
-    cursor?: string;
-    direction?: "UP" | "DOWN";
-    jumpToLatest?: boolean;
-  };
-  setQueryParams: React.Dispatch<
-    React.SetStateAction<{
-      cursor?: string;
-      direction?: "UP" | "DOWN";
-      jumpToLatest?: boolean;
-    }>
-  >;
+interface iuseControlScroll {
   conversation: Conversation;
+  messages?: MessagesResponse;
+  virtualizer: Virtualizer<HTMLDivElement, Element>;
+  prevConversationIdRef: RefObject<string>;
 }
 
 const useControlScroll = ({
-  messages,
-  rootNode,
-  queryParams,
-  setQueryParams,
   conversation,
-}: IUseControlScroll) => {
-  const oldScrollHeightRef = useRef<number>(0);
-  const oldScrollTopRef = useRef<number>(0);
-
-  const onScroll = (event: UIEvent<HTMLDivElement>) => {
-    oldScrollHeightRef.current = event.currentTarget.scrollHeight;
-    oldScrollTopRef.current = event.currentTarget.scrollTop;
-  };
+  messages,
+  virtualizer,
+  prevConversationIdRef,
+}: iuseControlScroll) => {
+  const scrollPositionsRef = useRef<Map<string, number>>(new Map());
 
   useLayoutEffect(() => {
-    if (!rootNode || !messages) return;
+    return () => {
+      if (virtualizer.scrollOffset !== null) {
+        scrollPositionsRef.current.set(
+          conversation.id,
+          virtualizer.scrollOffset,
+        );
+      }
+    };
+  }, [conversation.id, virtualizer]);
 
-    // Not ideal, but I don’t know a better way to do it for now.
-    if (queryParams.direction === "DOWN") {
-      const difference = rootNode.scrollHeight - oldScrollHeightRef.current;
-      rootNode.scrollTo({ top: oldScrollTopRef.current - difference });
-      setQueryParams((prev) => ({ ...prev, direction: undefined }));
+  useEffect(() => {
+    if (messages?.fromUser) {
+      scrollPositionsRef.current.delete(conversation.id);
+      virtualizer.scrollToIndex(messages.items.length - 1, {
+        align: "end",
+        behavior: "auto",
+      });
     }
-  }, [messages]);
+  }, [messages, virtualizer, conversation.id]);
 
-  const scrollToBottom = () => {
-    rootNode?.scrollTo({ top: rootNode.scrollHeight, behavior: "smooth" });
-
-    if (conversation.unreadMessages > 0) {
-      resetUnreadMessagesCount(conversation.id);
-      setQueryParams({ jumpToLatest: true });
+  useLayoutEffect(() => {
+    if (conversation.id === prevConversationIdRef.current) {
+      return;
     }
-  };
 
-  return { onScroll, scrollToBottom };
+    prevConversationIdRef.current = conversation.id;
+
+    const savedScrollPosition = scrollPositionsRef.current.get(conversation.id);
+
+    if (savedScrollPosition !== undefined) {
+      requestAnimationFrame(() => {
+        console.log("SAVED:", {
+          savedScrollPosition,
+          scrollOffset: virtualizer.scrollOffset,
+          height: virtualizer.getTotalSize(),
+          offset: virtualizer,
+        });
+
+        virtualizer.scrollToOffset(savedScrollPosition, { align: "start" });
+        console.log(virtualizer.scrollOffset);
+      });
+      return;
+    }
+
+    virtualizer.calculateRange();
+    if (conversation.unreadMessages > 0 && !messages?.hasMoreUp) {
+      requestAnimationFrame(() => {
+        virtualizer.scrollToOffset(0, { align: "start" });
+      });
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      virtualizer.scrollToOffset(Infinity, {
+        align: "end",
+        behavior: "auto",
+      });
+    });
+  }, [virtualizer, conversation, messages, prevConversationIdRef]);
+
+  return { scrollPositionsRef };
 };
 
 export default useControlScroll;

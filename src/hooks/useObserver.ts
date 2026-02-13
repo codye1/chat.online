@@ -7,7 +7,7 @@ const useObserver = <T>(
 ) => {
   const callbackRef = useRef(callback);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const elementsRef = useRef<Set<HTMLElement>>(new Set());
+  const elementsRef = useRef<Set<Element>>(new Set());
 
   useEffect(() => {
     callbackRef.current = callback;
@@ -35,7 +35,7 @@ const useObserver = <T>(
     };
   }, [options, follow]);
 
-  const setRef = useCallback((node: HTMLElement | null) => {
+  const setRef = useCallback((node: Element | null) => {
     if (!node) return;
 
     elementsRef.current.add(node);

@@ -6,6 +6,14 @@ import socket, {
 } from "@utils/socket";
 import type { Conversation, Message, SearchResponse } from "@utils/types";
 
+export interface MessagesResponse {
+  items: Message[];
+  hasMoreUp: boolean;
+  hasMoreDown: boolean;
+  anchor?: string;
+  fromUser: boolean;
+}
+
 const chatSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     search: builder.query<SearchResponse, { query: string }>({
@@ -120,7 +128,8 @@ const chatSlice = api.injectEndpoints({
               "getMessages",
               { conversationId: message.conversationId },
               (messagesDraft) => {
-                messagesDraft.items.unshift(message);
+                messagesDraft.items.push(message);
+                messagesDraft.fromUser = true;
               },
             ),
           );
@@ -146,7 +155,7 @@ const chatSlice = api.injectEndpoints({
       },
     }),
     getMessages: builder.query<
-      { items: Message[]; hasMoreUp: boolean; hasMoreDown: boolean },
+      MessagesResponse,
       {
         conversationId: string;
         cursor?: string;
@@ -163,10 +172,12 @@ const chatSlice = api.injectEndpoints({
           jumpToLatest,
         },
       }),
+      keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
         return `${endpointName}-${queryArgs.conversationId}`;
       },
       merge: (currentCache, newItems, { arg }) => {
+        currentCache.fromUser = false;
         if (typeof newItems.hasMoreUp !== "undefined") {
           currentCache.hasMoreUp = newItems.hasMoreUp;
         }
@@ -181,11 +192,11 @@ const chatSlice = api.injectEndpoints({
         }
 
         if (arg.direction === "UP") {
-          currentCache.items.push(...newItems.items);
+          currentCache.items.unshift(...newItems.items);
         }
 
         if (arg.direction === "DOWN") {
-          currentCache.items.unshift(...newItems.items);
+          currentCache.items.push(...newItems.items);
         }
       },
 

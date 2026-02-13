@@ -1,10 +1,10 @@
 import styles from "./Chat.module.css";
-import Messages from "./components/Messages/Messages";
 import InputWrapper from "./components/InputWrapper/InputWrapper";
 import { useEffect } from "react";
 import { useGetConversationQuery } from "@api/slices/chatSclice";
 import { useAppSelector } from "@hooks/hooks";
 import Header from "./components/Header/Header";
+import Messages from "./components/Messages/Messages";
 
 const Chat = () => {
   const { conversationId, recipientId } = useAppSelector(
