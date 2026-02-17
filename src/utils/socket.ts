@@ -75,6 +75,8 @@ export const markMessageAsRead = (
   conversationId: string,
   lastReadMessageId: string,
 ) => {
+  emitMessageReadDebounced(conversationId, lastReadMessageId);
+
   store.dispatch(
     chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
       const convo = draft.find((c) => c.id === conversationId);
@@ -90,12 +92,17 @@ export const markMessageAsRead = (
       { conversationId, recipientId: null },
       (draft) => {
         draft.unreadMessages -= 1;
-        draft.lastReadMessageId = lastReadMessageId;
       },
     ),
   );
-
-  emitMessageReadDebounced(conversationId, lastReadMessageId);
 };
+
+socket.on("connection:disconnected", () => {
+  console.log("Disconnected from socket server");
+});
+
+socket.on("connection:connected", () => {
+  console.log("Connected to socket server");
+});
 
 export default socket;

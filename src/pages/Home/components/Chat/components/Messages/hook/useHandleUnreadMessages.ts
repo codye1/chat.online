@@ -5,7 +5,6 @@ import useObserver from "@hooks/useObserver";
 
 const useHandleUnreadMessages = ({
   conversation,
-  user,
 }: {
   conversation: Conversation;
   user: User;
@@ -32,9 +31,7 @@ const useHandleUnreadMessages = ({
   ) => {
     if (
       node &&
-      (message.id > conversation.lastReadMessageId ||
-        conversation.lastReadMessageId === null) &&
-      message.senderId !== user.id
+      (message.id > conversation.lastReadId || conversation.lastReadId === null)
     ) {
       setRef(node);
     }

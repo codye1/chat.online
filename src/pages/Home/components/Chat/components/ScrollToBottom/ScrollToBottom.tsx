@@ -2,45 +2,40 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import chevron from "@assets/chevron.svg";
 import styles from "./ScrollToBottom.module.css";
+import checkIfNearBottom from "@utils/checkIfNearBottom";
 
 interface IScrollToBottom {
   component: HTMLDivElement | null;
   unreadCount: number;
+  conversationId: string;
   onClick: () => void;
 }
 
 const ScrollToBottom = ({
   component,
   unreadCount,
+  conversationId,
   onClick,
 }: IScrollToBottom) => {
-  const [isScrollToBottomVisible, setScrollToBottomVisible] = useState(true);
+  const [isScrollToBottomVisible, setScrollToBottomVisible] = useState(false);
+
   useEffect(() => {
     if (!component) return;
-    const onScroll = (event: Event) => {
-      const el = event.currentTarget;
-      if (!(el instanceof HTMLElement)) return;
 
-      // Вычисляем сколько осталось до низа
-      const scrolledFromBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight;
-
-      // Показываем кнопку, если отскроллено от низа больше чем на 100px или есть непрочитанные
-      if (scrolledFromBottom > 100 || unreadCount > 0) {
-        setScrollToBottomVisible(true);
-      } else {
-        setScrollToBottomVisible(false);
-      }
-
-      if (scrolledFromBottom < 100) {
-        setScrollToBottomVisible(false);
-      }
+    const updateVisibility = () => {
+      setScrollToBottomVisible(
+        !checkIfNearBottom(component, 100) ||
+          (unreadCount > 0 && !checkIfNearBottom(component, 10)),
+      );
     };
-    component.addEventListener("scroll", onScroll);
+
+    updateVisibility();
+
+    component.addEventListener("scroll", updateVisibility);
     return () => {
-      component.removeEventListener("scroll", onScroll);
+      component.removeEventListener("scroll", updateVisibility);
     };
-  }, [component, unreadCount]);
+  }, [component, unreadCount, conversationId]);
 
   return (
     <div

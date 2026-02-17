@@ -15,13 +15,15 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
 import ScrollToBottom from "../ScrollToBottom/ScrollToBottom";
 import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
-import useControlScroll from "./hook/useControlScroll";
+import checkIfNearBottom from "@utils/checkIfNearBottom";
+
+// Fix messy
+
 const Messages = ({ conversation }: { conversation: Conversation }) => {
   const user = useAppSelector((state) => state.auth.user);
-  const [rootNode, setRootNode] = useState<HTMLDivElement | null>(null);
-
+  const messagesRef = useRef<HTMLDivElement | null>(null);
   const [queryParams, setQueryParams] = useState<
-    Map<
+    Record<
       string,
       {
         cursor?: string;
@@ -29,18 +31,33 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
         jumpToLatest?: boolean;
       }
     >
-  >(new Map());
-
+  >({});
   const prevIdRef = useRef("");
   const prevCountRef = useRef(0);
   const prevTotalSizeRef = useRef(0);
-  const currentQueryParams = queryParams.get(conversation.id) || {};
-
+  const currentQueryParams = queryParams[conversation.id] || {};
   const prevConversationIdRef = useRef(conversation.id);
-  const { data: messages, isFetching } = useGetMessagesQuery({
+  const scrollPositionsRef = useRef<Map<string, { offset: number }>>(new Map());
+  const attachToBottomRef = useRef(false);
+  const { data, isFetching } = useGetMessagesQuery({
     conversationId: conversation.id,
     ...currentQueryParams,
   });
+
+  const [messages, setMessages] = useState(data?.items || []);
+
+  useEffect(() => {
+    if (data?.items) {
+      if (prevConversationIdRef.current !== conversation.id) {
+        scrollPositionsRef.current.set(prevConversationIdRef.current, {
+          offset: virtualizer.scrollOffset || 0,
+        });
+        prevConversationIdRef.current = conversation.id;
+      }
+      attachToBottomRef.current = checkIfNearBottom(messagesRef.current!);
+      setMessages(data.items);
+    }
+  }, [data]);
 
   const { trackUnreadMessageRef } = useHandleUnreadMessages({
     conversation,
@@ -48,21 +65,21 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
   });
 
   const beforeInView = useInView({
-    root: rootNode,
+    root: messagesRef.current,
     rootMargin: "300px 0px 0px 0px",
   });
   const afterInView = useInView({
-    root: rootNode,
+    root: messagesRef.current,
     rootMargin: "0px 0px 300px 0px",
   });
 
   const virtualizer = useVirtualizer({
-    count: messages?.items.length || 0,
-    getScrollElement: () => rootNode,
+    count: messages?.length || 0,
+    getScrollElement: () => messagesRef.current,
     estimateSize: () => 60,
     overscan: 5,
     getItemKey: useCallback(
-      (index: number) => messages?.items[index].id || index,
+      (index: number) => messages?.[index]?.id || index,
       [messages],
     ),
   });
@@ -73,74 +90,64 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
       prevIdRef.current = "";
       prevCountRef.current = 0;
       prevTotalSizeRef.current = 0;
+      isUserInteractedRef.current = false;
     }
-  }, [
-    conversation.id,
-    prevIdRef,
-    prevCountRef,
-    prevTotalSizeRef,
-    prevConversationIdRef,
-  ]);
+  }, [conversation.id, prevIdRef, prevCountRef, prevTotalSizeRef]);
 
   const scrollToBottom = useCallback(() => {
-    if (!rootNode || !messages?.items.length) return;
+    if (!messagesRef.current || !messages.length) return;
 
-    if (messages.hasMoreDown) {
+    if (data?.hasMoreDown) {
       resetUnreadMessagesCount(conversation.id);
-      setQueryParams((prev) =>
-        prev.set(conversation.id, {
+      setQueryParams((prev) => ({
+        ...prev,
+        [conversation.id]: {
           jumpToLatest: true,
           cursor: undefined,
           direction: undefined,
-        }),
-      );
+        },
+      }));
     } else {
-      virtualizer.scrollToIndex(messages.items.length - 1, {
+      virtualizer.scrollToIndex(messages.length - 1, {
         align: "end",
         behavior: "smooth",
       });
     }
-  }, [rootNode, messages?.items.length, virtualizer, messages?.hasMoreDown]);
-
-  const [, forseUpdate] = useState({});
+  }, [messagesRef.current, messages?.length, virtualizer, data?.hasMoreDown]);
 
   useEffect(() => {
-    if (beforeInView.inView && messages?.hasMoreUp && !isFetching) {
-      setQueryParams((prev) =>
-        prev.set(conversation.id, {
-          cursor: messages?.items.length ? messages.items[0].id : undefined,
+    if (beforeInView.inView && data?.hasMoreUp && !isFetching) {
+      setQueryParams((prev) => ({
+        ...prev,
+        [conversation.id]: {
+          cursor: messages?.length ? messages[0].id : undefined,
           direction: "UP",
-        }),
-      );
-      forseUpdate({});
+        },
+      }));
     }
-  }, [beforeInView.inView, messages?.hasMoreUp, messages?.items, isFetching]);
+  }, [beforeInView.inView, data?.hasMoreUp, messages, isFetching]);
 
   useEffect(() => {
     if (
       afterInView.inView &&
-      messages?.hasMoreDown &&
+      data?.hasMoreDown &&
       !isFetching &&
       !currentQueryParams.jumpToLatest
     ) {
-      setQueryParams((prev) =>
-        prev.set(conversation.id, {
-          cursor: messages?.items.length
-            ? messages.items[messages.items.length - 1].id
+      setQueryParams((prev) => ({
+        ...prev,
+        [conversation.id]: {
+          cursor: messages?.length
+            ? messages[messages.length - 1].id
             : undefined,
           direction: "DOWN",
-        }),
-      );
+        },
+      }));
     }
-  }, [afterInView.inView, messages?.hasMoreDown, messages?.items, isFetching]);
+  }, [afterInView.inView, data?.hasMoreDown, messages, isFetching]);
 
-  useControlScroll({
-    conversation,
-    messages,
-    virtualizer,
-    prevConversationIdRef,
-  });
-  const isUserScrollingRef = useRef(false);
+  const isUserInteractedRef = useRef(false);
+
   const handleMessagesRef = (
     node: Element | null | undefined,
     message: MessageType,
@@ -151,48 +158,62 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
 
   // Adjust scroll position when new messages are loaded
   // it's important to have it out of effect
-  // In Messages.tsx, around line 162
-  if (messages?.items.length) {
-    const firstId = messages.items[0].id;
+  if (messages?.length) {
+    const firstId = messages[0].id;
     const addedToTheBeginning = firstId < prevIdRef.current;
-
-    // ADD THIS CHECK: Only adjust scroll if we're still in the same conversation
-    const isSameConversation =
-      prevConversationIdRef.current === conversation.id;
-
-    if (addedToTheBeginning && prevCountRef.current > 0 && isSameConversation) {
+    if (addedToTheBeginning && prevCountRef.current > 0) {
       const currentTotalSize = virtualizer.getTotalSize();
       const sizeDifference = currentTotalSize - prevTotalSizeRef.current;
-
       if (sizeDifference > 0 && virtualizer.scrollOffset !== null) {
-        if (messages.anchor && !isUserScrollingRef.current) {
-          requestAnimationFrame(() => {
-            const anchorIndex = messages.items.findIndex(
-              (msg) => msg.id === messages.anchor,
-            );
-            if (anchorIndex !== -1) {
-              virtualizer.scrollToIndex(anchorIndex, { align: "start" });
-            }
-          });
-        } else {
+        {
           const newOffset = virtualizer.scrollOffset + sizeDifference;
-
           virtualizer.scrollOffset = newOffset;
           virtualizer.calculateRange();
           virtualizer.scrollToOffset(newOffset, { align: "start" });
         }
       }
     }
-
     prevTotalSizeRef.current = virtualizer.getTotalSize();
     prevIdRef.current = firstId;
-    prevCountRef.current = messages.items.length;
+    prevCountRef.current = messages.length;
   }
-  // Detect user scroll to prevent attaching to anchor
 
+  useEffect(() => {
+    // attach to bottom when message is sent
+    if (data?.fromUser && attachToBottomRef.current) {
+      virtualizer.scrollToIndex(messages.length - 1, {
+        align: "end",
+      });
+      return;
+    }
+
+    const savedScrollPosition = scrollPositionsRef.current.get(conversation.id);
+    // attach to previous position or to anchor
+    if (savedScrollPosition && !isUserInteractedRef.current) {
+      requestAnimationFrame(() => {
+        virtualizer.scrollToOffset(savedScrollPosition.offset, {
+          align: "start",
+          behavior: "auto",
+        });
+      });
+    }
+
+    if (!savedScrollPosition && data?.anchor && !isUserInteractedRef.current) {
+      requestAnimationFrame(() => {
+        const anchorIndex = messages.findIndex((msg) => msg.id === data.anchor);
+        if (anchorIndex !== -1) {
+          virtualizer.scrollToIndex(anchorIndex, {
+            align: "start",
+            behavior: "auto",
+          });
+        }
+      });
+    }
+  }, [messages]);
+
+  // Detect user scroll to prevent attaching to anchor
   const handleUserInteraction = () => {
-    isUserScrollingRef.current = true;
-    console.log(virtualizer.scrollOffset);
+    isUserInteractedRef.current = true;
   };
 
   if (!messages) {
@@ -201,14 +222,14 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
 
   return (
     <div
-      ref={(node) => setRootNode(node)}
+      ref={messagesRef}
       className={styles.messages}
       onKeyDown={handleUserInteraction}
       onWheel={handleUserInteraction}
       onTouchMove={handleUserInteraction}
       onPointerDown={handleUserInteraction}
     >
-      {messages.hasMoreUp && (
+      {data?.hasMoreUp && (
         <div
           ref={beforeInView.ref}
           style={{
@@ -229,12 +250,13 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
           }}
         >
           <ScrollToBottom
-            component={rootNode}
+            component={messagesRef.current}
             unreadCount={conversation.unreadMessages}
+            conversationId={conversation.id}
             onClick={scrollToBottom}
           />
           {virtualizer.getVirtualItems().map((virtualRow) => {
-            const message = messages.items[virtualRow.index];
+            const message = messages[virtualRow.index];
             return (
               <Message
                 data-index={virtualRow.index}
@@ -248,7 +270,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   width: "100%",
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
-                read={message.id <= conversation.lastReadMessageId}
+                read={message.id <= conversation.lastReadIdByParticipants}
                 isSentByCurrentUser={message.senderId === user.id}
                 createdAt={message.createdAt}
                 ref={(node) => handleMessagesRef(node, message)}
@@ -258,7 +280,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
         </div>
       </div>
 
-      {messages.hasMoreDown && (
+      {data?.hasMoreDown && (
         <div
           ref={afterInView.ref}
           style={{

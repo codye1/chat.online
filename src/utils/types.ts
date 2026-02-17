@@ -20,7 +20,8 @@ interface Conversation {
   type: "DIRECT" | "GROUP";
   lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
-  lastReadMessageId: string;
+  lastReadId: string;
+  lastReadIdByParticipants: string;
 }
 
 interface Global {

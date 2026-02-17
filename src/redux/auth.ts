@@ -20,6 +20,7 @@ export const authSlice = createSlice({
     authUser(state, action: PayloadAction<User>) {
       state.isAuth = true;
       state.user = action.payload;
+      console.log("CONNECT");
       socket.connect();
     },
     logoutUser(state) {

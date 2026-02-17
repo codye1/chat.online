@@ -36,11 +36,41 @@ const chatSlice = api.injectEndpoints({
 
       async onCacheEntryAdded(
         arg,
-        { cacheDataLoaded, cacheEntryRemoved, dispatch },
+        {
+          cacheDataLoaded,
+          cacheEntryRemoved,
+          dispatch,
+          updateCachedData,
+          getState,
+        },
       ) {
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
+        const state = getState() as RootState;
+        const user = state.auth.user;
+
+        const onMessageRead = ({
+          lastReadMessage,
+          conversationId,
+        }: {
+          lastReadMessage: {
+            id: string;
+            senderId: string;
+          };
+          conversationId: string;
+        }) => {
+          updateCachedData((draft) => {
+            if (draft.id === conversationId) {
+              if (lastReadMessage.senderId === user.id) {
+                draft.lastReadId = lastReadMessage.id;
+              } else {
+                draft.lastReadIdByParticipants = lastReadMessage.id;
+              }
+            }
+          });
+        };
+
         const onUpdateConversation = (conversation: Conversation) => {
           // Це спрацює, коли ми створили/знайшли чат з recipientId
           // Оновлюємо кеш для запиту по recipientId
@@ -79,10 +109,12 @@ const chatSlice = api.injectEndpoints({
           );
         };
 
+        socket.on("message:read", onMessageRead);
         socket.on("conversation:update", onUpdateConversation);
 
         await cacheEntryRemoved;
 
+        socket.off("message:read", onMessageRead);
         socket.off("conversation:update", onUpdateConversation);
       },
     }),
@@ -107,6 +139,7 @@ const chatSlice = api.injectEndpoints({
           const convoIds = draft.map((c) => c.id);
           connectToConversation(convoIds, null);
         });
+
         const onNewMessage = (message: Message) => {
           const state = getState() as RootState;
 
@@ -125,11 +158,44 @@ const chatSlice = api.injectEndpoints({
 
           dispatch(
             chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId: message.conversationId },
+              (draft) => {
+                if (draft) {
+                  draft.lastMessage = message;
+
+                  if (state.auth.user.id !== message.senderId) {
+                    draft.unreadMessages += 1;
+                  }
+                }
+              },
+            ),
+          );
+
+          const conversation = (getState() as RootState).global.conversationId;
+
+          if (conversation !== message.conversationId) {
+            dispatch(
+              chatSlice.util.updateQueryData(
+                "getMessages",
+                { conversationId: message.conversationId },
+                (messagesDraft) => {
+                  messagesDraft.hasMoreDown = true;
+                },
+              ),
+            );
+            return;
+          }
+
+          dispatch(
+            chatSlice.util.updateQueryData(
               "getMessages",
               { conversationId: message.conversationId },
               (messagesDraft) => {
-                messagesDraft.items.push(message);
-                messagesDraft.fromUser = true;
+                if (!messagesDraft.hasMoreDown) {
+                  messagesDraft.items.push(message);
+                  messagesDraft.fromUser = true;
+                }
               },
             ),
           );
@@ -215,34 +281,6 @@ const chatSlice = api.injectEndpoints({
           currentArg.direction !== previousArg.direction ||
           currentArg.jumpToLatest !== previousArg.jumpToLatest
         );
-      },
-      async onCacheEntryAdded(
-        arg,
-        { cacheDataLoaded, cacheEntryRemoved, updateCachedData },
-      ) {
-        await cacheDataLoaded;
-
-        syncSocketAuthorizationFromStorage();
-
-        const onMessageRead = (data: {
-          conversationId: string;
-          lastReadMessageId: string;
-        }) => {
-          if (data.conversationId !== arg.conversationId) return;
-          updateCachedData((draft) => {
-            draft.items.forEach((message) => {
-              if (message.id <= data.lastReadMessageId) {
-                message.read = true;
-              }
-            });
-          });
-        };
-
-        socket.on("message:read", onMessageRead);
-
-        await cacheEntryRemoved;
-
-        socket.off("message:read", onMessageRead);
       },
     }),
   }),

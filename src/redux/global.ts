@@ -3,11 +3,13 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 interface GlobalState {
   conversationId: string | null;
   recipientId: string | null;
+  connected: boolean;
 }
 
 const initialState: GlobalState = {
   conversationId: null,
   recipientId: null,
+  connected: false,
 };
 
 export const globalSlice = createSlice({
@@ -26,6 +28,9 @@ export const globalSlice = createSlice({
       state.recipientId = action.payload.recipientId;
       state.conversationId = null;
       console.log("Change reciptient " + action.payload.recipientId);
+    },
+    setConnected(state, action: PayloadAction<{ connected: boolean }>) {
+      state.connected = action.payload.connected;
     },
   },
 });
