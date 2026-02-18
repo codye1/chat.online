@@ -71,6 +71,23 @@ const chatSlice = api.injectEndpoints({
           });
         };
 
+        const onLastSeenAtUpdate = ({
+          userId,
+          lastSeenAt,
+        }: {
+          userId: string;
+          lastSeenAt: string;
+        }) => {
+          updateCachedData((draft) => {
+            if (
+              draft.type === "DIRECT" &&
+              draft.otherParticipant.id === userId
+            ) {
+              draft.lastSeenAt = lastSeenAt;
+            }
+          });
+        };
+
         const onUpdateConversation = (conversation: Conversation) => {
           // Це спрацює, коли ми створили/знайшли чат з recipientId
           // Оновлюємо кеш для запиту по recipientId
@@ -111,11 +128,13 @@ const chatSlice = api.injectEndpoints({
 
         socket.on("message:read", onMessageRead);
         socket.on("conversation:update", onUpdateConversation);
+        socket.on("lastSeenAt:update", onLastSeenAtUpdate);
 
         await cacheEntryRemoved;
 
         socket.off("message:read", onMessageRead);
         socket.off("conversation:update", onUpdateConversation);
+        socket.off("lastSeenAt:update", onLastSeenAtUpdate);
       },
     }),
 
@@ -139,6 +158,75 @@ const chatSlice = api.injectEndpoints({
           const convoIds = draft.map((c) => c.id);
           connectToConversation(convoIds, null);
         });
+
+        const onUserTyping = ({
+          conversationId,
+          nickname,
+        }: {
+          conversationId: string;
+          nickname: string;
+        }) => {
+          if (nickname === (getState() as RootState).auth.user.nickname) {
+            return;
+          }
+          updateCachedData((draft) => {
+            const convo = draft.find((c) => c.id === conversationId);
+            if (convo) {
+              convo.typingUsers = convo.typingUsers || [];
+              if (!convo.typingUsers.includes(nickname)) {
+                convo.typingUsers.push(nickname);
+              }
+            }
+          });
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId },
+              (draft) => {
+                if (draft) {
+                  draft.typingUsers = draft.typingUsers || [];
+                  if (!draft.typingUsers.includes(nickname)) {
+                    draft.typingUsers.push(nickname);
+                  }
+                }
+              },
+            ),
+          );
+        };
+
+        const onUserStopTyping = ({
+          conversationId,
+          nickname,
+        }: {
+          conversationId: string;
+          nickname: string;
+        }) => {
+          if (nickname === (getState() as RootState).auth.user.nickname) {
+            return;
+          }
+
+          updateCachedData((draft) => {
+            const convo = draft.find((c) => c.id === conversationId);
+            if (convo && convo.typingUsers) {
+              convo.typingUsers = convo.typingUsers.filter(
+                (id) => id !== nickname,
+              );
+            }
+          });
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId },
+              (draft) => {
+                if (draft && draft.typingUsers) {
+                  draft.typingUsers = draft.typingUsers.filter(
+                    (id) => id !== nickname,
+                  );
+                }
+              },
+            ),
+          );
+        };
 
         const onNewMessage = (message: Message) => {
           const state = getState() as RootState;
@@ -213,11 +301,15 @@ const chatSlice = api.injectEndpoints({
 
         socket.on("conversation:new", onNewConversation);
         socket.on("message:new", onNewMessage);
+        socket.on("typing:start", onUserTyping);
+        socket.on("typing:stop", onUserStopTyping);
 
         await cacheEntryRemoved;
 
         socket.off("message:new", onNewMessage);
         socket.off("conversation:new", onNewConversation);
+        socket.off("typing:start", onUserTyping);
+        socket.off("typing:stop", onUserStopTyping);
       },
     }),
     getMessages: builder.query<

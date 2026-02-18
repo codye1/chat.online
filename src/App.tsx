@@ -1,14 +1,18 @@
 import { BrowserRouter } from "react-router-dom";
 import Routing from "./router/routing";
 import { useRefreshMutation } from "@api/slices/authSlice";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 function App() {
-  const [refetch] = useRefreshMutation();
+  const [refreshToken] = useRefreshMutation();
+  const hasRefreshed = useRef(false);
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    if (hasRefreshed.current) return;
+    hasRefreshed.current = true;
+
+    refreshToken();
+  }, [refreshToken]);
 
   return (
     <BrowserRouter>

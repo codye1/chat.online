@@ -1,8 +1,8 @@
 import Input from "@components/Input/Input";
 import styles from "./InputWrapper.module.css";
 import Button from "@components/Button/Button";
-import { sendMessage } from "@utils/socket";
-import { useEffect, useState } from "react";
+import socket, { sendMessage } from "@utils/socket";
+import { useEffect, useRef, useState } from "react";
 import sendIcon from "@assets/send.svg";
 import { useAppSelector } from "@hooks/hooks";
 
@@ -11,6 +11,8 @@ const InputWrapper = () => {
   const { conversationId, recipientId } = useAppSelector(
     (state) => state.global,
   );
+  const { nickname } = useAppSelector((state) => state.auth.user);
+  const typingTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleEnterKey = (e: KeyboardEvent) => {
@@ -33,7 +35,16 @@ const InputWrapper = () => {
         placeholder="Type a message..."
         trackValue={{
           value: message,
-          onChange: (e) => setMessage(e.target.value),
+          onChange: (e) => {
+            socket.emit("typing:start", { conversationId, nickname });
+            setMessage(e.target.value);
+            if (typingTimeoutRef.current)
+              clearTimeout(typingTimeoutRef.current);
+
+            typingTimeoutRef.current = window.setTimeout(() => {
+              socket.emit("typing:stop", { conversationId, nickname });
+            }, 1000);
+          },
         }}
       />
       <Button

@@ -31,3 +31,7 @@
   margin-right: var(--space-4);
   padding: var(--space-2);
 }
+
+.typingUsers {
+  color: var(--c-default) !important;
+}

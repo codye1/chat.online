@@ -11,6 +11,11 @@ export const socket: Socket = io(API_BASE_URL, {
   auth: {
     token: localStorage.getItem("token") || undefined,
   },
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000,
 });
 
 export const syncSocketAuthorizationFromStorage = () => {
@@ -97,12 +102,53 @@ export const markMessageAsRead = (
   );
 };
 
-socket.on("connection:disconnected", () => {
-  console.log("Disconnected from socket server");
+socket.on("connect_error", (error) => {
+  console.error("Socket connection error:", error.message);
+
+  if (
+    error.message.includes("auth") ||
+    error.message.includes("unauthorized")
+  ) {
+    console.log("Auth error detected, syncing token from storage");
+    syncSocketAuthorizationFromStorage();
+  }
 });
 
-socket.on("connection:connected", () => {
-  console.log("Connected to socket server");
+socket.on("disconnect", (reason) => {
+  console.log("Socket disconnected. Reason:", reason);
+
+  if (reason === "io server disconnect") {
+    console.log(
+      "Server disconnected socket. Syncing token and reconnecting...",
+    );
+    syncSocketAuthorizationFromStorage();
+    socket.connect();
+  }
+});
+
+let pingInterval: number | null = null;
+
+socket.on("connect", () => {
+  console.log("Socket connected successfully");
+  if (pingInterval) {
+    clearInterval(pingInterval);
+  }
+  pingInterval = window.setInterval(() => {
+    socket.emit("lastSeenAt:update");
+  }, 1000 * 50);
+});
+
+socket.io.on("reconnect_attempt", (attempt) => {
+  console.log(`Reconnection attempt ${attempt}`);
+  syncSocketAuthorizationFromStorage();
+});
+
+socket.io.on("reconnect_failed", () => {
+  console.error("Socket reconnection failed after all attempts");
+});
+
+socket.io.on("reconnect", (attempt) => {
+  console.log(`Socket reconnected successfully after ${attempt} attempts`);
 });
 
 export default socket;

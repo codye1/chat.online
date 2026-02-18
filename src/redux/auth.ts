@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import socket from "@utils/socket";
+import socket, { syncSocketAuthorizationFromStorage } from "@utils/socket";
 import type { User } from "@utils/types";
 
 interface AuthState {
@@ -21,6 +21,8 @@ export const authSlice = createSlice({
       state.isAuth = true;
       state.user = action.payload;
       console.log("CONNECT");
+      // Sync token from localStorage before connecting
+      syncSocketAuthorizationFromStorage();
       socket.connect();
     },
     logoutUser(state) {

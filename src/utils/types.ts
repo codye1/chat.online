@@ -13,16 +13,32 @@ interface Message {
   createdAt: string;
 }
 
-interface Conversation {
+interface BaseConversation {
   id: string;
   avatarUrl: string | null;
   title: string;
-  type: "DIRECT" | "GROUP";
   lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
   lastReadId: string;
   lastReadIdByParticipants: string;
+  typingUsers?: string[];
 }
+
+interface DirectConversation extends BaseConversation {
+  type: "DIRECT";
+  lastSeenAt: string | null;
+  otherParticipant: {
+    id: string;
+    nickname: string;
+    avatarUrl: string | null;
+  };
+}
+
+interface GroupConversation extends BaseConversation {
+  type: "GROUP";
+}
+
+type Conversation = DirectConversation | GroupConversation;
 
 interface Global {
   //  chat,channel for fututre
