@@ -1,6 +1,10 @@
 .conversationsList {
   background-color: var(--c-foreground);
   border: 1px solid var(--c-border);
+
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
 }
 
 .searchInput {

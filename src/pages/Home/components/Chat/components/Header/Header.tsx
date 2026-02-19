@@ -8,7 +8,7 @@ interface IHeader {
 }
 
 const getOnlineStatus = (lastSeenAt: string | null): string => {
-  if (!lastSeenAt) return "offline";
+  if (!lastSeenAt) return "last seen a long time ago";
 
   const lastSeenDate = new Date(lastSeenAt);
   const now = new Date();
@@ -23,7 +23,6 @@ const Header = ({ conversation }: IHeader) => {
       socket.emit("subscribe:lastSeenAt", conversation.otherParticipant.id);
     }
   }, [conversation.id]);
-
   return (
     <header className={styles.header}>
       <span>

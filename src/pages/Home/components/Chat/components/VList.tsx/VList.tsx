@@ -26,7 +26,7 @@ interface IVList {
   hasMoreDown: boolean;
   attachToBottom: boolean;
   listId: string;
-  litstStyles: string;
+  listStyles: string;
   onBottomReached: () => void;
   onTopReached: () => void;
   onJumpToLatest?: () => void;
@@ -50,7 +50,7 @@ const VList = ({
   onBottomReached,
   onTopReached,
   onJumpToLatest,
-  litstStyles,
+  listStyles,
 }: IVList) => {
   const vlistRef = useRef<HTMLDivElement | null>(null);
   const prevIdRef = useRef("");
@@ -201,7 +201,7 @@ const VList = ({
   return (
     <div
       ref={vlistRef}
-      className={clsx(styles.vlist, litstStyles)}
+      className={clsx(styles.vlist, listStyles)}
       onKeyDown={handleUserInteraction}
       onWheel={handleUserInteraction}
       onTouchMove={handleUserInteraction}

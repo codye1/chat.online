@@ -5,3 +5,15 @@
   color: var(--c-muted);
   background-color: var(--c-light);
 }
+
+.noResultsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4);
+
+  & img {
+    width: 150px;
+    height: 150px;
+  }
+}

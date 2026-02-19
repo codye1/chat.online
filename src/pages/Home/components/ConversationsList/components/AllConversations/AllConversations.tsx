@@ -1,8 +1,23 @@
 import { useGetConversationsQuery } from "@api/slices/chatSclice";
 import { connectToConversation } from "@utils/socket";
 import PreviewItem from "../PreviewItem/PreviewItem";
+import PreviewItemSkeleton from "../PreviewItem/PreviewItemSkeleton";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { setConversation } from "@redux/global";
+import type { Conversation } from "@utils/types";
+
+const sortConversations = (conversations: Conversation[]) => {
+  return conversations.toSorted((a, b) => {
+    const aTime = a.lastMessage
+      ? new Date(a.lastMessage.createdAt).getTime()
+      : 0;
+    const bTime = b.lastMessage
+      ? new Date(b.lastMessage.createdAt).getTime()
+      : 0;
+    return bTime - aTime;
+  });
+};
+
 const AllConversations = () => {
   const {
     data: conversations,
@@ -14,10 +29,16 @@ const AllConversations = () => {
   const { conversationId } = useAppSelector((state) => state.global);
   return (
     <>
+      {conversationsLoading && (
+        <>
+          {Array.from({ length: 10 }).map((_, index) => (
+            <PreviewItemSkeleton key={index} />
+          ))}
+        </>
+      )}
       {conversationsErorr && <div>Error loading conversations.</div>}
-      {conversationsLoading && <div>Loading conversations...</div>}
       {conversations &&
-        conversations.map((conversation) => (
+        sortConversations(conversations).map((conversation) => (
           <PreviewItem
             key={conversation.id}
             avatarUrl={conversation.avatarUrl}

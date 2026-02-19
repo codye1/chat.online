@@ -130,6 +130,17 @@ let pingInterval: number | null = null;
 
 socket.on("connect", () => {
   console.log("Socket connected successfully");
+
+  const state = store.getState();
+  const conversations =
+    chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+
+  const conversationsIds = conversations?.map((c) => c.id) || [];
+
+  if (conversationsIds.length > 0) {
+    connectToConversation(conversationsIds, null);
+  }
+
   if (pingInterval) {
     clearInterval(pingInterval);
   }
