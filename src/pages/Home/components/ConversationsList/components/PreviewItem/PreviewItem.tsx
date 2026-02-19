@@ -4,7 +4,7 @@ import userIcon from "@assets/user.svg";
 
 interface IPreviewItem {
   avatarUrl: string | null;
-  tile: string;
+  title: string;
   description: string;
   meta?: {
     lastMessageTime: string;
@@ -17,7 +17,7 @@ interface IPreviewItem {
 
 const PreviewItem = ({
   avatarUrl,
-  tile,
+  title,
   description,
   meta,
   onClick,
@@ -41,7 +41,7 @@ const PreviewItem = ({
       </div>
       <div className={styles.details}>
         <div className={styles.mainInfo}>
-          <h2>{tile}</h2>
+          <h2>{title}</h2>
           <p>{description}</p>
         </div>
 

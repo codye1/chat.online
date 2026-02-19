@@ -19,7 +19,7 @@ interface BaseConversation {
   title: string;
   lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
-  lastReadId: string;
+  lastReadId: string | null;
   lastReadIdByParticipants: string;
   typingUsers?: string[];
 }
@@ -41,7 +41,7 @@ interface GroupConversation extends BaseConversation {
 type Conversation = DirectConversation | GroupConversation;
 
 interface Global {
-  //  chat,channel for fututre
+  //  chat,channel for future
   type: "user" | "chat" | "channel";
 }
 
@@ -52,11 +52,11 @@ interface UserPreview extends Global {
   avatarUrl: string | null;
 }
 
-type globalSearchItem = UserPreview; // | ChatPreview | ChannelPreview
+type GlobalSearchItem = UserPreview; // | ChatPreview | ChannelPreview
 
 interface SearchResponse {
   conversations: Conversation[];
-  global: globalSearchItem[];
+  global: GlobalSearchItem[];
 }
 
 export type {
@@ -65,6 +65,6 @@ export type {
   Message,
   Global,
   UserPreview,
-  globalSearchItem,
+  GlobalSearchItem,
   SearchResponse,
 };

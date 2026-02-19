@@ -22,7 +22,7 @@ const AllConversations = () => {
   const {
     data: conversations,
     isLoading: conversationsLoading,
-    error: conversationsErorr,
+    error: conversationsError,
   } = useGetConversationsQuery();
 
   const dispatch = useAppDispatch();
@@ -36,13 +36,13 @@ const AllConversations = () => {
           ))}
         </>
       )}
-      {conversationsErorr && <div>Error loading conversations.</div>}
+      {conversationsError && <div>Error loading conversations.</div>}
       {conversations &&
         sortConversations(conversations).map((conversation) => (
           <PreviewItem
             key={conversation.id}
             avatarUrl={conversation.avatarUrl}
-            tile={conversation.title}
+            title={conversation.title}
             description={conversation.lastMessage?.text ?? ""}
             meta={{
               lastMessageTime:

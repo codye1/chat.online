@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import styles from "./ResizebleSection.module.css";
 import vwToPx from "@utils/vwToPx";
+import clsx from "clsx";
 
 interface IResizebleSection {
   children: ReactNode;
@@ -39,7 +40,7 @@ const ResizebleSection = ({
 
   return (
     <section
-      className={`${styles.resizebleSection} ${className}`}
+      className={clsx(styles.resizebleSection, className)}
       style={{ width: `${width}px` }}
     >
       {children}

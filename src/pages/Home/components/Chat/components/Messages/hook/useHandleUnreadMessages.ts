@@ -1,6 +1,6 @@
 import { markMessageAsRead } from "@utils/socket";
 import type { Conversation, Message, User } from "@utils/types";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useObserver from "@hooks/useObserver";
 
 const useHandleUnreadMessages = ({
@@ -10,6 +10,10 @@ const useHandleUnreadMessages = ({
   user: User;
 }) => {
   const observedMessages = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    observedMessages.current.clear();
+  }, [conversation.id]);
 
   const handleRead = useCallback(
     (entry: IntersectionObserverEntry) => {
@@ -31,7 +35,7 @@ const useHandleUnreadMessages = ({
   ) => {
     if (
       node &&
-      (message.id > conversation.lastReadId || conversation.lastReadId === null)
+      (conversation.lastReadId === null || message.id > conversation.lastReadId)
     ) {
       setRef(node);
     }

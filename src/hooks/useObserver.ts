@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 
-const useObserver = <T>(
+const useObserver = (
   callback: (entry: IntersectionObserverEntry) => void,
   options?: IntersectionObserverInit,
-  follow?: T,
 ) => {
   const callbackRef = useRef(callback);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -33,7 +32,7 @@ const useObserver = <T>(
     return () => {
       observerRef.current?.disconnect();
     };
-  }, [options, follow]);
+  }, []);
 
   const setRef = useCallback((node: Element | null) => {
     if (!node) return;

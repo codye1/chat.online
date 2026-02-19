@@ -86,7 +86,7 @@ export const markMessageAsRead = (
     chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
       const convo = draft.find((c) => c.id === conversationId);
       if (convo) {
-        convo.unreadMessages -= 1;
+        convo.unreadMessages = Math.max(0, convo.unreadMessages - 1);
       }
     }),
   );
@@ -96,7 +96,7 @@ export const markMessageAsRead = (
       "getConversation",
       { conversationId, recipientId: null },
       (draft) => {
-        draft.unreadMessages -= 1;
+        draft.unreadMessages = Math.max(0, draft.unreadMessages - 1);
       },
     ),
   );
@@ -114,6 +114,8 @@ socket.on("connect_error", (error) => {
   }
 });
 
+let pingInterval: number | null = null;
+
 socket.on("disconnect", (reason) => {
   console.log("Socket disconnected. Reason:", reason);
 
@@ -124,9 +126,12 @@ socket.on("disconnect", (reason) => {
     syncSocketAuthorizationFromStorage();
     socket.connect();
   }
-});
 
-let pingInterval: number | null = null;
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+});
 
 socket.on("connect", () => {
   console.log("Socket connected successfully");

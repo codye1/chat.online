@@ -44,7 +44,12 @@ const ConversationsList = () => {
           }}
         />
         {searchFocus && (
-          <Button className={styles.closeButton}>
+          <Button
+            className={styles.closeButton}
+            onClick={() => {
+              setSearchFocus(false);
+            }}
+          >
             <img src={closeIcon} alt="Close" />
           </Button>
         )}

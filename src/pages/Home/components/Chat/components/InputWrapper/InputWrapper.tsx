@@ -19,11 +19,17 @@ const InputWrapper = () => {
       if (e.key === "Enter" && message.trim()) {
         sendMessage({ conversationId, recipientId, text: message });
         setMessage("");
+        clearTimeout(typingTimeoutRef.current!);
+        socket.emit("typing:stop", { conversationId, nickname });
       }
     };
     window.addEventListener("keydown", handleEnterKey);
     return () => {
       window.removeEventListener("keydown", handleEnterKey);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        socket.emit("typing:stop", { conversationId, nickname });
+      }
     };
   }, [conversationId, recipientId, message]);
 

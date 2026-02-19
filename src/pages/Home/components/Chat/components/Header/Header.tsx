@@ -22,6 +22,9 @@ const Header = ({ conversation }: IHeader) => {
     if (conversation.type === "DIRECT") {
       socket.emit("subscribe:lastSeenAt", conversation.otherParticipant.id);
     }
+    return () => {
+      socket.off("subscribe:lastSeenAt");
+    };
   }, [conversation.id]);
   return (
     <header className={styles.header}>

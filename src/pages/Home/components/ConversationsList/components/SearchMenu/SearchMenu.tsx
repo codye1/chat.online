@@ -28,7 +28,7 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
           <PreviewItem
             key={item.id}
             avatarUrl={item.avatarUrl}
-            tile={item.title}
+            title={item.title}
             description={item.lastMessage?.text ?? ""}
             meta={{
               lastMessageTime: item.lastMessage?.createdAt.toString() || "",
@@ -51,7 +51,7 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
                 <PreviewItem
                   key={global.id}
                   avatarUrl={global.avatarUrl}
-                  tile={global.nickname}
+                  title={global.nickname}
                   description={"@" + global.nickname}
                   onMouseDown={() => {
                     dispatch(setRecipient({ recipientId: global.id }));
