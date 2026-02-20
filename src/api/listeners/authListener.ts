@@ -5,14 +5,16 @@ import { authUser, logoutUser } from "@redux/auth";
 import type { AppDispatch, RootState } from "@redux/store";
 import { isAnyOf } from "@reduxjs/toolkit";
 import type { ListenerEffectAPI } from "@reduxjs/toolkit";
+import socket, { syncSocketAuthorizationFromStorage } from "@utils/socket";
 
 export const handleAuthSuccess = (
   response: AuthResponse,
   api: ListenerEffectAPI<RootState, AppDispatch>,
 ) => {
   localStorage.setItem("token", response.accessToken);
-
   api.dispatch(authUser(response.user));
+  syncSocketAuthorizationFromStorage();
+  socket.connect();
 };
 
 export const addAuthListeners = (startAppListening: AppStartListening) => {
@@ -34,6 +36,7 @@ export const addAuthListeners = (startAppListening: AppStartListening) => {
     effect: async (_action, api) => {
       localStorage.removeItem("token");
       api.dispatch(logoutUser());
+      socket.disconnect();
     },
   });
 

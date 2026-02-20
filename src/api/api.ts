@@ -6,6 +6,8 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import authSlice from "./slices/authSlice";
+import getErrorCode from "@utils/getErrorCode";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -28,14 +30,9 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  const error = result.error;
-  const data =
-    typeof error?.data === "object" && error.data !== null
-      ? (error.data as Record<string, unknown>)
-      : undefined;
-
+  const code = getErrorCode(result.error);
   const isUnauthorized =
-    "code" in (data || {}) && data!.code === "UNAUTHORIZED";
+    code === "UNAUTHORIZED" && result.error?.status === 401;
 
   if (isUnauthorized) {
     await api.dispatch(authSlice.endpoints.refresh.initiate());
@@ -47,17 +44,7 @@ const baseQueryWithReauth: BaseQueryFn<
 const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  endpoints: (build) => ({
-    getUsers: build.query<{ message: string }, void>({
-      query: () => `health`,
-    }),
-
-    getProtected: build.query<{ message: string }, void>({
-      query: () => `protected`,
-    }),
-  }),
+  endpoints: () => ({}),
 });
-
-export const { useGetUsersQuery, useGetProtectedQuery } = api;
 
 export default api;

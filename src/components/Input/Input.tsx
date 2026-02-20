@@ -1,6 +1,7 @@
 import ErrorsList from "@components/ErrorsList/ErrorsList";
-import "./Input.css";
+import styles from "./Input.module.css";
 import type { ChangeEvent } from "react";
+import clsx from "clsx";
 
 interface IInput {
   label?: string;
@@ -13,6 +14,8 @@ interface IInput {
   isLoading?: boolean;
   errors?: string[];
   name: string;
+  className?: string;
+  onFocusChange?: (isFocused: boolean) => void;
 }
 
 const Input = ({
@@ -23,11 +26,14 @@ const Input = ({
   placeholder,
   errors,
   isLoading,
+  className,
+  onFocusChange,
 }: IInput) => {
   return (
-    <label htmlFor={name} className="input">
+    <label htmlFor={name} className={clsx(styles.label, className)}>
       {label}
       <input
+        className={styles.input}
         type={type}
         value={trackValue?.value}
         onChange={trackValue?.onChange}
@@ -35,6 +41,8 @@ const Input = ({
         id={name}
         placeholder={placeholder}
         disabled={isLoading}
+        onFocus={() => onFocusChange?.(true)}
+        onBlur={() => onFocusChange?.(false)}
       />
       {errors && <ErrorsList errors={errors} />}
     </label>

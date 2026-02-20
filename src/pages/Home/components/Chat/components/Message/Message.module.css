@@ -1,0 +1,51 @@
+.messageWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+}
+
+.message {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  width: fit-content;
+  font-size: var(--text-xl);
+  background-color: var(--c-foreground);
+  display: flex;
+  box-shadow: var(--shadow-s);
+
+  max-width: 50%;
+  object-fit: cover;
+
+  & :first-child {
+    overflow-wrap: anywhere;
+  }
+}
+
+.sentByCurrentUser {
+  background-color: var(--c-light);
+  margin-left: auto;
+}
+
+.check {
+  align-self: flex-end;
+  width: 20px;
+  height: 20px;
+  opacity: 0.5;
+  fill: red;
+  margin-left: 5px;
+}
+
+.read {
+  opacity: 1;
+}
+
+.createdAt {
+  align-self: flex-end;
+  font-size: var(--text-sm);
+  color: var(--c-muted);
+  margin-top: 2px;
+  margin-left: 5px;
+}

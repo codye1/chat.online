@@ -56,14 +56,8 @@ const Register = ({ onHaveAccount }: IRegister) => {
       <Button type="submit" isLoading={isPending}>
         Register
       </Button>
-      <p className={"mt-[30px] mb-[30px] font-light text-xl"}>
-        Do you have an account?{" "}
-        <strong
-          className={"cursor-pointer text-shadow-m"}
-          onClick={onHaveAccount}
-        >
-          Login
-        </strong>
+      <p>
+        Do you have an account? <strong onClick={onHaveAccount}>Login</strong>
       </p>
       <GoogleButton />
     </form>

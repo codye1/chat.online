@@ -1,0 +1,25 @@
+.conversationsList {
+  background-color: var(--c-foreground);
+  border: 1px solid var(--c-border);
+
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
+}
+
+.searchInput {
+  padding: 0 var(--space-4);
+}
+
+.searchWrapper {
+  display: flex;
+}
+
+.closeButton {
+  margin-right: var(--space-4);
+
+  & img {
+    width: 40px;
+    height: 40px;
+  }
+}

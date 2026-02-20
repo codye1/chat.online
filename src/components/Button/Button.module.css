@@ -13,9 +13,22 @@
   font-weight: 700;
 
   margin: var(--space-2) 0;
+
+  &:hover {
+    background-color: var(--c-hover);
+  }
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.loading {
+  cursor: wait;
+  opacity: 0.8;
+}
 
-.btn:hover {
-  background-color: var(--c-hover);
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
