@@ -12,9 +12,9 @@ const DirectHeader = ({ conversation }: IDirectHeader) => {
   useEffect(() => {
     socket.emit("subscribe:lastSeenAt", conversation.otherParticipant.id);
     return () => {
-      socket.off("subscribe:lastSeenAt");
+      socket.emit("unsubscribe:lastSeenAt", conversation.otherParticipant.id);
     };
-  }, [conversation.id]);
+  }, [conversation.otherParticipant.id]);
 
   return (
     <span>

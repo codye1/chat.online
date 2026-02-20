@@ -48,7 +48,7 @@ const chatSlice = api.injectEndpoints({
         );
       },
       async onCacheEntryAdded(
-        arg,
+        _arg,
         {
           cacheDataLoaded,
           cacheEntryRemoved,
@@ -102,26 +102,31 @@ const chatSlice = api.injectEndpoints({
         };
 
         const onUpdateConversation = (conversation: Conversation) => {
-          // Це спрацює, коли ми створили/знайшли чат з recipientId
-          // Оновлюємо кеш для запиту по recipientId
+          // Triggered when a chat was created/found by recipientId
+          // Update cache for the query by recipientId
+          if (conversation.type === "DIRECT") {
+            dispatch(
+              chatSlice.util.updateQueryData(
+                "getConversation",
+                {
+                  recipientId: conversation.otherParticipant.id,
+                  conversationId: null,
+                },
+                () => conversation,
+              ),
+            );
+          }
+
+          // Update cache for the query by conversationId just in case
           dispatch(
             chatSlice.util.updateQueryData(
               "getConversation",
-              { recipientId: arg.recipientId, conversationId: null },
+              { recipientId: null, conversationId: conversation.id },
               () => conversation,
             ),
           );
 
-          // Оновлюємо кеш для запиту по conversationId на всяк випадок
-          dispatch(
-            chatSlice.util.updateQueryData(
-              "getConversation",
-              { recipientId: null, conversationId: arg.conversationId },
-              () => conversation,
-            ),
-          );
-
-          // Оновлюємо кеш для списку розмов
+          // Update conversations list cache
           dispatch(
             chatSlice.util.updateQueryData(
               "getConversations",
@@ -246,6 +251,7 @@ const chatSlice = api.injectEndpoints({
 
         const onNewMessage = (message: Message) => {
           const state = getState() as RootState;
+          const conversation = state.global.conversationId;
 
           updateCachedData((draft) => {
             const convo = draft.find((c) => c.id === message.conversationId);
@@ -274,8 +280,6 @@ const chatSlice = api.injectEndpoints({
               },
             ),
           );
-
-          const conversation = (getState() as RootState).global.conversationId;
 
           if (conversation !== message.conversationId) {
             dispatch(

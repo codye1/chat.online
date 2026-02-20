@@ -4,7 +4,7 @@ import Message from "../Message/Message";
 import { useGetMessagesQuery } from "@api/slices/chatSlice";
 import type { Conversation } from "@utils/types";
 import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
-import VList from "../VList.tsx/VList";
+import VList from "../VList/VList";
 import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";

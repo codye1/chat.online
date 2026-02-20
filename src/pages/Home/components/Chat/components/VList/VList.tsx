@@ -67,20 +67,6 @@ const VList = ({
 
   const [itemsBuffer, setItemsBuffer] = useState(items || []);
 
-  // handle items change and conversation switch
-  useEffect(() => {
-    if (items) {
-      if (prevConversationIdRef.current !== listId) {
-        scrollPositionsRef.current.set(prevConversationIdRef.current, {
-          offset: virtualizer.scrollOffset || 0,
-        });
-        prevConversationIdRef.current = listId;
-      }
-      canAttachToBottomRef.current = checkIfNearBottom(vlistRef.current!);
-      setItemsBuffer(items);
-    }
-  }, [items]);
-
   const beforeInView = useInView({
     root: vlistRef.current,
     rootMargin: "300px 0px 0px 0px",
@@ -101,6 +87,20 @@ const VList = ({
     ),
   });
 
+  // handle items change and conversation switch
+  useEffect(() => {
+    if (items) {
+      if (prevConversationIdRef.current !== listId) {
+        scrollPositionsRef.current.set(prevConversationIdRef.current, {
+          offset: virtualizer.scrollOffset || 0,
+        });
+        prevConversationIdRef.current = listId;
+      }
+      canAttachToBottomRef.current = checkIfNearBottom(vlistRef.current!);
+      setItemsBuffer(items);
+    }
+  }, [items, listId, virtualizer.scrollOffset]);
+
   // Reset refs when conversation changes
   useLayoutEffect(() => {
     if (prevConversationIdRef.current !== listId) {
@@ -109,7 +109,7 @@ const VList = ({
       prevTotalSizeRef.current = 0;
       isUserInteractedRef.current = false;
     }
-  }, [listId, prevIdRef, prevCountRef, prevTotalSizeRef]);
+  }, [listId]);
 
   const scrollToBottom = useCallback(() => {
     if (!vlistRef.current || !itemsBuffer.length) return;
@@ -130,12 +130,18 @@ const VList = ({
     if (beforeInView.inView && hasMoreUp && !itemsFetching) {
       onTopReached();
     }
-  }, [beforeInView.inView, hasMoreUp, itemsFetching]);
+  }, [beforeInView.inView, hasMoreUp, itemsFetching, onTopReached]);
   useEffect(() => {
     if (afterInView.inView && hasMoreDown && !itemsFetching) {
       onBottomReached();
     }
-  }, [afterInView.inView, hasMoreDown, itemsBuffer, itemsFetching]);
+  }, [
+    afterInView.inView,
+    hasMoreDown,
+    itemsBuffer,
+    itemsFetching,
+    onBottomReached,
+  ]);
 
   const isUserInteractedRef = useRef(false);
 

@@ -21,6 +21,11 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
     );
   }
 
+  const onMouseDown = (newConversationId: string) => {
+    connectToConversation([newConversationId], conversationId);
+    dispatch(setConversation({ conversationId: newConversationId }));
+  };
+
   return (
     <>
       {searchResults.conversations.map((item) => (
@@ -33,10 +38,7 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
             lastMessageTime: item.lastMessage?.createdAt.toString() || "",
             unreadMessages: item.unreadMessages,
           }}
-          onMouseDown={() => {
-            connectToConversation([item.id], conversationId);
-            dispatch(setConversation({ conversationId: item.id }));
-          }}
+          onMouseDown={() => onMouseDown(item.id)}
         />
       ))}
 

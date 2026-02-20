@@ -6,9 +6,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const getErrorCode = (
   error: FetchBaseQueryError | undefined,
 ): string | undefined => {
-  if (!error || !isRecord(error)) return undefined;
+  if (!error) return undefined;
 
-  const data = (error as FetchBaseQueryError).data;
+  const data = error.data;
   if (!isRecord(data)) return undefined;
 
   const nestedError = data.error;

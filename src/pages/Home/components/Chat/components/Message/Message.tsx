@@ -27,7 +27,6 @@ const Message = ({
     <div
       id={id}
       className={styles.messageWrapper}
-      role="message"
       ref={ref}
       data-index={dataIndex}
       style={style}

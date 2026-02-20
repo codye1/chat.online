@@ -1,4 +1,3 @@
-import ResizebleSection from "@components/ResizebleSection/ResizebleSection";
 import vwToPx from "@utils/vwToPx";
 import styles from "./ConversationsList.module.css";
 import Input from "@components/Input/Input";
@@ -8,6 +7,7 @@ import { useSearchQuery } from "@api/slices/chatSlice";
 import Button from "@components/Button/Button";
 import closeIcon from "@assets/close.svg";
 import SearchMenu from "./components/SearchMenu/SearchMenu";
+import ResizableSection from "@components/ResizebleSection/ResizableSection";
 
 const ConversationsList = () => {
   const [searchFocus, setSearchFocus] = useState(false);
@@ -24,7 +24,7 @@ const ConversationsList = () => {
   }, [search, refetch]);
 
   return (
-    <ResizebleSection
+    <ResizableSection
       maxWidth={vwToPx(65)}
       className={styles.conversationsList}
     >
@@ -57,7 +57,7 @@ const ConversationsList = () => {
 
       {searchFocus && <SearchMenu searchResults={searchResults} />}
       {!searchFocus && <AllConversations />}
-    </ResizebleSection>
+    </ResizableSection>
   );
 };
 
