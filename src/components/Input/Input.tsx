@@ -30,10 +30,10 @@ const Input = ({
   onFocusChange,
 }: IInput) => {
   return (
-    <label htmlFor={name} className={clsx(styles.input, className)}>
+    <label htmlFor={name} className={clsx(styles.label, className)}>
       {label}
       <input
-        className={styles.inputField}
+        className={styles.input}
         type={type}
         value={trackValue?.value}
         onChange={trackValue?.onChange}

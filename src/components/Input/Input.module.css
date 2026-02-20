@@ -1,4 +1,4 @@
-.input {
+.label {
   color: var(--c-default);
 
   display: flex;
@@ -10,7 +10,7 @@
   width: 100%;
 }
 
-.inputField {
+.input {
   color: var(--c-default);
   font-size: var(--text-2xl);
   padding: var(--space-4);
