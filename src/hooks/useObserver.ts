@@ -16,7 +16,6 @@ const useObserver = (
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
-
     observerRef.current = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -32,7 +31,7 @@ const useObserver = (
     return () => {
       observerRef.current?.disconnect();
     };
-  }, []);
+  }, [options]);
 
   const setRef = useCallback((node: Element | null) => {
     if (!node) return;

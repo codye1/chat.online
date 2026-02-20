@@ -1,16 +1,14 @@
 import { markMessageAsRead } from "@utils/socket";
-import type { Conversation, Message, User } from "@utils/types";
-import { useCallback, useEffect, useRef } from "react";
+import type { Conversation, Message } from "@utils/types";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import useObserver from "@hooks/useObserver";
 
 const useHandleUnreadMessages = ({
   conversation,
 }: {
   conversation: Conversation;
-  user: User;
 }) => {
   const observedMessages = useRef<Set<string>>(new Set());
-
   useEffect(() => {
     observedMessages.current.clear();
   }, [conversation.id]);
@@ -27,7 +25,10 @@ const useHandleUnreadMessages = ({
     [conversation.id],
   );
 
-  const { setRef } = useObserver(handleRead, { threshold: 1.0 });
+  const { setRef } = useObserver(
+    handleRead,
+    useMemo(() => ({ threshold: 1 }), []),
+  );
 
   const trackUnreadMessageRef = (
     node: Element | null | undefined,

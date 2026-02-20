@@ -1,7 +1,6 @@
 import styles from "./Chat.module.css";
 import InputWrapper from "./components/InputWrapper/InputWrapper";
-import { useEffect } from "react";
-import { useGetConversationQuery } from "@api/slices/chatSclice";
+import { useGetConversationQuery } from "@api/slices/chatSlice";
 import { useAppSelector } from "@hooks/hooks";
 import Header from "./components/Header/Header";
 import Messages from "./components/Messages/Messages";
@@ -10,26 +9,33 @@ const Chat = () => {
   const { conversationId, recipientId } = useAppSelector(
     (state) => state.global,
   );
-  const { data, refetch } = useGetConversationQuery(
+  const { data, isLoading, error } = useGetConversationQuery(
     { recipientId, conversationId },
     { skip: !conversationId && !recipientId },
   );
-
-  useEffect(() => {
-    if (conversationId || recipientId) {
-      refetch();
-    }
-  }, [conversationId, recipientId, refetch]);
 
   if (!conversationId && !recipientId) {
     return (
       <div className={styles.noConversation}>No conversation selected.</div>
     );
   }
+
+  if (isLoading) {
+    return <div className={styles.noConversation}>Loading conversation...</div>;
+  }
+
+  if (error || !data) {
+    return (
+      <div className={styles.noConversation}>
+        Error loading conversation. Please try again.
+      </div>
+    );
+  }
+
   return (
     <section className={styles.chat}>
-      {data && <Header conversation={data} />}
-      {data && <Messages conversation={data} />}
+      <Header conversation={data} />
+      <Messages conversation={data} />
       <InputWrapper />
     </section>
   );

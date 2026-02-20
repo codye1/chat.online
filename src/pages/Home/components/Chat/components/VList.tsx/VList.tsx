@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import styles from "./VList.module.css";
 import type { Message as MessageType } from "@utils/types";
@@ -27,6 +28,8 @@ interface IVList {
   attachToBottom: boolean;
   listId: string;
   listStyles: string;
+  topSentinel?: ReactNode;
+  bottomSentinel?: ReactNode;
   onBottomReached: () => void;
   onTopReached: () => void;
   onJumpToLatest?: () => void;
@@ -46,6 +49,8 @@ const VList = ({
   attachToBottom,
   anchor,
   unseenItemsCount,
+  bottomSentinel,
+  topSentinel,
   renderItem,
   onBottomReached,
   onTopReached,
@@ -62,6 +67,7 @@ const VList = ({
 
   const [itemsBuffer, setItemsBuffer] = useState(items || []);
 
+  // handle items change and conversation switch
   useEffect(() => {
     if (items) {
       if (prevConversationIdRef.current !== listId) {
@@ -118,13 +124,7 @@ const VList = ({
         behavior: "smooth",
       });
     }
-  }, [
-    vlistRef.current,
-    itemsBuffer?.length,
-    virtualizer,
-    hasMoreDown,
-    onJumpToLatest,
-  ]);
+  }, [itemsBuffer?.length, virtualizer, hasMoreDown, onJumpToLatest]);
 
   useEffect(() => {
     if (beforeInView.inView && hasMoreUp && !itemsFetching) {
@@ -212,10 +212,9 @@ const VList = ({
           ref={beforeInView.ref}
           style={{
             width: "100%",
-            height: "60px",
           }}
         >
-          OLDER
+          {topSentinel}
         </div>
       )}
 
@@ -246,10 +245,9 @@ const VList = ({
           ref={afterInView.ref}
           style={{
             width: "100%",
-            height: "60px",
           }}
         >
-          NEWER
+          {bottomSentinel}
         </div>
       )}
     </div>

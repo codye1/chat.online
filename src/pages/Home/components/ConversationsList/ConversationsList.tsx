@@ -4,7 +4,7 @@ import styles from "./ConversationsList.module.css";
 import Input from "@components/Input/Input";
 import { useEffect, useState } from "react";
 import AllConversations from "./components/AllConversations/AllConversations";
-import { useSearchQuery } from "@api/slices/chatSclice";
+import { useSearchQuery } from "@api/slices/chatSlice";
 import Button from "@components/Button/Button";
 import closeIcon from "@assets/close.svg";
 import SearchMenu from "./components/SearchMenu/SearchMenu";

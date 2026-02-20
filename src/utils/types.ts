@@ -13,10 +13,13 @@ interface Message {
   createdAt: string;
 }
 
+type ConversationTypes = "DIRECT" | "GROUP";
+
 interface BaseConversation {
   id: string;
   avatarUrl: string | null;
   title: string;
+  type: ConversationTypes;
   lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
   lastReadId: string | null;
@@ -62,6 +65,8 @@ interface SearchResponse {
 export type {
   User,
   Conversation,
+  DirectConversation,
+  ConversationTypes,
   Message,
   Global,
   UserPreview,

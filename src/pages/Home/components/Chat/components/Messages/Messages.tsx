@@ -1,7 +1,7 @@
 import { useAppSelector } from "@hooks/hooks";
 import { useState } from "react";
 import Message from "../Message/Message";
-import { useGetMessagesQuery } from "@api/slices/chatSclice";
+import { useGetMessagesQuery } from "@api/slices/chatSlice";
 import type { Conversation } from "@utils/types";
 import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
 import VList from "../VList.tsx/VList";
@@ -11,7 +11,7 @@ import MessageSkeleton from "../Message/MessageSkeleton";
 
 const skeletonItems = Array.from({ length: 20 }, () => ({
   alignRight: Math.random() > 0.5,
-  height: Math.random() * 60 + 30,
+  height: Math.random() * 30 + 30,
   width: Math.random() * 150 + 40,
 }));
 
@@ -35,11 +35,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
 
   const { trackUnreadMessageRef } = useHandleUnreadMessages({
     conversation,
-    user,
   });
-  console.log(
-    isLoading || (isFetching && Object.keys(currentQueryParams).length === 0),
-  );
 
   if (isError) {
     return <div>Error loading messages.</div>;
@@ -117,8 +113,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
           }}
         />
       )}
-      {(isLoading ||
-        (isFetching && Object.keys(currentQueryParams).length === 0)) && (
+      {(isLoading || (isFetching && !queryParams[conversation.id])) && (
         <div className={styles.overlay}>
           {skeletonItems.map((item, index) => (
             <MessageSkeleton

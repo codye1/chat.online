@@ -33,7 +33,20 @@ const chatSlice = api.injectEndpoints({
             : {}),
         },
       }),
+      forceRefetch({ currentArg, previousArg }) {
+        if (!currentArg) {
+          return false;
+        }
 
+        if (!previousArg) {
+          return true;
+        }
+
+        return (
+          currentArg.conversationId !== previousArg.conversationId ||
+          currentArg.recipientId !== previousArg.recipientId
+        );
+      },
       async onCacheEntryAdded(
         arg,
         {
@@ -166,7 +179,10 @@ const chatSlice = api.injectEndpoints({
           conversationId: string;
           nickname: string;
         }) => {
-          if (nickname === (getState() as RootState).auth.user.nickname) {
+          const state = getState() as RootState;
+          const user = state.auth.user;
+
+          if (nickname === user.nickname) {
             return;
           }
           updateCachedData((draft) => {
@@ -233,7 +249,6 @@ const chatSlice = api.injectEndpoints({
 
           updateCachedData((draft) => {
             const convo = draft.find((c) => c.id === message.conversationId);
-            console.log(convo?.unreadMessages);
 
             if (convo) {
               convo.lastMessage = message;

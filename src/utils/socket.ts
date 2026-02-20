@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import store from "@redux/store";
-import chatSlice from "@api/slices/chatSclice";
+import chatSlice from "@api/slices/chatSlice";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -37,6 +37,8 @@ export const sendMessage = ({
   recipientId: string | null;
   text: string;
 }) => {
+  if (text.length === 0) return;
+
   socket.emit("message:send", {
     conversationId,
     recipientId,
@@ -67,7 +69,6 @@ const emitMessageReadDebounced = (() => {
 
     timeouts[conversationId] = window.setTimeout(() => {
       const maxId = maxIds[conversationId];
-      console.log("last read " + maxId);
       socket.emit("message:read", { conversationId, lastReadMessageId: maxId });
 
       delete maxIds[conversationId];
@@ -102,69 +103,92 @@ export const markMessageAsRead = (
   );
 };
 
-socket.on("connect_error", (error) => {
-  console.error("Socket connection error:", error.message);
+export const initializeSocketListeners = (): (() => void) => {
+  let pingInterval: number | null = null;
 
-  if (
-    error.message.includes("auth") ||
-    error.message.includes("unauthorized")
-  ) {
-    console.log("Auth error detected, syncing token from storage");
+  const onConnectError = (error: Error) => {
+    console.error("Socket connection error:", error.message);
+
+    if (
+      error.message.includes("auth") ||
+      error.message.includes("unauthorized")
+    ) {
+      console.log("Auth error detected, syncing token from storage");
+      syncSocketAuthorizationFromStorage();
+    }
+  };
+
+  const onDisconnect = (reason: string) => {
+    console.log("Socket disconnected. Reason:", reason);
+
+    if (reason === "io server disconnect") {
+      console.log(
+        "Server disconnected socket. Syncing token and reconnecting...",
+      );
+      syncSocketAuthorizationFromStorage();
+      socket.connect();
+    }
+
+    if (pingInterval) {
+      clearInterval(pingInterval);
+      pingInterval = null;
+    }
+  };
+
+  const onConnect = () => {
+    console.log("Socket connected successfully");
+
+    const state = store.getState();
+    const conversations =
+      chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+
+    const conversationsIds = conversations?.map((c) => c.id) || [];
+
+    if (conversationsIds.length > 0) {
+      connectToConversation(conversationsIds, null);
+    }
+
+    if (pingInterval) {
+      clearInterval(pingInterval);
+    }
+    pingInterval = window.setInterval(() => {
+      socket.emit("lastSeenAt:update");
+    }, 1000 * 50);
+  };
+
+  const onReconnectAttempt = (attempt: number) => {
+    console.log(`Reconnection attempt ${attempt}`);
     syncSocketAuthorizationFromStorage();
-  }
-});
+  };
 
-let pingInterval: number | null = null;
+  const onReconnectFailed = () => {
+    console.error("Socket reconnection failed after all attempts");
+  };
 
-socket.on("disconnect", (reason) => {
-  console.log("Socket disconnected. Reason:", reason);
+  const onReconnect = (attempt: number) => {
+    console.log(`Socket reconnected successfully after ${attempt} attempts`);
+  };
 
-  if (reason === "io server disconnect") {
-    console.log(
-      "Server disconnected socket. Syncing token and reconnecting...",
-    );
-    syncSocketAuthorizationFromStorage();
-    socket.connect();
-  }
+  socket.on("connect_error", onConnectError);
+  socket.on("disconnect", onDisconnect);
+  socket.on("connect", onConnect);
+  socket.io.on("reconnect_attempt", onReconnectAttempt);
+  socket.io.on("reconnect_failed", onReconnectFailed);
+  socket.io.on("reconnect", onReconnect);
 
-  if (pingInterval) {
-    clearInterval(pingInterval);
-    pingInterval = null;
-  }
-});
+  return () => {
+    socket.off("connect_error", onConnectError);
+    socket.off("disconnect", onDisconnect);
+    socket.off("connect", onConnect);
+    socket.io.off("reconnect_attempt", onReconnectAttempt);
+    socket.io.off("reconnect_failed", onReconnectFailed);
+    socket.io.off("reconnect", onReconnect);
 
-socket.on("connect", () => {
-  console.log("Socket connected successfully");
-
-  const state = store.getState();
-  const conversations =
-    chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
-
-  const conversationsIds = conversations?.map((c) => c.id) || [];
-
-  if (conversationsIds.length > 0) {
-    connectToConversation(conversationsIds, null);
-  }
-
-  if (pingInterval) {
-    clearInterval(pingInterval);
-  }
-  pingInterval = window.setInterval(() => {
-    socket.emit("lastSeenAt:update");
-  }, 1000 * 50);
-});
-
-socket.io.on("reconnect_attempt", (attempt) => {
-  console.log(`Reconnection attempt ${attempt}`);
-  syncSocketAuthorizationFromStorage();
-});
-
-socket.io.on("reconnect_failed", () => {
-  console.error("Socket reconnection failed after all attempts");
-});
-
-socket.io.on("reconnect", (attempt) => {
-  console.log(`Socket reconnected successfully after ${attempt} attempts`);
-});
+    if (pingInterval) {
+      clearInterval(pingInterval);
+      pingInterval = null;
+    }
+  };
+};
 
 export default socket;

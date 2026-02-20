@@ -21,7 +21,6 @@ const ScrollToBottom = ({
 
   useEffect(() => {
     if (!component) return;
-
     const updateVisibility = () => {
       setScrollToBottomVisible(
         !checkIfNearBottom(component, 100) ||

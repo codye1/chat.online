@@ -1,22 +1,10 @@
-import { useGetConversationsQuery } from "@api/slices/chatSclice";
+import { useGetConversationsQuery } from "@api/slices/chatSlice";
 import { connectToConversation } from "@utils/socket";
 import PreviewItem from "../PreviewItem/PreviewItem";
 import PreviewItemSkeleton from "../PreviewItem/PreviewItemSkeleton";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { setConversation } from "@redux/global";
-import type { Conversation } from "@utils/types";
-
-const sortConversations = (conversations: Conversation[]) => {
-  return conversations.toSorted((a, b) => {
-    const aTime = a.lastMessage
-      ? new Date(a.lastMessage.createdAt).getTime()
-      : 0;
-    const bTime = b.lastMessage
-      ? new Date(b.lastMessage.createdAt).getTime()
-      : 0;
-    return bTime - aTime;
-  });
-};
+import sortConversations from "./utils/sortConversations";
 
 const AllConversations = () => {
   const {

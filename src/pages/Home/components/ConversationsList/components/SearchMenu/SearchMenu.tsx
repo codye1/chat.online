@@ -23,24 +23,22 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
 
   return (
     <>
-      {searchResults.conversations.map((item) => {
-        return (
-          <PreviewItem
-            key={item.id}
-            avatarUrl={item.avatarUrl}
-            title={item.title}
-            description={item.lastMessage?.text ?? ""}
-            meta={{
-              lastMessageTime: item.lastMessage?.createdAt.toString() || "",
-              unreadMessages: item.unreadMessages,
-            }}
-            onMouseDown={() => {
-              connectToConversation([item.id], conversationId);
-              dispatch(setConversation({ conversationId: item.id }));
-            }}
-          />
-        );
-      })}
+      {searchResults.conversations.map((item) => (
+        <PreviewItem
+          key={item.id}
+          avatarUrl={item.avatarUrl}
+          title={item.title}
+          description={item.lastMessage?.text ?? ""}
+          meta={{
+            lastMessageTime: item.lastMessage?.createdAt.toString() || "",
+            unreadMessages: item.unreadMessages,
+          }}
+          onMouseDown={() => {
+            connectToConversation([item.id], conversationId);
+            dispatch(setConversation({ conversationId: item.id }));
+          }}
+        />
+      ))}
 
       {searchResults.global.length > 0 && (
         <>
@@ -59,7 +57,6 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
                 />
               );
             }
-            return;
           })}
         </>
       )}
