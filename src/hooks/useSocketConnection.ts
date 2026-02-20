@@ -1,36 +1,26 @@
 import { useState, useEffect } from "react";
-import { socket, initializeSocketListeners } from "@utils/socket";
+import { initializeSocketListeners } from "@utils/socket";
+import socket from "@utils/socket";
 
 export const useSocketConnection = () => {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
-    const cleanupCoreListeners = initializeSocketListeners();
+    const cleanup = initializeSocketListeners({
+      onConnect: () => {
+        setIsConnected(true);
+        setConnectionError(null);
+      },
+      onDisconnect: () => {
+        setIsConnected(false);
+      },
+      onConnectError: (error: Error) => {
+        setConnectionError(error.message);
+      },
+    });
 
-    const onConnect = () => {
-      setIsConnected(true);
-      setConnectionError(null);
-    };
-
-    const onDisconnect = () => {
-      setIsConnected(false);
-    };
-
-    const onConnectError = (error: Error) => {
-      setConnectionError(error.message);
-    };
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("connect_error", onConnectError);
-
-    return () => {
-      cleanupCoreListeners();
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("connect_error", onConnectError);
-    };
+    return cleanup;
   }, []);
 
   return { isConnected, connectionError };

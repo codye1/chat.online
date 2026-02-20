@@ -103,9 +103,17 @@ export const markMessageAsRead = (
   );
 };
 
-export const initializeSocketListeners = (): (() => void) => {
-  let pingInterval: number | null = null;
+interface SocketListenerCallbacks {
+  onConnect?: () => void;
+  onDisconnect?: () => void;
+  onConnectError?: (error: Error) => void;
+}
 
+let pingInterval: number | null = null;
+
+export const initializeSocketListeners = (
+  callbacks?: SocketListenerCallbacks,
+): (() => void) => {
   const onConnectError = (error: Error) => {
     console.error("Socket connection error:", error.message);
 
@@ -116,6 +124,8 @@ export const initializeSocketListeners = (): (() => void) => {
       console.log("Auth error detected, syncing token from storage");
       syncSocketAuthorizationFromStorage();
     }
+
+    callbacks?.onConnectError?.(error);
   };
 
   const onDisconnect = (reason: string) => {
@@ -133,6 +143,8 @@ export const initializeSocketListeners = (): (() => void) => {
       clearInterval(pingInterval);
       pingInterval = null;
     }
+
+    callbacks?.onDisconnect?.();
   };
 
   const onConnect = () => {
@@ -154,6 +166,8 @@ export const initializeSocketListeners = (): (() => void) => {
     pingInterval = window.setInterval(() => {
       socket.emit("lastSeenAt:update");
     }, 1000 * 50);
+
+    callbacks?.onConnect?.();
   };
 
   const onReconnectAttempt = (attempt: number) => {

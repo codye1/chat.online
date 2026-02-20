@@ -124,7 +124,7 @@ const VList = ({
         behavior: "smooth",
       });
     }
-  }, [itemsBuffer?.length, virtualizer, hasMoreDown, onJumpToLatest]);
+  }, [itemsBuffer, virtualizer, hasMoreDown, onJumpToLatest]);
 
   useEffect(() => {
     if (beforeInView.inView && hasMoreUp && !itemsFetching) {

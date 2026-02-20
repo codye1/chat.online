@@ -53,7 +53,7 @@ const ResizableSection = ({
 
   return (
     <section
-      className={clsx(styles.ResizableSection, className)}
+      className={clsx(styles.resizableSection, className)}
       style={{ width: `${width}px` }}
     >
       {children}

@@ -1,27 +1,22 @@
 import vwToPx from "@utils/vwToPx";
 import styles from "./ConversationsList.module.css";
 import Input from "@components/Input/Input";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AllConversations from "./components/AllConversations/AllConversations";
 import { useSearchQuery } from "@api/slices/chatSlice";
 import Button from "@components/Button/Button";
 import closeIcon from "@assets/close.svg";
 import SearchMenu from "./components/SearchMenu/SearchMenu";
-import ResizableSection from "@components/ResizebleSection/ResizableSection";
+import ResizableSection from "@components/ResizableSection/ResizableSection";
 
 const ConversationsList = () => {
   const [searchFocus, setSearchFocus] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: searchResults, refetch } = useSearchQuery(
+  const { data: searchResults } = useSearchQuery(
     { query: search },
     { skip: search.trim().length === 0, refetchOnMountOrArgChange: true },
   );
-  useEffect(() => {
-    if (search.trim().length > 0) {
-      refetch();
-    }
-  }, [search, refetch]);
 
   return (
     <ResizableSection

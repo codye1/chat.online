@@ -19,7 +19,7 @@ const DirectHeader = ({ conversation }: IDirectHeader) => {
   return (
     <span>
       <h1>{conversation.title}</h1>
-      {conversation.typingUsers && conversation.typingUsers?.length > 0 && (
+      {(conversation.typingUsers?.length ?? 0) > 0 && (
         <h2 className={headerStyles.typingUsers}>typing...</h2>
       )}
       {!conversation.typingUsers?.length && (

@@ -35,7 +35,7 @@ const PreviewItem = ({
           <img src={avatarUrl} alt="Conversation Icon" />
         ) : (
           <div className={styles.placeholderIcon}>
-            <img src={userIcon} alt="" />
+            <img src={userIcon} alt="User icon" />
           </div>
         )}
       </div>

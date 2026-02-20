@@ -17,7 +17,10 @@ export interface MessagesResponse {
 const chatSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     search: builder.query<SearchResponse, { query: string }>({
-      query: ({ query }) => `chat/search?query=${query}`,
+      query: ({ query }) => ({
+        url: `chat/search`,
+        params: { query },
+      }),
     }),
     getConversation: builder.query<
       Conversation,
