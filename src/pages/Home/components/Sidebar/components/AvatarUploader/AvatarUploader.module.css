@@ -1,0 +1,34 @@
+.cropperContainer {
+  width: 100vw;
+  height: 100vh;
+  z-index: 1001;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cropperContainer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--c-foreground);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.cropperWrapper {
+  position: relative;
+  width: 100%;
+  height: 80%;
+  display: flex;
+}
+
+.cropperButtons {
+  margin: var(--space-4);
+  display: flex;
+  gap: var(--space-4);
+}

@@ -114,6 +114,11 @@ let pingInterval: number | null = null;
 export const initializeSocketListeners = (
   callbacks?: SocketListenerCallbacks,
 ): (() => void) => {
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+
   const onConnectError = (error: Error) => {
     console.error("Socket connection error:", error.message);
 

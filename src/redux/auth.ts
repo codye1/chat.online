@@ -9,7 +9,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   isAuth: false,
-  user: { email: "", nickname: "", id: "" },
+  user: { email: "", nickname: "", id: "", avatarUrl: null },
 };
 
 export const authSlice = createSlice({
@@ -22,7 +22,7 @@ export const authSlice = createSlice({
     },
     logoutUser(state) {
       state.isAuth = false;
-      state.user = { email: "", nickname: "", id: "" };
+      state.user = { email: "", nickname: "", id: "", avatarUrl: null };
     },
   },
 });
