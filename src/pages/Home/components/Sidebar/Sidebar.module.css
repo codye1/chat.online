@@ -11,6 +11,10 @@
   flex-direction: column;
   height: 84px;
 
+  background-color: transparent;
+  border: none;
+
+  color: var(--c-default);
   & h3 {
     font-size: var(--text-xs);
     text-align: center;

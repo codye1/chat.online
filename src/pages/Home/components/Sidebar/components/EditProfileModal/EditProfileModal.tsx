@@ -9,6 +9,7 @@ import AvatarWithUploader from "../AvatarWithUploader/AvatarWithUploader";
 import {
   startTransition,
   useActionState,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -16,8 +17,9 @@ import type { User } from "@utils/types";
 import { useUpdateUserMutation } from "@api/slices/userSlice";
 import styles from "./EditProfileModal.module.css";
 import editUser from "@actions/editUser";
-import { EditNameModal } from "./components/EditNameModal";
-import { EditUsernameModal } from "./components/EditNickname";
+import getDisplayName from "@utils/getDisplayName";
+import EditNicknameModal from "./components/EditNickname";
+import EditNameModal from "./components/EditNameModal";
 
 interface IEditProfileModal {
   user: User;
@@ -25,8 +27,6 @@ interface IEditProfileModal {
   onClickClose: () => void;
   onClickBack: () => void;
 }
-
-let bioTimeout: number;
 
 const EditProfileModal = ({
   user,
@@ -36,9 +36,12 @@ const EditProfileModal = ({
 }: IEditProfileModal) => {
   const [updateUser] = useUpdateUserMutation();
   const [bioValue, setBioValue] = useState(user.biography || "");
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [viewEditModle, setViewEditModle] = useState<
+    "name" | "nickname" | null
+  >(null);
+
   const [state, action, isPending] = useActionState(editUser, undefined);
+  const bioTimeoutRef = useRef<number | null>(null);
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -46,33 +49,27 @@ const EditProfileModal = ({
       action(formData);
     });
   };
-
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newBio = e.target.value;
     setBioValue(newBio);
 
-    clearTimeout(bioTimeout);
-    bioTimeout = window.setTimeout(() => {
+    clearTimeout(bioTimeoutRef.current!);
+    bioTimeoutRef.current = window.setTimeout(() => {
       updateUser({ biography: newBio });
     }, 1000);
   };
-
   return (
     <>
       <Modal onClickOutside={onClickOutside}>
-        <div className={styles.backIcon}>
-          <img src={backIcon} alt="back icon" onClick={onClickBack} />
-        </div>
-        <div className={styles.closeIcon}>
-          <img src={closeIcon} alt="close icon" onClick={onClickClose} />
-        </div>
+        <button className={styles.backIcon} onClick={onClickBack}>
+          <img src={backIcon} alt="back icon" />
+        </button>
+        <button className={styles.closeIcon} onClick={onClickClose}>
+          <img src={closeIcon} alt="close icon" />
+        </button>
         <div className={styles.modalHeader}>
           <AvatarWithUploader />
-          <h2>
-            {user.firstName
-              ? `${user.firstName} ${user.lastName}`
-              : user.nickname}
-          </h2>
+          <h2>{getDisplayName(user)}</h2>
           <div className={styles.bioSection}>
             <TextArea
               placeholder="Bio"
@@ -86,21 +83,17 @@ const EditProfileModal = ({
           <button
             className={styles.editModalButton}
             onClick={() => {
-              setIsEditingName(true);
+              setViewEditModle("name");
             }}
           >
             <img src={userCircle} alt="user circle icon" />
             Name
-            <span className={styles.link}>
-              {user.firstName
-                ? `${user.firstName} ${user.lastName}`
-                : user.nickname}
-            </span>
+            <span className={styles.link}>{getDisplayName(user)}</span>
           </button>
           <button
             className={styles.editModalButton}
             onClick={() => {
-              setIsEditingUsername(true);
+              setViewEditModle("nickname");
             }}
           >
             <img src={at} alt="at icon" />
@@ -110,20 +103,20 @@ const EditProfileModal = ({
         </div>
       </Modal>
 
-      {isEditingName && !state?.success && (
+      {viewEditModle === "name" && (
         <EditNameModal
           user={user}
           state={state}
-          onClose={() => setIsEditingName(false)}
+          onClose={() => setViewEditModle(null)}
           onSubmit={handleSubmit}
           isPending={isPending}
         />
       )}
-      {isEditingUsername && !state?.success && (
-        <EditUsernameModal
+      {viewEditModle === "nickname" && (
+        <EditNicknameModal
           user={user}
           state={state}
-          onClose={() => setIsEditingUsername(false)}
+          onClose={() => setViewEditModle(null)}
           onSubmit={handleSubmit}
           isPending={isPending}
         />

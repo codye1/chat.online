@@ -1,6 +1,6 @@
 import { useAppSelector } from "@hooks/hooks";
 import styles from "./Sidebar.module.css";
-import burderIcon from "@assets/burger.svg";
+import burgerIcon from "@assets/burger.svg";
 import messagesIcon from "@assets/messages.svg";
 import { useState } from "react";
 import NavigationDrawer from "./components/NavigationDrawer/NavigationDrawer";
@@ -15,19 +15,19 @@ const Sidebar = () => {
 
   return (
     <section className={styles.sidebar}>
-      <span
+      <button
         className={styles.sidebarItem}
         onClick={() => setActiveView("drawer")}
       >
-        <img src={burderIcon} alt="burger menu icon" />
-      </span>
-      <span className={styles.sidebarItem}>
+        <img src={burgerIcon} alt="burger menu icon" />
+      </button>
+      <button className={styles.sidebarItem}>
         <img src={messagesIcon} alt="messages icon" />
         <h3>All chats</h3>
-      </span>
-      <span className={styles.sidebarItem}>
+      </button>
+      <button className={styles.sidebarItem}>
         <h2>{user.nickname}</h2>
-      </span>
+      </button>
 
       {activeView === "drawer" && (
         <NavigationDrawer

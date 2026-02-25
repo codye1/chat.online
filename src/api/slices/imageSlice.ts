@@ -51,9 +51,9 @@ const imageSlice = createApi({
         // Remove data:image/...;base64, prefix if present
         const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
         formData.append("image", base64Data);
-
+        formData.append("key", IMGBB_API_KEY);
         return {
-          url: `/upload?key=${IMGBB_API_KEY}`,
+          url: `/upload`,
           method: "POST",
           body: formData,
         };

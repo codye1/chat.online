@@ -9,6 +9,9 @@
   margin: var(--space-4);
   display: flex;
   justify-content: flex-end;
+
+  background-color: transparent;
+  border: none;
   & img {
     width: 20px;
     height: 20px;
@@ -33,7 +36,6 @@
 
 .modalHeader {
   background-color: var(--c-accent);
-  width: 100%;
   width: 300px;
   padding: var(--space-6);
   border-radius: var(--radius-md) var(--radius-md) 0 0;

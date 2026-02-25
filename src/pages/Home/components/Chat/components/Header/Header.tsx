@@ -12,7 +12,7 @@ const Header = ({ conversation }: IHeader) => {
       return (
         <DirectHeader conversation={conversation} className={styles.header} />
       );
-    case "GROUP":
+    default:
       return <h1 className={styles.header}>{conversation.title}</h1>;
   }
 };

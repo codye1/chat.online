@@ -4,6 +4,7 @@ import styles from "./DirectInfoModal.module.css";
 import closeIcon from "@assets/close.svg";
 import Avatar from "@components/Avatar/Avatar";
 import clsx from "clsx";
+import getDisplayName from "@utils/getDisplayName";
 
 interface IDirectInfoModal {
   conversation: DirectConversation;
@@ -13,20 +14,16 @@ interface IDirectInfoModal {
 const DirectInfoModal = ({ conversation, onClickClose }: IDirectInfoModal) => {
   return (
     <Modal onClickOutside={onClickClose}>
-      <div className={styles.closeIcon}>
-        <img src={closeIcon} alt="close icon" onClick={onClickClose} />
-      </div>
+      <button className={styles.closeIcon} onClick={onClickClose}>
+        <img src={closeIcon} alt="close icon" />
+      </button>
       <div className={styles.modalHeader}>
         <Avatar
           avatarUrl={conversation.avatarUrl}
           width={"100px"}
           height={"100px"}
         />
-        <h2>
-          {conversation.otherParticipant.firstName
-            ? `${conversation.otherParticipant.firstName} ${conversation.otherParticipant.lastName}`
-            : conversation.otherParticipant.nickname}
-        </h2>
+        <h2>{getDisplayName(conversation.otherParticipant)}</h2>
       </div>
       <div className={clsx(styles.modalBody, styles.profileModalBody)}>
         {conversation.otherParticipant.biography && (

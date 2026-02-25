@@ -5,6 +5,9 @@
   margin: var(--space-4);
   display: flex;
   justify-content: flex-end;
+
+  background-color: transparent;
+  border: none;
   & img {
     width: 20px;
     height: 20px;
@@ -20,6 +23,8 @@
   margin: var(--space-4);
   display: flex;
   justify-content: flex-end;
+  background-color: transparent;
+  border: none;
   & img {
     width: 25px;
     height: 25px;
@@ -29,7 +34,6 @@
 
 .modalHeader {
   background-color: var(--c-accent);
-  width: 100%;
   width: 300px;
   padding: var(--space-4) var(--space-6);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
@@ -80,7 +84,6 @@
   height: fit-content;
   display: flex;
   justify-content: flex-start;
-  align-items: start;
 
   padding: var(--space-2) 0;
   padding-right: var(--space-4);

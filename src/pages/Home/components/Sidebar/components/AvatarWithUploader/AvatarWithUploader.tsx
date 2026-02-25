@@ -35,9 +35,7 @@ const AvatarWithUploader = () => {
       );
 
       const result = await uploadImage(croppedImageBase64).unwrap();
-      console.log("Image uploaded successfully:", result.data.url);
 
-      // TODO: Update user avatar with result.data.url
       await updateUser({ avatarUrl: result.data.url }).unwrap();
 
       setLoadedImage(null);
@@ -81,10 +79,6 @@ const AvatarWithUploader = () => {
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
-                classes={{
-                  containerClassName: styles.cropper,
-                  cropAreaClassName: styles.cropArea,
-                }}
               />
             </div>
 

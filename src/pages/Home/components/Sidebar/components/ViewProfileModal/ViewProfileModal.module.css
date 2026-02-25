@@ -15,6 +15,11 @@
     margin-left: var(--space-2);
     cursor: pointer;
   }
+
+  & button {
+    background-color: transparent;
+    border: none;
+  }
 }
 
 .backIcon {
@@ -33,7 +38,6 @@
 
 .modalHeader {
   background-color: var(--c-accent);
-  width: 100%;
   width: 300px;
   padding: var(--space-6);
   border-radius: var(--radius-md) var(--radius-md) 0 0;

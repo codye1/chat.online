@@ -8,7 +8,7 @@
 
   height: 70px;
 
-  cursor:pointer;
+  cursor: pointer;
 
   padding: var(--space-2) 0;
   & h1 {

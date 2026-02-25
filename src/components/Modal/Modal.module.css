@@ -25,3 +25,7 @@
   flex-direction: column;
   position: relative;
 }
+
+.modalContent {
+  outline: none;
+}

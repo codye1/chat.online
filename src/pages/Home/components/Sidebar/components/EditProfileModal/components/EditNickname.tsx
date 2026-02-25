@@ -2,7 +2,7 @@ import InputWithLabel from "@components/InputWithLabel/InputWithLabel";
 import { EditModal } from "./EditFormModal/EditFormModal";
 import type { User } from "@utils/types";
 import type { EditUserFormState } from "@utils/schemas";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 interface IEditNameModal {
   user: User;
@@ -12,27 +12,34 @@ interface IEditNameModal {
   isPending: boolean;
 }
 
-export function EditUsernameModal({
+const EditNicknameModal = ({
   user,
   state,
   onClose,
   onSubmit,
   isPending,
-}: IEditNameModal) {
+}: IEditNameModal) => {
+  const [nickname, setNickname] = useState(user.nickname || "");
+
   return (
     <EditModal
-      title="Edit username"
+      title="Edit nickname"
       onClose={onClose}
       onSubmit={onSubmit}
       isPending={isPending}
       apiErrors={state?.properties?.api?.errors}
+      forbidden={user.nickname === nickname}
     >
       <InputWithLabel
-        label="@username"
+        label="@nickname"
         name="nickname"
+        onChange={(e) => setNickname(e.target.value)}
+        value={nickname}
         defaultValue={user.nickname || ""}
         errors={state?.properties?.nickname?.errors}
       />
     </EditModal>
   );
-}
+};
+
+export default EditNicknameModal;

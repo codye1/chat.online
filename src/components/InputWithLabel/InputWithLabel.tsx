@@ -7,8 +7,8 @@ interface InputWithLabelProps {
   label: string;
   name: string;
   type?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   defaultValue?: string;
   errors?: string[];
@@ -18,24 +18,17 @@ const InputWithLabel = ({
   label,
   name,
   type = "text",
-  value: controlledValue,
+  value,
   onChange,
   placeholder = "",
-  defaultValue,
   errors,
 }: InputWithLabelProps) => {
-  const [internalValue, setInternalValue] = useState(defaultValue || "");
   const [isFocused, setIsFocused] = useState(false);
 
-  const value = controlledValue !== undefined ? controlledValue : internalValue;
   const hasValue = value.length > 0;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (onChange) {
-      onChange(e);
-    } else {
-      setInternalValue(e.target.value);
-    }
+    onChange(e);
   };
 
   return (
@@ -50,6 +43,7 @@ const InputWithLabel = ({
         {label}
       </label>
       <input
+        id={name}
         name={name}
         type={type}
         value={value}

@@ -7,9 +7,7 @@ export const addUserListeners = (startAppListening: AppStartListening) => {
   startAppListening({
     matcher: userSlice.endpoints.updateUser.matchFulfilled,
     effect: async (action, api) => {
-      console.log(action.payload);
-
-      api.dispatch(updateUser(action.payload)); // Assuming the response has a 'user' field with the updated user data
+      api.dispatch(updateUser(action.payload));
     },
   });
 };

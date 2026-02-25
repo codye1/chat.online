@@ -25,9 +25,6 @@ const editUser = async (
   });
 
   if (!validatedFields.success) {
-    console.log(
-      z.treeifyError(validatedFields.error).properties?.firstName?.errors,
-    );
     return {
       properties: {
         ...z.treeifyError(validatedFields.error).properties,
@@ -38,7 +35,7 @@ const editUser = async (
   try {
     const dataToUpdate = Object.fromEntries(
       Object.entries(validatedFields.data).filter(
-        ([, value]) => value !== null,
+        ([, value]) => value !== null && value !== "",
       ),
     );
     await store
@@ -49,14 +46,14 @@ const editUser = async (
     if (typeof error === "object" && error !== null && "data" in error) {
       const err = error as apiError;
 
-      console.error("Помилка редагування користувача:", err);
+      console.error("Error editing user:", err);
       return {
         properties: {
           api: { errors: [err.data.error.message] },
         },
       };
     } else {
-      console.error("Невідома помилка редагування користувача:", error);
+      console.error("Unknown error editing user:", error);
       return {
         properties: {
           api: { errors: ["An unknown error occurred"] },

@@ -12,6 +12,7 @@ interface EditModalProps {
   isPending: boolean;
   apiErrors?: string[];
   children: React.ReactNode;
+  forbidden?: boolean;
 }
 
 export function EditModal({
@@ -21,6 +22,7 @@ export function EditModal({
   isPending,
   apiErrors,
   children,
+  forbidden,
 }: EditModalProps) {
   return (
     <Modal onClickOutside={onClose}>
@@ -29,7 +31,7 @@ export function EditModal({
         {children}
         <span className={styles.editModalButtons}>
           <Button onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={isPending}>
+          <Button type="submit" disabled={isPending || forbidden}>
             {isPending ? <Spinner /> : "Save"}
           </Button>
         </span>
