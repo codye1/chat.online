@@ -1,0 +1,13 @@
+.editModal {
+  width: 300px;
+  padding: var(--space-4);
+  background-color: var(--c-foreground);
+  border-radius: var(--radius-md);
+}
+
+.editModalButtons {
+  margin-top: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}

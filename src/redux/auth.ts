@@ -9,7 +9,15 @@ interface AuthState {
 
 const initialState: AuthState = {
   isAuth: false,
-  user: { email: "", nickname: "", id: "" },
+  user: {
+    email: "",
+    nickname: "",
+    id: "",
+    avatarUrl: null,
+    lastName: null,
+    biography: null,
+    firstName: null,
+  },
 };
 
 export const authSlice = createSlice({
@@ -22,11 +30,22 @@ export const authSlice = createSlice({
     },
     logoutUser(state) {
       state.isAuth = false;
-      state.user = { email: "", nickname: "", id: "" };
+      state.user = {
+        email: "",
+        nickname: "",
+        id: "",
+        avatarUrl: null,
+        lastName: null,
+        firstName: null,
+        biography: null,
+      };
+    },
+    updateUser(state, action: PayloadAction<Partial<User>>) {
+      state.user = { ...state.user, ...action.payload };
     },
   },
 });
 
-export const { authUser, logoutUser } = authSlice.actions;
+export const { authUser, logoutUser, updateUser } = authSlice.actions;
 
 export default authSlice;

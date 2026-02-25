@@ -3,11 +3,6 @@
 
   display: flex;
   flex-direction: column;
-  margin: var(--space-2) 0;
-
-  font-size: var(--text-xl);
-
-  width: 100%;
 }
 
 .input {
@@ -17,6 +12,8 @@
   background-color: var(--c-light);
   border-radius: var(--radius-sm);
 
+  margin: var(--space-2) 0;
+  width: 100%;
   border: none;
   box-shadow: var(--shadow-s);
 }

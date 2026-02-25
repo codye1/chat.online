@@ -1,0 +1,17 @@
+.textarea {
+  margin-top: var(--space-2);
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  resize: none;
+  overflow: hidden;
+  border: none;
+  background-color: transparent;
+
+  color: var(--c-default);
+  font-size: var(--text-base);
+}
+
+.textarea:focus {
+  background-color: transparent;
+}

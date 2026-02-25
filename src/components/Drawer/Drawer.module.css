@@ -1,0 +1,51 @@
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  z-index: 1000;
+}
+.drawer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--c-dark);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.drawerContent {
+  display: flex;
+  width: fit-content;
+  height: 100%;
+  background-color: var(--c-foreground);
+  border-radius: 0 8px 8px 0;
+}
+
+.drawer {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.drawerContent {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

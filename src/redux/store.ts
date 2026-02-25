@@ -8,11 +8,13 @@ import api from "../api/api";
 import auth from "./auth";
 import { listenerMiddleware } from "@api/listenerMiddleware";
 import globalSlice from "./global";
+import imageSlice from "@api/slices/imageSlice";
 
 export const rootReducer = combineReducers({
   global: globalSlice.reducer,
   auth: auth.reducer,
   [api.reducerPath]: api.reducer,
+  [imageSlice.reducerPath]: imageSlice.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -25,5 +27,6 @@ export default configureStore({
     getDefaultMiddleware().concat(
       listenerMiddleware.middleware,
       api.middleware,
+      imageSlice.middleware,
     ),
 });

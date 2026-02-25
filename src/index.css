@@ -26,6 +26,8 @@ body.loading * {
   --c-selected: oklch(0.32 0 264);
   --c-focus: oklch(0.4 0 264);
   --c-border: oklch(0.3 0 20);
+  --c-accent: oklch(0.35 0 20);
+  --c-link: oklch(0.725 0.1554 247.24);
   --c-default: oklch(0.96 0 20);
   --c-muted: oklch(0.76 0 20);
   --c-error: oklch(0.65 0.2 25);

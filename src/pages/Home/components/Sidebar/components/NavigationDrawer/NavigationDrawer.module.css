@@ -1,0 +1,50 @@
+.drawerContent{
+  flex-direction: column;
+}
+
+.drawerHeader {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.drawerSection {
+  width: 300px;
+  height: fit-content;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--c-border);
+  font-size: var(--text-xs);
+
+  & button {
+    width: 100%;
+    padding: var(--space-2) 0;
+    background-color: transparent;
+    border: none;
+    color: var(--c-default);
+    font-size: var(--text-lg);
+    font-weight: 500;
+
+    display: flex;
+    align-items: center;
+    text-align: left;
+    &:hover {
+      background-color: var(--c-hover);
+      cursor: pointer;
+    }
+
+    & img {
+      width: 20px;
+      height: 20px;
+      margin: 0 var(--space-4);
+    }
+  }
+}
+
+.logout {
+  border-top: 1px solid var(--c-border);
+  border-bottom: none;
+  margin-top: auto;
+}

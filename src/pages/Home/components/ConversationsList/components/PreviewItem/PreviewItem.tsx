@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import styles from "./PreviewItem.module.css";
-import userIcon from "@assets/user.svg";
+import Avatar from "@components/Avatar/Avatar";
 
 interface IPreviewItem {
   avatarUrl: string | null;
@@ -31,13 +31,7 @@ const PreviewItem = ({
       onMouseDown={onMouseDown}
     >
       <div className={styles.icon}>
-        {avatarUrl ? (
-          <img src={avatarUrl} alt="Conversation Icon" />
-        ) : (
-          <div className={styles.placeholderIcon}>
-            <img src={userIcon} alt="User icon" />
-          </div>
-        )}
+        <Avatar avatarUrl={avatarUrl} />
       </div>
       <div className={styles.details}>
         <div className={styles.mainInfo}>

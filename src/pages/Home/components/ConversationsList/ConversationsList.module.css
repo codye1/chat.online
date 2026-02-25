@@ -7,16 +7,13 @@
   scrollbar-color: var(--c-border) transparent;
 }
 
-.searchInput {
-  padding: 0 var(--space-4);
-}
-
 .searchWrapper {
   display: flex;
+  padding: 0 var(--space-2);
 }
 
 .closeButton {
-  margin-right: var(--space-4);
+  margin: var(--space-2);
 
   & img {
     width: 40px;
