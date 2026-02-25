@@ -1,14 +1,16 @@
 import socket from "@utils/socket";
 import type { DirectConversation } from "@utils/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import headerStyles from "../Header.module.css";
 import getOnlineStatus from "@utils/getOnlineStatus";
+import DirectInfoModal from "./DirectInfoModal/DirectInfoModal";
 
 interface IDirectHeader {
   conversation: DirectConversation;
+  className: string;
 }
 
-const DirectHeader = ({ conversation }: IDirectHeader) => {
+const DirectHeader = ({ conversation, className }: IDirectHeader) => {
   useEffect(() => {
     socket.emit("subscribe:lastSeenAt", conversation.otherParticipant.id);
     return () => {
@@ -16,16 +18,27 @@ const DirectHeader = ({ conversation }: IDirectHeader) => {
     };
   }, [conversation.otherParticipant.id]);
 
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+
   return (
-    <span>
-      <h1>{conversation.title}</h1>
-      {(conversation.typingUsers?.length ?? 0) > 0 && (
-        <h2 className={headerStyles.typingUsers}>typing...</h2>
+    <header className={className} onClick={() => setInfoModalOpen(true)}>
+      <span>
+        <h1>{conversation.title}</h1>
+        {(conversation.typingUsers?.length ?? 0) > 0 && (
+          <h2 className={headerStyles.typingUsers}>typing...</h2>
+        )}
+        {!conversation.typingUsers?.length && (
+          <h2>{getOnlineStatus(conversation.lastSeenAt)}</h2>
+        )}
+      </span>
+
+      {infoModalOpen && (
+        <DirectInfoModal
+          conversation={conversation}
+          onClickClose={() => setInfoModalOpen(false)}
+        />
       )}
-      {!conversation.typingUsers?.length && (
-        <h2>{getOnlineStatus(conversation.lastSeenAt)}</h2>
-      )}
-    </span>
+    </header>
   );
 };
 

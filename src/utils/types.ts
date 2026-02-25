@@ -3,6 +3,9 @@ interface User {
   email: string;
   nickname: string;
   avatarUrl: string | null;
+  lastName: string | null;
+  firstName: string | null;
+  biography: string | null;
 }
 
 interface Message {
@@ -31,11 +34,7 @@ interface BaseConversation {
 interface DirectConversation extends BaseConversation {
   type: "DIRECT";
   lastSeenAt: string | null;
-  otherParticipant: {
-    id: string;
-    nickname: string;
-    avatarUrl: string | null;
-  };
+  otherParticipant: User;
 }
 
 interface GroupConversation extends BaseConversation {

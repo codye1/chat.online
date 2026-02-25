@@ -19,7 +19,6 @@ interface IInput {
 }
 
 const Input = ({
-  label,
   type,
   trackValue,
   name,
@@ -30,10 +29,9 @@ const Input = ({
   onFocusChange,
 }: IInput) => {
   return (
-    <label htmlFor={name} className={clsx(styles.label, className)}>
-      {label}
+    <>
       <input
-        className={styles.input}
+        className={clsx(styles.input, className)}
         type={type}
         value={trackValue?.value}
         onChange={trackValue?.onChange}
@@ -45,7 +43,7 @@ const Input = ({
         onBlur={() => onFocusChange?.(false)}
       />
       {errors && <ErrorsList errors={errors} />}
-    </label>
+    </>
   );
 };
 

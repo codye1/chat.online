@@ -1,0 +1,44 @@
+.inputWithLabel {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: 30px;
+
+  & input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--c-border);
+    color: var(--c-default);
+    padding: var(--space-2) 0;
+    outline: none;
+    transition: border-color 0.2s ease;
+
+    font-size: var(--text-lg);
+  }
+
+  & input:focus {
+    border-bottom-color: var(--c-focus);
+  }
+}
+
+.label {
+  position: absolute;
+  left: 0;
+  top: 38px;
+  color: var(--c-default);
+  opacity: 0.5;
+  pointer-events: none;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    opacity 0.2s ease,
+    color 0.2s ease;
+  transform-origin: left top;
+  font-size: var(--text-base);
+}
+
+.labelFloat {
+  transform: translateY(-30px);
+  font-size: var(--text-lg);
+  opacity: 1;
+}

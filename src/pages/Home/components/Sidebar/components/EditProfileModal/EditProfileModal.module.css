@@ -1,0 +1,111 @@
+.closeIcon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  & img {
+    width: 20px;
+    height: 20px;
+    margin-left: var(--space-2);
+    cursor: pointer;
+  }
+}
+
+.backIcon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: var(--space-4);
+  display: flex;
+  justify-content: flex-end;
+  & img {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+  }
+}
+
+.modalHeader {
+  background-color: var(--c-accent);
+  width: 100%;
+  width: 300px;
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.bioSection {
+  width: 100%;
+  display: flex;
+
+  & span {
+    margin-left: var(--space-1);
+    margin-top: var(--space-2);
+    color: var(--c-muted);
+    font-size: var(--text-sm);
+  }
+}
+
+.modalBody {
+  width: 300px;
+  background-color: var(--c-foreground);
+
+  padding: var(--space-3) 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  & h3 {
+    font-weight: 300;
+  }
+  & label {
+    color: var(--c-muted);
+    font-size: var(--text-base);
+    font-weight: 300;
+  }
+}
+
+.link {
+  color: var(--c-link);
+}
+
+.profileModalBody {
+  padding: var(--space-4);
+}
+
+.editModalButton {
+  width: 300px;
+  height: fit-content;
+  display: flex;
+  justify-content: flex-start;
+  align-items: start;
+
+  padding: var(--space-2) 0;
+  padding-right: var(--space-4);
+  background-color: transparent;
+  border: none;
+  color: var(--c-default);
+  font-size: var(--text-base);
+  font-weight: 500;
+
+  display: flex;
+  align-items: center;
+  text-align: left;
+  &:hover {
+    background-color: var(--c-hover);
+    cursor: pointer;
+  }
+
+  & img {
+    width: 20px;
+    height: 20px;
+    margin: 0 var(--space-4);
+  }
+
+  & span {
+    margin-left: auto;
+    font-weight: 300;
+  }
+}

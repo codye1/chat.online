@@ -5,15 +5,22 @@ import { useUploadImageMutation } from "@api/slices/imageSlice";
 import getCroppedImg from "@utils/getCroppedImg";
 import { useState } from "react";
 import Modal from "@components/Modal/Modal";
-import styles from "./AvatarUploader.module.css";
+import styles from "./AvatarWithUploader.module.css";
+import Avatar from "@components/Avatar/Avatar";
 
-const AvatarUploader = () => {
+import photoCamera from "@assets/photoCamera.svg";
+import { useAppSelector } from "@hooks/hooks";
+import { useUpdateUserMutation } from "@api/slices/userSlice";
+import Spinner from "@components/Spinner/Spinner";
+
+const AvatarWithUploader = () => {
   const [loadedImage, setLoadedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [uploadImage, { isLoading: isUploading }] = useUploadImageMutation();
-
+  const [updateUser] = useUpdateUserMutation();
+  const user = useAppSelector((state) => state.auth.user);
   const onCropComplete = (_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
@@ -31,6 +38,8 @@ const AvatarUploader = () => {
       console.log("Image uploaded successfully:", result.data.url);
 
       // TODO: Update user avatar with result.data.url
+      await updateUser({ avatarUrl: result.data.url }).unwrap();
+
       setLoadedImage(null);
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -38,22 +47,27 @@ const AvatarUploader = () => {
   };
   return (
     <>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(event) => {
-          const file = event.target.files?.[0];
+      <Avatar avatarUrl={user.avatarUrl} width={"100px"} height={"100px"}>
+        <div className={styles.avatarButton}>
+          <img src={photoCamera} alt="photo camera icon" />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
 
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const imageDataUrl = e.target?.result as string;
-              setLoadedImage(imageDataUrl);
-            };
-            reader.readAsDataURL(file);
-          }
-        }}
-      />
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  const imageDataUrl = e.target?.result as string;
+                  setLoadedImage(imageDataUrl);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+          />
+        </div>
+      </Avatar>
       {loadedImage && (
         <Modal onClickOutside={() => setLoadedImage(null)}>
           <div className={styles.cropperContainer}>
@@ -82,7 +96,7 @@ const AvatarUploader = () => {
                 Cancel
               </Button>
               <Button onClick={handleSaveCroppedImage} disabled={isUploading}>
-                {isUploading ? "Uploading..." : "Save"}
+                {isUploading ? <Spinner /> : "Save"}
               </Button>
             </span>
           </div>
@@ -92,4 +106,4 @@ const AvatarUploader = () => {
   );
 };
 
-export default AvatarUploader;
+export default AvatarWithUploader;

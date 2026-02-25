@@ -7,15 +7,14 @@ interface IHeader {
 }
 
 const Header = ({ conversation }: IHeader) => {
-  return (
-    <header className={styles.header}>
-      {conversation.type === "DIRECT" ? (
-        <DirectHeader conversation={conversation} />
-      ) : (
-        <h1>{conversation.title}</h1>
-      )}
-    </header>
-  );
+  switch (conversation.type) {
+    case "DIRECT":
+      return (
+        <DirectHeader conversation={conversation} className={styles.header} />
+      );
+    case "GROUP":
+      return <h1 className={styles.header}>{conversation.title}</h1>;
+  }
 };
 
 export default Header;
