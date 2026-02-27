@@ -24,10 +24,12 @@ const DirectHeader = ({ conversation, className }: IDirectHeader) => {
     <header className={className} onClick={() => setInfoModalOpen(true)}>
       <span>
         <h1>{conversation.title}</h1>
-        {(conversation.typingUsers?.length ?? 0) > 0 && (
-          <h2 className={headerStyles.typingUsers}>typing...</h2>
+        {conversation.activeUsers.length > 0 && (
+          <h2 className={headerStyles.typingUsers}>
+            {conversation.activeUsers[0].reason}
+          </h2>
         )}
-        {!conversation.typingUsers?.length && (
+        {!conversation.activeUsers?.length && (
           <h2>{getOnlineStatus(conversation.lastSeenAt)}</h2>
         )}
       </span>

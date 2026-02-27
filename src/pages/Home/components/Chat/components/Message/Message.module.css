@@ -15,13 +15,11 @@
   background-color: var(--c-foreground);
   display: flex;
   box-shadow: var(--shadow-s);
-
+  flex-direction: column;
   max-width: 50%;
   object-fit: cover;
 
-  & :first-child {
-    overflow-wrap: anywhere;
-  }
+  cursor: pointer;
 }
 
 .sentByCurrentUser {
@@ -48,4 +46,11 @@
   color: var(--c-muted);
   margin-top: 2px;
   margin-left: 5px;
+}
+
+.textContainer {
+  display: flex;
+  & :first-child {
+    overflow-wrap: anywhere;
+  }
 }

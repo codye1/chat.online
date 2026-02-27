@@ -5,7 +5,7 @@ import chatSlice from "@api/slices/chatSlice";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-export const socket: Socket = io(API_BASE_URL, {
+const socket: Socket = io(API_BASE_URL, {
   autoConnect: false,
   withCredentials: true,
   auth: {
@@ -18,17 +18,17 @@ export const socket: Socket = io(API_BASE_URL, {
   timeout: 20000,
 });
 
-export const syncSocketAuthorizationFromStorage = () => {
+const syncSocketAuthorizationFromStorage = () => {
   const token = localStorage.getItem("token") || undefined;
 
   socket.auth = token ? { token } : {};
 };
 
-export const setSocketAuthorization = (token?: string | null) => {
+const setSocketAuthorization = (token?: string | null) => {
   socket.auth = token ? { token } : {};
 };
 
-export const sendMessage = ({
+const sendMessage = ({
   conversationId,
   recipientId,
   text,
@@ -46,11 +46,8 @@ export const sendMessage = ({
   });
 };
 
-export const connectToConversation = (
-  conversationId: string[] | null,
-  oldConversationId: string | null,
-) => {
-  socket.emit("conversation:join", { conversationId, oldConversationId });
+const connectToConversation = (conversationId: string[] | null) => {
+  socket.emit("conversation:join", { conversationId });
 };
 
 // i use @id @default(cuid()) so message ids are strings and sortable
@@ -77,7 +74,7 @@ const emitMessageReadDebounced = (() => {
   };
 })();
 
-export const markMessageAsRead = (
+const markMessageAsRead = (
   conversationId: string,
   lastReadMessageId: string,
 ) => {
@@ -98,9 +95,46 @@ export const markMessageAsRead = (
       { conversationId, recipientId: null },
       (draft) => {
         draft.unreadMessages = Math.max(0, draft.unreadMessages - 1);
+        draft.lastReadId = lastReadMessageId;
       },
     ),
   );
+};
+
+const addReaction = ({
+  messageId,
+  content,
+}: {
+  messageId: string;
+  content: string;
+}) => {
+  socket.emit("reaction:add", { messageId, content });
+};
+
+const removeReaction = ({
+  messageId,
+  reactionId,
+}: {
+  messageId: string;
+  reactionId: string;
+}) => {
+  socket.emit("reaction:remove", { messageId, reactionId });
+};
+
+const deleteMessage = (messageId: string) => {
+  socket.emit("message:delete", { messageId });
+};
+
+const editMessage = ({
+  messageId,
+  conversationId,
+  newText,
+}: {
+  messageId: string;
+  conversationId: string;
+  newText: string;
+}) => {
+  socket.emit("message:edit", { messageId, conversationId, newText });
 };
 
 interface SocketListenerCallbacks {
@@ -111,7 +145,7 @@ interface SocketListenerCallbacks {
 
 let pingInterval: number | null = null;
 
-export const initializeSocketListeners = (
+const initializeSocketListeners = (
   callbacks?: SocketListenerCallbacks,
 ): (() => void) => {
   if (pingInterval) {
@@ -162,7 +196,7 @@ export const initializeSocketListeners = (
     const conversationsIds = conversations?.map((c) => c.id) || [];
 
     if (conversationsIds.length > 0) {
-      connectToConversation(conversationsIds, null);
+      connectToConversation(conversationsIds);
     }
 
     if (pingInterval) {
@@ -211,3 +245,15 @@ export const initializeSocketListeners = (
 };
 
 export default socket;
+export {
+  setSocketAuthorization,
+  sendMessage,
+  deleteMessage,
+  editMessage,
+  connectToConversation,
+  markMessageAsRead,
+  addReaction,
+  removeReaction,
+  initializeSocketListeners,
+  syncSocketAuthorizationFromStorage,
+};

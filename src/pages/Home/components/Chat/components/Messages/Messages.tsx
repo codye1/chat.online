@@ -8,6 +8,7 @@ import VList from "../VList/VList";
 import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";
+import { addReaction, removeReaction } from "@utils/socket";
 
 const skeletonItems = Array.from({ length: 20 }, () => ({
   alignRight: Math.random() > 0.5,
@@ -101,12 +102,26 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   width: "100%",
                   transform: `translateY(${item.start}px)`,
                 }}
+                reactions={message.reactions}
                 read={message.id <= conversation.lastReadIdByParticipants}
                 isSentByCurrentUser={message.senderId === user.id}
                 createdAt={message.createdAt}
                 ref={(el) => {
                   trackUnreadMessageRef(el, message);
                   virtualizer.measureElement(el);
+                }}
+                onDoubleClick={() => {
+                  const reaction = message.reactions.find(
+                    (r) => r.userId === user.id,
+                  );
+                  if (reaction) {
+                    removeReaction({
+                      messageId: message.id,
+                      reactionId: reaction.id,
+                    });
+                    return;
+                  }
+                  addReaction({ messageId: message.id, content: "👍" });
                 }}
               />
             );

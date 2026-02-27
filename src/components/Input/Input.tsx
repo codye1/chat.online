@@ -2,6 +2,7 @@ import ErrorsList from "@components/ErrorsList/ErrorsList";
 import styles from "./Input.module.css";
 import type { ChangeEvent } from "react";
 import clsx from "clsx";
+import { type KeyboardEvent } from "react";
 
 interface IInput {
   label?: string;
@@ -16,6 +17,7 @@ interface IInput {
   name: string;
   className?: string;
   onFocusChange?: (isFocused: boolean) => void;
+  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
 const Input = ({
@@ -27,6 +29,7 @@ const Input = ({
   isLoading,
   className,
   onFocusChange,
+  onKeyDown,
 }: IInput) => {
   return (
     <>
@@ -41,6 +44,7 @@ const Input = ({
         disabled={isLoading}
         onFocus={() => onFocusChange?.(true)}
         onBlur={() => onFocusChange?.(false)}
+        onKeyDown={onKeyDown}
       />
       {errors && <ErrorsList errors={errors} />}
     </>

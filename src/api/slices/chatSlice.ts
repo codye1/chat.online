@@ -1,10 +1,17 @@
 import api from "@api/api";
+import { setConversation } from "@redux/global";
 import type { RootState } from "@redux/store";
 import socket, {
   connectToConversation,
   syncSocketAuthorizationFromStorage,
 } from "@utils/socket";
-import type { Conversation, Message, SearchResponse } from "@utils/types";
+import type {
+  Conversation,
+  ConversationPreview,
+  Message,
+  Reaction,
+  SearchResponse,
+} from "@utils/types";
 
 export interface MessagesResponse {
   items: Message[];
@@ -36,6 +43,20 @@ const chatSlice = api.injectEndpoints({
             : {}),
         },
       }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+
+        if (arg.recipientId && data.id !== null) {
+          dispatch(setConversation({ conversationId: data.id }));
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId: data.id },
+              () => data,
+            ),
+          );
+        }
+      },
       forceRefetch({ currentArg, previousArg }) {
         if (!currentArg) {
           return false;
@@ -63,8 +84,6 @@ const chatSlice = api.injectEndpoints({
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
-        const state = getState() as RootState;
-        const user = state.auth.user;
 
         const onMessageRead = ({
           lastReadMessage,
@@ -76,13 +95,11 @@ const chatSlice = api.injectEndpoints({
           };
           conversationId: string;
         }) => {
+          console.log("message readed" + lastReadMessage.id);
+
           updateCachedData((draft) => {
             if (draft.id === conversationId) {
-              if (lastReadMessage.senderId === user.id) {
-                draft.lastReadId = lastReadMessage.id;
-              } else {
-                draft.lastReadIdByParticipants = lastReadMessage.id;
-              }
+              draft.lastReadIdByParticipants = lastReadMessage.id;
             }
           });
         };
@@ -104,23 +121,24 @@ const chatSlice = api.injectEndpoints({
           });
         };
 
-        const onUpdateConversation = (conversation: Conversation) => {
+        const onUpdateConversation = ({
+          conversation,
+          recipientId,
+        }: {
+          conversation: Conversation;
+          recipientId: string;
+        }) => {
           // Triggered when a chat was created/found by recipientId
-          // Update cache for the query by recipientId
-          if (conversation.type === "DIRECT") {
-            dispatch(
-              chatSlice.util.updateQueryData(
-                "getConversation",
-                {
-                  recipientId: conversation.otherParticipant.id,
-                  conversationId: null,
-                },
-                () => conversation,
-              ),
-            );
-          }
 
-          // Update cache for the query by conversationId just in case
+          const state = getState() as RootState;
+          const { recipientId: globalRecipientId } = state.global;
+
+          if (globalRecipientId == recipientId) {
+            dispatch(setConversation({ conversationId: conversation.id }));
+          }
+          console.log(conversation);
+
+          // Update cache
           dispatch(
             chatSlice.util.updateQueryData(
               "getConversation",
@@ -159,7 +177,7 @@ const chatSlice = api.injectEndpoints({
       },
     }),
 
-    getConversations: builder.query<Conversation[], void>({
+    getConversations: builder.query<ConversationPreview[], void>({
       query: () => `chat/conversations`,
 
       async onCacheEntryAdded(
@@ -177,15 +195,17 @@ const chatSlice = api.injectEndpoints({
         syncSocketAuthorizationFromStorage();
         updateCachedData((draft) => {
           const convoIds = draft.map((c) => c.id);
-          connectToConversation(convoIds, null);
+          connectToConversation(convoIds);
         });
 
-        const onUserTyping = ({
+        const onUserActive = ({
           conversationId,
           nickname,
+          reason,
         }: {
           conversationId: string;
           nickname: string;
+          reason: "typing" | "editing";
         }) => {
           const state = getState() as RootState;
           const user = state.auth.user;
@@ -196,9 +216,9 @@ const chatSlice = api.injectEndpoints({
           updateCachedData((draft) => {
             const convo = draft.find((c) => c.id === conversationId);
             if (convo) {
-              convo.typingUsers = convo.typingUsers || [];
-              if (!convo.typingUsers.includes(nickname)) {
-                convo.typingUsers.push(nickname);
+              convo.activeUsers = convo.activeUsers || [];
+              if (!convo.activeUsers.find((u) => u.nickname === nickname)) {
+                convo.activeUsers.push({ nickname, reason });
               }
             }
           });
@@ -208,9 +228,9 @@ const chatSlice = api.injectEndpoints({
               { recipientId: null, conversationId },
               (draft) => {
                 if (draft) {
-                  draft.typingUsers = draft.typingUsers || [];
-                  if (!draft.typingUsers.includes(nickname)) {
-                    draft.typingUsers.push(nickname);
+                  draft.activeUsers = draft.activeUsers || [];
+                  if (!draft.activeUsers.find((u) => u.nickname === nickname)) {
+                    draft.activeUsers.push({ nickname, reason });
                   }
                 }
               },
@@ -218,7 +238,7 @@ const chatSlice = api.injectEndpoints({
           );
         };
 
-        const onUserStopTyping = ({
+        const onUserStopActive = ({
           conversationId,
           nickname,
         }: {
@@ -231,9 +251,9 @@ const chatSlice = api.injectEndpoints({
 
           updateCachedData((draft) => {
             const convo = draft.find((c) => c.id === conversationId);
-            if (convo && convo.typingUsers) {
-              convo.typingUsers = convo.typingUsers.filter(
-                (id) => id !== nickname,
+            if (convo && convo.activeUsers) {
+              convo.activeUsers = convo.activeUsers.filter(
+                (u) => u.nickname !== nickname,
               );
             }
           });
@@ -242,16 +262,15 @@ const chatSlice = api.injectEndpoints({
               "getConversation",
               { recipientId: null, conversationId },
               (draft) => {
-                if (draft && draft.typingUsers) {
-                  draft.typingUsers = draft.typingUsers.filter(
-                    (id) => id !== nickname,
+                if (draft && draft.activeUsers) {
+                  draft.activeUsers = draft.activeUsers.filter(
+                    (id) => id.nickname !== nickname,
                   );
                 }
               },
             ),
           );
         };
-
         const onNewMessage = (message: Message) => {
           const state = getState() as RootState;
           const conversation = state.global.conversationId;
@@ -311,27 +330,207 @@ const chatSlice = api.injectEndpoints({
           );
         };
 
-        const onNewConversation = (conversation: Conversation) => {
-          connectToConversation([conversation.id], null);
+        const onDeleteMessage = ({
+          conversationId,
+          messageId,
+        }: {
+          conversationId: string;
+          messageId: string;
+        }) => {
+          let lastMessageSnapshot: {
+            text: string;
+            createdAt: string;
+            id: string;
+          } | null = null;
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  draft.items = draft.items.filter((m) => m.id !== messageId);
+                  const last = draft.items[draft.items.length - 1];
+                  if (last) {
+                    lastMessageSnapshot = {
+                      text: last.text,
+                      createdAt: last.createdAt,
+                      id: last.id,
+                    };
+                  }
+                }
+              },
+            ),
+          );
+
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId },
+              (draft) => {
+                if (draft) {
+                  draft.lastMessage = lastMessageSnapshot;
+                }
+              },
+            ),
+          );
+
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversations",
+              undefined,
+              (draft) => {
+                const convo = draft.find((c) => c.id === conversationId);
+                if (convo) {
+                  convo.lastMessage = lastMessageSnapshot;
+                }
+              },
+            ),
+          );
+        };
+
+        const onNewConversation = ({
+          conversation,
+          recipientId,
+          initiator,
+        }: {
+          conversation: Conversation;
+          recipientId: string;
+          initiator?: string;
+        }) => {
+          connectToConversation([conversation.id]);
           updateCachedData((draft) => {
             const exists = draft.find((c) => c.id === conversation.id);
             if (!exists) {
               draft.push(conversation);
             }
           });
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId: conversation.id },
+              () => conversation,
+            ),
+          );
+          const state = getState() as RootState;
+
+          if (
+            state.global.recipientId === recipientId ||
+            state.global.recipientId === initiator
+          ) {
+            dispatch(setConversation({ conversationId: conversation.id }));
+          }
         };
 
+        const onNewReaction = ({
+          conversationId,
+          messageId,
+          reaction,
+        }: {
+          conversationId: string;
+          messageId: string;
+          reaction: Reaction;
+        }) => {
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  const message = draft.items.find((m) => m.id === messageId);
+                  if (message) {
+                    message.reactions.push(reaction);
+                  }
+                }
+              },
+            ),
+          );
+        };
+
+        const onRemoveReaction = ({
+          conversationId,
+          messageId,
+          reactionId,
+        }: {
+          conversationId: string;
+          messageId: string;
+          reactionId: string;
+        }) => {
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  const message = draft.items.find((m) => m.id === messageId);
+                  if (message) {
+                    message.reactions = message.reactions.filter(
+                      (r) => r.id !== reactionId,
+                    );
+                  }
+                }
+              },
+            ),
+          );
+        };
+
+        const onMessageEdited = ({
+          updatedMessage,
+        }: {
+          updatedMessage: Message;
+        }) => {
+          console.log(updatedMessage);
+
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId: updatedMessage.conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  const messageIndex = draft.items.findIndex(
+                    (m) => m.id === updatedMessage.id,
+                  );
+                  if (messageIndex !== -1) {
+                    draft.items[messageIndex] = updatedMessage;
+                  }
+                }
+              },
+            ),
+          );
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversations",
+              undefined,
+              (draft) => {
+                const convo = draft.find(
+                  (c) => c.id === updatedMessage.conversationId,
+                );
+                if (convo && convo.lastMessage?.id === updatedMessage.id) {
+                  convo.lastMessage = updatedMessage;
+                }
+              },
+            ),
+          );
+        };
+
+        socket.on("message:edited", onMessageEdited);
+        socket.on("reaction:removed", onRemoveReaction);
+        socket.on("reaction:new", onNewReaction);
         socket.on("conversation:new", onNewConversation);
         socket.on("message:new", onNewMessage);
-        socket.on("typing:start", onUserTyping);
-        socket.on("typing:stop", onUserStopTyping);
+        socket.on("message:deleted", onDeleteMessage);
+        socket.on("activity:start", onUserActive);
+        socket.on("activity:stop", onUserStopActive);
 
         await cacheEntryRemoved;
 
+        socket.off("message:edited", onMessageEdited);
+        socket.off("reaction:removed", onRemoveReaction);
+        socket.off("reaction:new", onNewReaction);
         socket.off("message:new", onNewMessage);
+        socket.off("message:deleted", onDeleteMessage);
         socket.off("conversation:new", onNewConversation);
-        socket.off("typing:start", onUserTyping);
-        socket.off("typing:stop", onUserStopTyping);
+        socket.off("activity:start", onUserActive);
+        socket.off("activity:stop", onUserStopActive);
       },
     }),
     getMessages: builder.query<

@@ -1,6 +1,6 @@
 import { useAppSelector } from "@hooks/hooks";
 import socket, { sendMessage } from "@utils/socket";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 
 const useWriteMessage = () => {
   const [message, setMessage] = useState("");
@@ -12,45 +12,43 @@ const useWriteMessage = () => {
     (state) => state.global,
   );
 
-  useEffect(() => {
+  const startTyping = () => {
+    if (!conversationId) return;
+    socket.emit("activity:start", {
+      conversationId,
+      nickname,
+      reason: "typing",
+    });
+    isTypingRef.current = true;
+  };
+
+  const stopTyping = () => {
+    if (!conversationId) return;
+    socket.emit("activity:stop", { conversationId, nickname });
+    isTypingRef.current = false;
+  };
+
+  const handleEnterKey = (e: KeyboardEvent<HTMLSpanElement>) => {
     if (!conversationId && !recipientId) return;
-
-    const stopTyping = () => {
-      socket.emit("typing:stop", { conversationId, nickname });
-      isTypingRef.current = false;
-    };
-
-    const handleEnterKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && message.trim()) {
-        sendMessage({ conversationId, recipientId, text: message });
-        setMessage("");
-        clearTimeout(typingTimeoutRef.current!);
-        stopTyping();
-      }
-    };
-    window.addEventListener("keydown", handleEnterKey);
-    return () => {
-      window.removeEventListener("keydown", handleEnterKey);
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-        stopTyping();
-      }
-    };
-  }, [conversationId, recipientId, message, nickname]);
+    if (e.key === "Enter" && message.trim()) {
+      sendMessage({ conversationId, recipientId, text: message });
+      setMessage("");
+      clearTimeout(typingTimeoutRef.current!);
+      stopTyping();
+    }
+  };
 
   const handleWriteMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!conversationId && !recipientId) return;
 
     if (!isTypingRef.current) {
-      socket.emit("typing:start", { conversationId, nickname });
-      isTypingRef.current = true;
+      startTyping();
     }
     setMessage(e.target.value);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     typingTimeoutRef.current = window.setTimeout(() => {
-      socket.emit("typing:stop", { conversationId, nickname });
-      isTypingRef.current = false;
+      stopTyping();
     }, 1000);
   };
 
@@ -63,13 +61,12 @@ const useWriteMessage = () => {
 
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
-        socket.emit("typing:stop", { conversationId, nickname });
-        isTypingRef.current = false;
+        stopTyping();
       }
     }
   };
 
-  return { message, handleWriteMessage, onSendMessage };
+  return { message, handleWriteMessage, onSendMessage, handleEnterKey };
 };
 
 export default useWriteMessage;

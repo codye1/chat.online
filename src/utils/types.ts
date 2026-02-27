@@ -8,6 +8,12 @@ interface User {
   biography: string | null;
 }
 
+interface Reaction {
+  id: string;
+  userId: string;
+  content: string;
+}
+
 interface Message {
   id: string;
   text: string;
@@ -15,20 +21,24 @@ interface Message {
   senderId: string;
   read: boolean;
   createdAt: string;
+  reactions: Reaction[];
 }
 
 type ConversationTypes = "DIRECT" | "GROUP";
 
-interface BaseConversation {
+interface BaseConversationData {
   id: string;
   avatarUrl: string | null;
   title: string;
   type: ConversationTypes;
-  lastMessage: { text: string; createdAt: string } | null;
   unreadMessages: number;
+  lastMessage: { text: string; createdAt: string; id: string } | null;
+  activeUsers: { nickname: string; reason: "typing" | "editing" }[];
+}
+
+interface BaseConversation extends BaseConversationData {
   lastReadId: string | null;
-  lastReadIdByParticipants: string;
-  typingUsers?: string[];
+  lastReadIdByParticipants: string | null;
 }
 
 interface DirectConversation extends BaseConversation {
@@ -43,9 +53,23 @@ interface GroupConversation extends BaseConversation {
 
 type Conversation = DirectConversation | GroupConversation;
 
+interface DirectPreview extends BaseConversationData {
+  type: "DIRECT";
+  otherParticipant: {
+    id: string;
+  };
+}
+
+interface GroupPreview extends BaseConversationData {
+  type: "GROUP";
+}
+
+type ConversationPreview = DirectPreview | GroupPreview;
+
+// previews for search result
 interface Global {
   //  chat,channel for future
-  type: "user" | "chat" | "channel";
+  type: "user";
 }
 
 interface UserPreview extends Global {
@@ -55,7 +79,7 @@ interface UserPreview extends Global {
   avatarUrl: string | null;
 }
 
-type GlobalSearchItem = UserPreview; // | ChatPreview | ChannelPreview
+type GlobalSearchItem = UserPreview | ConversationPreview;
 
 interface SearchResponse {
   conversations: Conversation[];
@@ -64,6 +88,7 @@ interface SearchResponse {
 
 export type {
   User,
+  Reaction,
   Conversation,
   DirectConversation,
   ConversationTypes,
@@ -72,4 +97,5 @@ export type {
   UserPreview,
   GlobalSearchItem,
   SearchResponse,
+  ConversationPreview,
 };

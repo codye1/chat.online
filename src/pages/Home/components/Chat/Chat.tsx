@@ -35,7 +35,7 @@ const Chat = () => {
   return (
     <section className={styles.chat}>
       <Header conversation={data} />
-      <Messages conversation={data} />
+      {conversationId && <Messages conversation={data} />}
       <InputWrapper />
     </section>
   );

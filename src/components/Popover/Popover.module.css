@@ -1,0 +1,49 @@
+.popover {
+  position: fixed;
+  z-index: 1100;
+  background-color: var(--c-foreground);
+  box-shadow: var(--shadow-s);
+  min-width: 120px;
+  animation: fadeIn 0.15s ease;
+
+  border-radius: var(--radius-sm);
+}
+
+.bottom::before {
+  top: -4px;
+  left: 50%;
+  translate: -50% 0;
+  box-shadow: -2px -2px 4px -2px rgba(0, 0, 0, 0.15);
+}
+
+.top::before {
+  bottom: -4px;
+  left: 50%;
+  translate: -50% 0;
+  box-shadow: 2px 2px 4px -2px rgba(0, 0, 0, 0.15);
+}
+
+.left::before {
+  right: -4px;
+  top: 50%;
+  translate: 0 -50%;
+  box-shadow: 2px -2px 4px -2px rgba(0, 0, 0, 0.15);
+}
+
+.right::before {
+  left: -4px;
+  top: 50%;
+  translate: 0 -50%;
+  box-shadow: -2px 2px 4px -2px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

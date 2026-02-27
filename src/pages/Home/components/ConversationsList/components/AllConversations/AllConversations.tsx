@@ -1,5 +1,4 @@
 import { useGetConversationsQuery } from "@api/slices/chatSlice";
-import { connectToConversation } from "@utils/socket";
 import PreviewItem from "../PreviewItem/PreviewItem";
 import PreviewItemSkeleton from "../PreviewItem/PreviewItemSkeleton";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
@@ -39,7 +38,6 @@ const AllConversations = () => {
             }}
             isActive={conversationId === conversation.id}
             onClick={() => {
-              connectToConversation([conversation.id], conversationId);
               dispatch(setConversation({ conversationId: conversation.id }));
             }}
           />
