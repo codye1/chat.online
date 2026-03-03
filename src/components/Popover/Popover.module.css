@@ -1,12 +1,8 @@
 .popover {
   position: fixed;
   z-index: 1100;
-  background-color: var(--c-foreground);
-  box-shadow: var(--shadow-s);
   min-width: 120px;
   animation: fadeIn 0.15s ease;
-
-  border-radius: var(--radius-sm);
 }
 
 .bottom::before {

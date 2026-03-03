@@ -8,20 +8,39 @@ interface User {
   biography: string | null;
 }
 
-interface Reaction {
+type Reaction = {
   id: string;
-  userId: string;
   content: string;
-}
+  createdAt: Date;
+  messageId: string;
+  userId: string;
+};
+
+type Reactor = {
+  id: string;
+  nickname: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+  reactedAt: Date;
+  reaction: {
+    content: string;
+    createdAt: Date;
+  };
+};
+
+type GroupedReactions = Record<
+  string,
+  { count: number; users: Reactor[]; isActive: boolean }
+>;
 
 interface Message {
   id: string;
   text: string;
   conversationId: string;
   senderId: string;
-  read: boolean;
   createdAt: string;
-  reactions: Reaction[];
+  reactions: GroupedReactions;
 }
 
 type ConversationTypes = "DIRECT" | "GROUP";
@@ -89,6 +108,8 @@ interface SearchResponse {
 export type {
   User,
   Reaction,
+  Reactor,
+  GroupedReactions,
   Conversation,
   DirectConversation,
   ConversationTypes,

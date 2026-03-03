@@ -2,24 +2,26 @@ import Avatar from "@components/Avatar/Avatar";
 import Modal from "@components/Modal/Modal";
 import type { User } from "@utils/types";
 import clsx from "clsx";
-import styles from "./ViewProfileModal.module.css";
+import styles from "./ProfileViewModal.module.css";
 import closeIcon from "@assets/close.svg";
 import edit from "@assets/edit.svg";
 import getDisplayName from "@utils/getDisplayName";
 
-interface IViewProfileModal {
+interface IProfileViewModal {
   user: User;
   onClickOutside: () => void;
   onClickEdit: () => void;
   onClickClose: () => void;
 }
 
-const ViewProfileModal = ({
+const ProfileViewModal = ({
   user,
   onClickOutside,
   onClickEdit,
   onClickClose,
-}: IViewProfileModal) => {
+}: IProfileViewModal) => {
+  console.log(user);
+
   return (
     <Modal onClickOutside={onClickOutside}>
       <div className={styles.closeIcon}>
@@ -50,4 +52,4 @@ const ViewProfileModal = ({
   );
 };
 
-export default ViewProfileModal;
+export default ProfileViewModal;

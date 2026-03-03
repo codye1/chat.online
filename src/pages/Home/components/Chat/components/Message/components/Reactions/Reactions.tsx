@@ -1,15 +1,36 @@
-import type { Reaction } from "@utils/types";
+import type { GroupedReactions } from "@utils/types";
 import styles from "./Reactions.module.css";
+import clsx from "clsx";
+import { addReaction, removeReaction } from "@utils/socket";
 
-const Reactions = ({ reactions }: { reactions: Reaction[] }) => {
+const Reactions = ({
+  reactions,
+  messageId,
+}: {
+  reactions: GroupedReactions;
+  messageId: string;
+}) => {
   return (
     <>
-      {reactions.length > 0 && (
+      {Object.keys(reactions).length > 0 && (
         <div className={styles.reactions}>
-          {reactions.map((reaction) => (
-            <span key={reaction.id} className={styles.reaction}>
-              {reaction.content}
-            </span>
+          {Object.entries(reactions).map(([key, group]) => (
+            <button
+              key={key}
+              className={clsx(styles.groupReactions, {
+                [styles.chosen]: group.isActive,
+              })}
+              onClick={() => {
+                if (group.isActive) {
+                  removeReaction({ messageId });
+                } else {
+                  addReaction({ messageId, content: key });
+                }
+              }}
+            >
+              <div>{key}</div>
+              <div className={styles.count}>{group.count}</div>
+            </button>
           ))}
         </div>
       )}

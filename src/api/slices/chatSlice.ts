@@ -10,6 +10,7 @@ import type {
   ConversationPreview,
   Message,
   Reaction,
+  Reactor,
   SearchResponse,
 } from "@utils/types";
 
@@ -29,6 +30,7 @@ const chatSlice = api.injectEndpoints({
         params: { query },
       }),
     }),
+
     getConversation: builder.query<
       Conversation,
       { recipientId: string | null; conversationId: string | null }
@@ -424,11 +426,13 @@ const chatSlice = api.injectEndpoints({
         const onNewReaction = ({
           conversationId,
           messageId,
-          reaction,
+          newReaction,
+          prevReaction,
         }: {
           conversationId: string;
           messageId: string;
-          reaction: Reaction;
+          newReaction: Reaction & { user: Reactor };
+          prevReaction?: Reaction & { user: Reactor };
         }) => {
           dispatch(
             chatSlice.util.updateQueryData(
@@ -438,7 +442,46 @@ const chatSlice = api.injectEndpoints({
                 if (draft && draft.items) {
                   const message = draft.items.find((m) => m.id === messageId);
                   if (message) {
-                    message.reactions.push(reaction);
+                    if (prevReaction) {
+                      const prevReactionGroup =
+                        message.reactions[prevReaction.content];
+
+                      if (prevReactionGroup) {
+                        prevReactionGroup.users =
+                          prevReactionGroup.users.filter(
+                            (u) => u.id !== prevReaction.user.id,
+                          );
+                        prevReactionGroup.count -= 1;
+
+                        if (prevReactionGroup.count <= 0) {
+                          delete message.reactions[prevReaction.content];
+                        }
+
+                        const state = getState() as RootState;
+                        if (prevReaction.user.id === state.auth.user.id) {
+                          prevReactionGroup.isActive = false;
+                        }
+                      }
+                    }
+
+                    if (!message.reactions[newReaction.content]) {
+                      message.reactions[newReaction.content] = {
+                        count: 0,
+                        users: [],
+                        isActive: false,
+                      };
+                    }
+
+                    message.reactions[newReaction.content].count += 1;
+
+                    message.reactions[newReaction.content].users.push(
+                      newReaction.user,
+                    );
+
+                    const state = getState() as RootState;
+                    if (newReaction.user.id === state.auth.user.id) {
+                      message.reactions[newReaction.content].isActive = true;
+                    }
                   }
                 }
               },
@@ -449,11 +492,11 @@ const chatSlice = api.injectEndpoints({
         const onRemoveReaction = ({
           conversationId,
           messageId,
-          reactionId,
+          removedReaction,
         }: {
           conversationId: string;
           messageId: string;
-          reactionId: string;
+          removedReaction: Reaction & { user: Reactor };
         }) => {
           dispatch(
             chatSlice.util.updateQueryData(
@@ -462,10 +505,26 @@ const chatSlice = api.injectEndpoints({
               (draft) => {
                 if (draft && draft.items) {
                   const message = draft.items.find((m) => m.id === messageId);
+
                   if (message) {
-                    message.reactions = message.reactions.filter(
-                      (r) => r.id !== reactionId,
-                    );
+                    const removedReactionGroup =
+                      message.reactions[removedReaction.content];
+
+                    if (removedReactionGroup) {
+                      removedReactionGroup.users =
+                        removedReactionGroup.users.filter(
+                          (u) => u.id !== removedReaction.user.id,
+                        );
+                      removedReactionGroup.count -= 1;
+                      if (removedReactionGroup.count <= 0) {
+                        delete message.reactions[removedReaction.content];
+                      }
+
+                      const state = getState() as RootState;
+                      if (removedReaction.user.id === state.auth.user.id) {
+                        removedReactionGroup.isActive = false;
+                      }
+                    }
                   }
                 }
               },
@@ -474,23 +533,23 @@ const chatSlice = api.injectEndpoints({
         };
 
         const onMessageEdited = ({
-          updatedMessage,
+          editedMessage,
         }: {
-          updatedMessage: Message;
+          editedMessage: Message;
         }) => {
-          console.log(updatedMessage);
+          console.log(editedMessage);
 
           dispatch(
             chatSlice.util.updateQueryData(
               "getMessages",
-              { conversationId: updatedMessage.conversationId },
+              { conversationId: editedMessage.conversationId },
               (draft) => {
                 if (draft && draft.items) {
                   const messageIndex = draft.items.findIndex(
-                    (m) => m.id === updatedMessage.id,
+                    (m) => m.id === editedMessage.id,
                   );
                   if (messageIndex !== -1) {
-                    draft.items[messageIndex] = updatedMessage;
+                    draft.items[messageIndex] = editedMessage;
                   }
                 }
               },
@@ -502,10 +561,10 @@ const chatSlice = api.injectEndpoints({
               undefined,
               (draft) => {
                 const convo = draft.find(
-                  (c) => c.id === updatedMessage.conversationId,
+                  (c) => c.id === editedMessage.conversationId,
                 );
-                if (convo && convo.lastMessage?.id === updatedMessage.id) {
-                  convo.lastMessage = updatedMessage;
+                if (convo && convo.lastMessage?.id === editedMessage.id) {
+                  convo.lastMessage = editedMessage;
                 }
               },
             ),
@@ -533,6 +592,7 @@ const chatSlice = api.injectEndpoints({
         socket.off("activity:stop", onUserStopActive);
       },
     }),
+
     getMessages: builder.query<
       MessagesResponse,
       {
@@ -596,6 +656,24 @@ const chatSlice = api.injectEndpoints({
         );
       },
     }),
+    getReactors: builder.query<
+      Reactor[],
+      {
+        messageId: string;
+        conversationId: string;
+        reaction?: string;
+        cursor?: string;
+      }
+    >({
+      query: ({ messageId, conversationId, reaction, cursor }) => ({
+        url: `chat/conversations/${conversationId}/messages/${messageId}/reactors`,
+        method: "GET",
+        params: {
+          ...(reaction ? { reaction } : {}),
+          ...(cursor ? { cursor } : {}),
+        },
+      }),
+    }),
   }),
 });
 
@@ -604,6 +682,7 @@ export const {
   useGetConversationQuery,
   useGetConversationsQuery,
   useGetMessagesQuery,
+  useGetReactorsQuery,
 } = chatSlice;
 
 export default chatSlice;

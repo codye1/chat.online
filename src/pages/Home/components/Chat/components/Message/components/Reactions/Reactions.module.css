@@ -1,0 +1,28 @@
+.reactions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.groupReactions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: var(--c-light-x2);
+  border-radius: var(--radius-md);
+  border: none;
+  color: var(--c-default);
+  padding: 0 var(--space-1);
+  height: 30px;
+  font-size: 20px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.count {
+  padding: var(--space-1);
+}
+
+.chosen {
+  background-color: var(--c-light-x3);
+}

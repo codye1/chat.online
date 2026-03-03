@@ -22,6 +22,8 @@ body.loading * {
   --c-dark: oklch(0.1 0 264);
   --c-foreground: oklch(0.23 0 264);
   --c-light: oklch(0.3 0 264);
+  --c-light-x2: oklch(0.4 0 264);
+  --c-light-x3: oklch(0.6 0 264);
   --c-hover: oklch(0.35 0 264);
   --c-selected: oklch(0.32 0 264);
   --c-focus: oklch(0.4 0 264);

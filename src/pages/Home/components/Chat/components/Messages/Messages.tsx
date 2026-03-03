@@ -8,7 +8,7 @@ import VList from "../VList/VList";
 import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";
-import { addReaction, removeReaction } from "@utils/socket";
+import { addReaction } from "@utils/socket";
 
 const skeletonItems = Array.from({ length: 20 }, () => ({
   alignRight: Math.random() > 0.5,
@@ -95,6 +95,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                 key={message.id}
                 id={message.id}
                 text={message.text}
+                conversationId={conversation.id}
                 style={{
                   position: "absolute",
                   top: 0,
@@ -103,7 +104,11 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   transform: `translateY(${item.start}px)`,
                 }}
                 reactions={message.reactions}
-                read={message.id <= conversation.lastReadIdByParticipants}
+                read={
+                  conversation.lastReadIdByParticipants
+                    ? message.id <= conversation.lastReadIdByParticipants
+                    : false
+                }
                 isSentByCurrentUser={message.senderId === user.id}
                 createdAt={message.createdAt}
                 ref={(el) => {
@@ -111,14 +116,9 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   virtualizer.measureElement(el);
                 }}
                 onDoubleClick={() => {
-                  const reaction = message.reactions.find(
-                    (r) => r.userId === user.id,
-                  );
-                  if (reaction) {
-                    removeReaction({
-                      messageId: message.id,
-                      reactionId: reaction.id,
-                    });
+                  if (window.getSelection()) {
+                    console.log(window.getSelection());
+
                     return;
                   }
                   addReaction({ messageId: message.id, content: "👍" });

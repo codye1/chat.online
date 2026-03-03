@@ -1,0 +1,26 @@
+.contextMenu {
+  position: fixed;
+  z-index: 1200;
+  min-width: 160px;
+  list-style: none;
+
+  padding: var(--space-2) 0;
+  background-color: var(--c-foreground);
+  box-shadow: var(--shadow-s);
+  border-radius: var(--radius-sm);
+
+  animation: fadeIn 0.12s ease;
+  outline: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.95;
+    transform-origin: top left;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

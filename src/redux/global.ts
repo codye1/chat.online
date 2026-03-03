@@ -1,15 +1,24 @@
+import type { IReactorsList } from "@components/ModalManager/Modals/ReactorsList/ReactorsList";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { User } from "@utils/types";
+
+type AvailableModals =
+  | { type: "profileView"; user: User }
+  | { type: "editProfile"; user: User }
+  | { type: "reactorsList"; props: IReactorsList };
 
 interface GlobalState {
   conversationId: string | null;
   recipientId: string | null;
   editingMessage: { id: string; text: string } | null;
+  activeModal: AvailableModals | null;
 }
 
 const initialState: GlobalState = {
   conversationId: null,
   recipientId: null,
   editingMessage: null,
+  activeModal: null,
 };
 
 export const globalSlice = createSlice({
@@ -35,9 +44,20 @@ export const globalSlice = createSlice({
     ) {
       state.editingMessage = action.payload;
     },
+    openModal(state, action: PayloadAction<AvailableModals>) {
+      state.activeModal = action.payload;
+    },
+    closeModal(state) {
+      state.activeModal = null;
+    },
   },
 });
 
-export const { setConversation, setRecipient, setEditingMessage } =
-  globalSlice.actions;
+export const {
+  setConversation,
+  setRecipient,
+  setEditingMessage,
+  openModal,
+  closeModal,
+} = globalSlice.actions;
 export default globalSlice;

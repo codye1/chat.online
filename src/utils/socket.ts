@@ -111,14 +111,8 @@ const addReaction = ({
   socket.emit("reaction:add", { messageId, content });
 };
 
-const removeReaction = ({
-  messageId,
-  reactionId,
-}: {
-  messageId: string;
-  reactionId: string;
-}) => {
-  socket.emit("reaction:remove", { messageId, reactionId });
+const removeReaction = ({ messageId }: { messageId: string }) => {
+  socket.emit("reaction:remove", { messageId });
 };
 
 const deleteMessage = (messageId: string) => {

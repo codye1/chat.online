@@ -4,7 +4,6 @@ import backIcon from "@assets/back.svg";
 import TextArea from "@components/TextArea/TextArea";
 import at from "@assets/at.svg";
 import Modal from "@components/Modal/Modal";
-import AvatarWithUploader from "../AvatarWithUploader/AvatarWithUploader";
 
 import {
   startTransition,
@@ -20,6 +19,7 @@ import editUser from "@actions/editUser";
 import getDisplayName from "@utils/getDisplayName";
 import EditNicknameModal from "./components/EditNickname";
 import EditNameModal from "./components/EditNameModal";
+import AvatarWithUploader from "./components/AvatarWithUploader/AvatarWithUploader";
 
 interface IEditProfileModal {
   user: User;
