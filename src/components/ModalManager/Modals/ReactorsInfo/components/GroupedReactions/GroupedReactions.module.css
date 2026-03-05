@@ -1,0 +1,42 @@
+.reactionsList {
+  display: flex;
+  list-style: none;
+  gap: var(--space-2);
+  padding: var(--space-2);
+
+  overflow-x: auto;
+
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+}
+
+.reaction {
+  display: flex;
+  align-items: center;
+  font-size: 25px;
+  background-color: var(--c-light);
+  border-radius: var(--radius-md);
+
+  padding: 0 var(--space-1);
+
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--c-light-x3);
+  }
+}
+
+.count {
+  padding: var(--space-1);
+}
+
+.selected {
+  background-color: var(--c-light-x2);
+}
+
+.reactionIcon {
+  width: 25px;
+  height: 25px;
+}

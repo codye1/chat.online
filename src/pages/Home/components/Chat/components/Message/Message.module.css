@@ -8,7 +8,7 @@
 
 .message {
   padding: 10px;
-  margin: 5px 0;
+  margin: 2px 0;
   border-radius: 5px;
   width: fit-content;
   font-size: var(--text-xl);
@@ -52,3 +52,35 @@
     overflow-wrap: anywhere;
   }
 }
+
+.rplyContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: color-mix(in oklch, var(--c-link) 20%, transparent);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--c-link);
+
+  cursor: pointer;
+
+  & h3{
+    font-size: var(--text-sm);
+    font-weight: 500;
+    margin-left: var(--space-1);
+    margin-top: var(--space-1);
+    color: var(--c-link);
+  }
+
+  & span {
+    font-size: var(--text-sm);
+    margin: var(--space-1);
+    margin-top: 0;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+}
+

@@ -1,3 +1,10 @@
+.inputContainer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  width: 100%;
+}
+
 .sendIcon {
   width: 40px;
   height: 40px;

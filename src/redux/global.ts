@@ -1,16 +1,23 @@
-import type { IReactorsList } from "@components/ModalManager/Modals/ReactorsList/ReactorsList";
+import type { IProfileViewModal } from "@components/ModalManager/Modals/ProfileViewModal/ProfileViewModal";
+import type { IReactorsInfo } from "@components/ModalManager/Modals/ReactorsInfo/ReactorsInfo";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "@utils/types";
+import type { ReplyMessage } from "@utils/types";
 
 type AvailableModals =
-  | { type: "profileView"; user: User }
-  | { type: "editProfile"; user: User }
-  | { type: "reactorsList"; props: IReactorsList };
+  | { type: "profileView"; props: IProfileViewModal }
+  | { type: "editProfile" }
+  | { type: "reactorsInfo"; props: IReactorsInfo };
+
+interface EditMessage {
+  id: string;
+  text: string;
+}
 
 interface GlobalState {
   conversationId: string | null;
   recipientId: string | null;
-  editingMessage: { id: string; text: string } | null;
+  editingMessage: EditMessage | null;
+  replyMessage: ReplyMessage | null;
   activeModal: AvailableModals | null;
 }
 
@@ -18,6 +25,7 @@ const initialState: GlobalState = {
   conversationId: null,
   recipientId: null,
   editingMessage: null,
+  replyMessage: null,
   activeModal: null,
 };
 
@@ -38,11 +46,13 @@ export const globalSlice = createSlice({
       state.conversationId = null;
       state.editingMessage = null;
     },
-    setEditingMessage(
-      state,
-      action: PayloadAction<{ id: string; text: string } | null>,
-    ) {
+    setEditingMessage(state, action: PayloadAction<EditMessage | null>) {
       state.editingMessage = action.payload;
+      state.replyMessage = null;
+    },
+    setReplyMessage(state, action: PayloadAction<ReplyMessage | null>) {
+      state.editingMessage = null;
+      state.replyMessage = action.payload;
     },
     openModal(state, action: PayloadAction<AvailableModals>) {
       state.activeModal = action.payload;
@@ -57,6 +67,7 @@ export const {
   setConversation,
   setRecipient,
   setEditingMessage,
+  setReplyMessage,
   openModal,
   closeModal,
 } = globalSlice.actions;

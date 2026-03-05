@@ -12,7 +12,6 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import type { User } from "@utils/types";
 import { useUpdateUserMutation } from "@api/slices/userSlice";
 import styles from "./EditProfileModal.module.css";
 import editUser from "@actions/editUser";
@@ -20,20 +19,11 @@ import getDisplayName from "@utils/getDisplayName";
 import EditNicknameModal from "./components/EditNickname";
 import EditNameModal from "./components/EditNameModal";
 import AvatarWithUploader from "./components/AvatarWithUploader/AvatarWithUploader";
-
-interface IEditProfileModal {
-  user: User;
-  onClickOutside: () => void;
-  onClickClose: () => void;
-  onClickBack: () => void;
-}
-
-const EditProfileModal = ({
-  user,
-  onClickOutside,
-  onClickClose,
-  onClickBack,
-}: IEditProfileModal) => {
+import { useAppDispatch, useAppSelector } from "@hooks/hooks";
+import { closeModal, openModal } from "@redux/global";
+const EditProfileModal = () => {
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const [updateUser] = useUpdateUserMutation();
   const [bioValue, setBioValue] = useState(user.biography || "");
   const [viewEditModle, setViewEditModle] = useState<
@@ -60,11 +50,19 @@ const EditProfileModal = ({
   };
   return (
     <>
-      <Modal onClickOutside={onClickOutside}>
-        <button className={styles.backIcon} onClick={onClickBack}>
+      <Modal onClickOutside={() => dispatch(closeModal())}>
+        <button
+          className={styles.backIcon}
+          onClick={() =>
+            dispatch(openModal({ type: "profileView", props: { user } }))
+          }
+        >
           <img src={backIcon} alt="back icon" />
         </button>
-        <button className={styles.closeIcon} onClick={onClickClose}>
+        <button
+          className={styles.closeIcon}
+          onClick={() => dispatch(closeModal())}
+        >
           <img src={closeIcon} alt="close icon" />
         </button>
         <div className={styles.modalHeader}>

@@ -3,34 +3,27 @@ import styles from "./Message.module.css";
 import Check from "@assets/check.svg";
 import { useRef, useState } from "react";
 import Reactions from "./components/Reactions/Reactions";
-import type { GroupedReactions } from "@utils/types";
+import type { Message as MessageType } from "@utils/types";
 import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
+import getDisplayName from "@utils/getDisplayName";
 
 export interface IMessage {
-  conversationId: string;
-  text: string;
+  message: MessageType;
   isSentByCurrentUser: boolean;
   read: boolean;
-  createdAt: string;
-  id: string;
   ref: (node: Element | null | undefined) => void;
   "data-index": number;
   style?: React.CSSProperties;
-  reactions: GroupedReactions;
   onDoubleClick?: () => void;
 }
 
 const Message = ({
-  text,
+  message,
   isSentByCurrentUser,
   read,
-  createdAt,
-  id,
   ref,
   "data-index": dataIndex,
   style,
-  reactions,
-  conversationId,
   onDoubleClick,
 }: IMessage) => {
   const popoverAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -40,7 +33,7 @@ const Message = ({
   return (
     <>
       <div
-        id={id}
+        id={message.id}
         className={styles.messageWrapper}
         ref={ref}
         data-index={dataIndex}
@@ -58,10 +51,19 @@ const Message = ({
             [styles.sentByCurrentUser]: isSentByCurrentUser,
           })}
         >
+          {/*TODO: make scroll on click (with better messageList)*/}
+          {message.replyTo && (
+            <div className={styles.rplyContainer}>
+              <h3 className={styles.rplyAuthor}>
+                {getDisplayName(message.replyTo.sender)}
+              </h3>
+              <span className={styles.rplyText}>{message.replyTo.text}</span>
+            </div>
+          )}
           <div className={styles.textContainer}>
-            <span>{text}</span>
+            <span>{message.text}</span>
             <span className={styles.createdAt}>
-              {new Date(createdAt).toLocaleString(undefined, {
+              {new Date(message.createdAt).toLocaleString(undefined, {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
@@ -74,17 +76,14 @@ const Message = ({
               />
             )}
           </div>
-          <Reactions reactions={reactions} messageId={id} />
+          <Reactions reactions={message.reactions} messageId={message.id} />
         </div>
       </div>
       <MessageContextMenu
         isContextMenuOpen={contextMenu}
         setIsContextMenuOpen={setContextMenu}
         mousePosition={mousePosition}
-        messageId={id}
-        sentByCurrentUser={isSentByCurrentUser}
-        text={text}
-        conversationId={conversationId}
+        message={{ ...message, sentByCurrentUser: isSentByCurrentUser }}
       />
     </>
   );

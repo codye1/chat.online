@@ -30,7 +30,9 @@ const NavigationDrawer = ({ onClickOutside, user }: INavigationDrawer) => {
             dispatch(
               openModal({
                 type: "profileView",
-                user,
+                props: {
+                  user,
+                },
               }),
             );
             onClickOutside();

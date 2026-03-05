@@ -1,4 +1,5 @@
-import { useAppSelector } from "@hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@hooks/hooks";
+import { setReplyMessage } from "@redux/global";
 import socket, { sendMessage } from "@utils/socket";
 import { useRef, useState, type KeyboardEvent } from "react";
 
@@ -7,10 +8,11 @@ const useWriteMessage = () => {
   const { nickname } = useAppSelector((state) => state.auth.user);
   const typingTimeoutRef = useRef<number | null>(null);
   const isTypingRef = useRef(false);
-
-  const { conversationId, recipientId } = useAppSelector(
+  const { conversationId, replyMessage } = useAppSelector(
     (state) => state.global,
   );
+
+  const dispatch = useAppDispatch();
 
   const startTyping = () => {
     if (!conversationId) return;
@@ -29,9 +31,14 @@ const useWriteMessage = () => {
   };
 
   const handleEnterKey = (e: KeyboardEvent<HTMLSpanElement>) => {
-    if (!conversationId && !recipientId) return;
+    if (!conversationId) return;
     if (e.key === "Enter" && message.trim()) {
-      sendMessage({ conversationId, recipientId, text: message });
+      sendMessage({
+        conversationId,
+        text: message,
+        replyToMessageId: replyMessage?.id,
+      });
+      dispatch(setReplyMessage(null));
       setMessage("");
       clearTimeout(typingTimeoutRef.current!);
       stopTyping();
@@ -39,7 +46,7 @@ const useWriteMessage = () => {
   };
 
   const handleWriteMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!conversationId && !recipientId) return;
+    if (!conversationId) return;
 
     if (!isTypingRef.current) {
       startTyping();
@@ -53,10 +60,15 @@ const useWriteMessage = () => {
   };
 
   const onSendMessage = () => {
-    if (!conversationId && !recipientId) return;
+    if (!conversationId) return;
 
     if (message.trim()) {
-      sendMessage({ conversationId, recipientId, text: message });
+      sendMessage({
+        conversationId,
+        text: message,
+        replyToMessageId: replyMessage?.id,
+      });
+      dispatch(setReplyMessage(null));
       setMessage("");
 
       if (typingTimeoutRef.current) {
@@ -66,7 +78,13 @@ const useWriteMessage = () => {
     }
   };
 
-  return { message, handleWriteMessage, onSendMessage, handleEnterKey };
+  return {
+    message,
+    handleWriteMessage,
+    onSendMessage,
+    handleEnterKey,
+    replyMessage,
+  };
 };
 
 export default useWriteMessage;

@@ -4,10 +4,9 @@ import styles from "./EditMessage.module.css";
 import checkIcon from "@assets/check.svg";
 import Button from "@components/Button/Button";
 import editIcon from "@assets/edit.svg";
-import cancelIcon from "@assets/close.svg";
-import clsx from "clsx";
 import { useAppDispatch } from "@hooks/hooks";
 import { setEditingMessage } from "@redux/global";
+import InputHeader from "../InputHeader/InputHeader";
 
 const EditMessage = ({
   editingMessage,
@@ -29,21 +28,12 @@ const EditMessage = ({
 
   return (
     <div className={styles.inputContainer}>
-      <span className={styles.editingHeader}>
-        <button className={styles.icon}>
-          <img src={editIcon} alt="Edit" />
-        </button>
-        <div>
-          <h2>Edit message</h2>
-          <h3>{editingMessage.text}</h3>
-        </div>
-        <button
-          onClick={onCancelEdit}
-          className={clsx(styles.icon, styles.cancel)}
-        >
-          <img src={cancelIcon} alt="Cancel" />
-        </button>
-      </span>
+      <InputHeader
+        icon={editIcon}
+        label="Edit Message"
+        description={editingMessage.text}
+        onCancel={onCancelEdit}
+      />
       <Input
         name="message"
         type="text"

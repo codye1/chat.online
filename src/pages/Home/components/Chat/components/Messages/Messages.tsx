@@ -1,6 +1,5 @@
 import { useAppSelector } from "@hooks/hooks";
 import { useState } from "react";
-import Message from "../Message/Message";
 import { useGetMessagesQuery } from "@api/slices/chatSlice";
 import type { Conversation } from "@utils/types";
 import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
@@ -9,6 +8,7 @@ import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";
 import { addReaction } from "@utils/socket";
+import Message from "../Message/Message";
 
 const skeletonItems = Array.from({ length: 20 }, () => ({
   alignRight: Math.random() > 0.5,
@@ -91,11 +91,9 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
             const message = itemsBuffer[item.index];
             return (
               <Message
-                data-index={item.index}
                 key={message.id}
-                id={message.id}
-                text={message.text}
-                conversationId={conversation.id}
+                data-index={item.index}
+                message={message}
                 style={{
                   position: "absolute",
                   top: 0,
@@ -103,14 +101,12 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   width: "100%",
                   transform: `translateY(${item.start}px)`,
                 }}
-                reactions={message.reactions}
                 read={
                   conversation.lastReadIdByParticipants
                     ? message.id <= conversation.lastReadIdByParticipants
                     : false
                 }
-                isSentByCurrentUser={message.senderId === user.id}
-                createdAt={message.createdAt}
+                isSentByCurrentUser={message.sender.id === user.id}
                 ref={(el) => {
                   trackUnreadMessageRef(el, message);
                   virtualizer.measureElement(el);

@@ -10,7 +10,8 @@ import type {
   ConversationPreview,
   Message,
   Reaction,
-  Reactor,
+  UserPreview,
+  ReactorListItem,
   SearchResponse,
 } from "@utils/types";
 
@@ -48,15 +49,32 @@ const chatSlice = api.injectEndpoints({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
 
-        if (arg.recipientId && data.id !== null) {
+        if (arg.recipientId) {
+          const isTemp = data.id.startsWith("tempId");
+
           dispatch(setConversation({ conversationId: data.id }));
           dispatch(
-            chatSlice.util.updateQueryData(
+            chatSlice.util.upsertQueryData(
               "getConversation",
               { recipientId: null, conversationId: data.id },
-              () => data,
+              data,
             ),
           );
+
+          if (isTemp) {
+            dispatch(
+              chatSlice.util.upsertQueryData(
+                "getMessages",
+                { conversationId: data.id },
+                {
+                  items: [],
+                  hasMoreUp: false,
+                  hasMoreDown: false,
+                  fromUser: false,
+                },
+              ),
+            );
+          }
         }
       },
       forceRefetch({ currentArg, previousArg }) {
@@ -283,7 +301,7 @@ const chatSlice = api.injectEndpoints({
             if (convo) {
               convo.lastMessage = message;
 
-              if (state.auth.user.id !== message.senderId) {
+              if (state.auth.user.id !== message.sender.id) {
                 convo.unreadMessages += 1;
               }
             }
@@ -297,7 +315,7 @@ const chatSlice = api.injectEndpoints({
                 if (draft) {
                   draft.lastMessage = message;
 
-                  if (state.auth.user.id !== message.senderId) {
+                  if (state.auth.user.id !== message.sender.id) {
                     draft.unreadMessages += 1;
                   }
                 }
@@ -394,11 +412,15 @@ const chatSlice = api.injectEndpoints({
           conversation,
           recipientId,
           initiator,
+          firstMessage,
         }: {
           conversation: Conversation;
           recipientId: string;
           initiator?: string;
+          firstMessage: Message;
         }) => {
+          console.log("new");
+
           connectToConversation([conversation.id]);
           updateCachedData((draft) => {
             const exists = draft.find((c) => c.id === conversation.id);
@@ -413,11 +435,25 @@ const chatSlice = api.injectEndpoints({
               () => conversation,
             ),
           );
-          const state = getState() as RootState;
 
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId: conversation.id },
+              (draft) => {
+                draft.items = [firstMessage];
+                draft.hasMoreUp = false;
+                draft.hasMoreDown = false;
+              },
+            ),
+          );
+          const state = getState() as RootState;
+          const isTempSelected =
+            state.global.conversationId?.startsWith("tempId");
+          const tempId = state.global.conversationId?.split(":")[1];
           if (
-            state.global.recipientId === recipientId ||
-            state.global.recipientId === initiator
+            isTempSelected &&
+            (tempId === recipientId || tempId === initiator)
           ) {
             dispatch(setConversation({ conversationId: conversation.id }));
           }
@@ -431,8 +467,8 @@ const chatSlice = api.injectEndpoints({
         }: {
           conversationId: string;
           messageId: string;
-          newReaction: Reaction & { user: Reactor };
-          prevReaction?: Reaction & { user: Reactor };
+          newReaction: Reaction & { user: UserPreview };
+          prevReaction?: Reaction & { user: UserPreview };
         }) => {
           dispatch(
             chatSlice.util.updateQueryData(
@@ -496,7 +532,7 @@ const chatSlice = api.injectEndpoints({
         }: {
           conversationId: string;
           messageId: string;
-          removedReaction: Reaction & { user: Reactor };
+          removedReaction: Reaction & { user: UserPreview };
         }) => {
           dispatch(
             chatSlice.util.updateQueryData(
@@ -600,15 +636,17 @@ const chatSlice = api.injectEndpoints({
         cursor?: string;
         direction?: "UP" | "DOWN";
         jumpToLatest?: boolean;
+        take?: number;
       }
     >({
-      query: ({ conversationId, cursor, direction, jumpToLatest }) => ({
+      query: ({ conversationId, cursor, direction, jumpToLatest, take }) => ({
         url: `chat/conversations/${conversationId}/messages`,
         method: "GET",
         params: {
           cursor,
           direction,
           jumpToLatest,
+          take: take ?? 20,
         },
       }),
       keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
@@ -657,22 +695,60 @@ const chatSlice = api.injectEndpoints({
       },
     }),
     getReactors: builder.query<
-      Reactor[],
+      { items: ReactorListItem[]; hasMore: boolean },
       {
         messageId: string;
         conversationId: string;
-        reaction?: string;
+        reactionContent: string;
         cursor?: string;
+        take?: number;
       }
     >({
-      query: ({ messageId, conversationId, reaction, cursor }) => ({
+      query: ({
+        messageId,
+        conversationId,
+        reactionContent,
+        cursor,
+        take,
+      }) => ({
         url: `chat/conversations/${conversationId}/messages/${messageId}/reactors`,
         method: "GET",
         params: {
-          ...(reaction ? { reaction } : {}),
+          ...(reactionContent ? { reactionContent } : {}),
           ...(cursor ? { cursor } : {}),
+          take: take ?? 20,
         },
       }),
+      keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        return `${endpointName}-${queryArgs.messageId}-${queryArgs.conversationId}-${queryArgs.reactionContent}`;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        const nextCursor = arg.cursor;
+        const newCursor =
+          newItems.items[newItems.items.length - 1]?.reaction.id;
+
+        if (nextCursor && newCursor && nextCursor !== newCursor) {
+          currentCache.items.push(...newItems.items);
+          currentCache.hasMore = newItems.hasMore;
+        }
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        if (!currentArg) {
+          return false;
+        }
+
+        if (!previousArg) {
+          return true;
+        }
+
+        return (
+          currentArg.messageId !== previousArg.messageId ||
+          currentArg.conversationId !== previousArg.conversationId ||
+          currentArg.reactionContent !== previousArg.reactionContent ||
+          currentArg.cursor !== previousArg.cursor
+        );
+      },
     }),
   }),
 });

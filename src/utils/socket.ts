@@ -30,20 +30,32 @@ const setSocketAuthorization = (token?: string | null) => {
 
 const sendMessage = ({
   conversationId,
-  recipientId,
   text,
+  replyToMessageId,
 }: {
-  conversationId: string | null;
-  recipientId: string | null;
+  conversationId: string;
   text: string;
+  replyToMessageId?: string | null;
 }) => {
   if (text.length === 0) return;
+  const isTemp = conversationId?.startsWith("tempId");
 
-  socket.emit("message:send", {
-    conversationId,
-    recipientId,
-    text,
-  });
+  if (isTemp) {
+    const recipientId = conversationId.split(":")[1];
+    socket.emit("message:send", {
+      text,
+      replyToMessageId,
+      recipientId,
+    });
+  }
+
+  if (!isTemp) {
+    socket.emit("message:send", {
+      conversationId,
+      text,
+      replyToMessageId,
+    });
+  }
 };
 
 const connectToConversation = (conversationId: string[] | null) => {

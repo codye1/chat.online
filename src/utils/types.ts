@@ -8,6 +8,14 @@ interface User {
   biography: string | null;
 }
 
+type UserPreview = {
+  id: string;
+  nickname: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+};
+
 type Reaction = {
   id: string;
   content: string;
@@ -16,31 +24,27 @@ type Reaction = {
   userId: string;
 };
 
-type Reactor = {
-  id: string;
-  nickname: string;
-  firstName: string | null;
-  lastName: string | null;
-  avatarUrl: string | null;
-  reactedAt: Date;
-  reaction: {
-    content: string;
-    createdAt: Date;
-  };
-};
+type ReactorListItem = UserPreview & { reaction: Reaction };
 
 type GroupedReactions = Record<
   string,
-  { count: number; users: Reactor[]; isActive: boolean }
+  { count: number; users: UserPreview[]; isActive: boolean }
 >;
+
+interface ReplyMessage {
+  id: string;
+  text: string;
+  sender: UserPreview;
+}
 
 interface Message {
   id: string;
   text: string;
   conversationId: string;
-  senderId: string;
+  sender: UserPreview;
   createdAt: string;
   reactions: GroupedReactions;
+  replyTo: ReplyMessage | null;
 }
 
 type ConversationTypes = "DIRECT" | "GROUP";
@@ -91,14 +95,14 @@ interface Global {
   type: "user";
 }
 
-interface UserPreview extends Global {
+interface UserSearchPreview extends Global {
   type: "user";
   id: string;
   nickname: string;
   avatarUrl: string | null;
 }
 
-type GlobalSearchItem = UserPreview | ConversationPreview;
+type GlobalSearchItem = UserSearchPreview | ConversationPreview;
 
 interface SearchResponse {
   conversations: Conversation[];
@@ -107,16 +111,18 @@ interface SearchResponse {
 
 export type {
   User,
+  UserPreview,
   Reaction,
-  Reactor,
+  ReactorListItem,
   GroupedReactions,
   Conversation,
   DirectConversation,
   ConversationTypes,
   Message,
   Global,
-  UserPreview,
+  UserSearchPreview,
   GlobalSearchItem,
   SearchResponse,
   ConversationPreview,
+  ReplyMessage,
 };

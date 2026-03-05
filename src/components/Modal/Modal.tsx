@@ -13,7 +13,7 @@ const Modal = ({ children, onClickOutside }: IModal) => {
 
   useEffect(() => {
     contentRef.current?.focus();
-  }, [children]);
+  }, []);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     e.stopPropagation();

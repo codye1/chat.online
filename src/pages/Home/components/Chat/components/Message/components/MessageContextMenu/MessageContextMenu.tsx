@@ -1,33 +1,31 @@
 import ContextMenu from "@components/ContextMenu/ContextMenu";
-import { addReaction, deleteMessage } from "@utils/socket";
+import { deleteMessage } from "@utils/socket";
 import deleteIcon from "@assets/delete.svg";
 import editIcon from "@assets/edit.svg";
 import copyIcon from "@assets/copy.svg";
 import heart from "@assets/heart.svg";
-import styles from "./MessageContextMenu.module.css";
 import { useAppDispatch } from "@hooks/hooks";
-import { openModal, setEditingMessage } from "@redux/global";
+import { openModal, setEditingMessage, setReplyMessage } from "@redux/global";
 import Separator from "@components/Separator/Separator";
 import getMessage from "@utils/getMessage";
+import ContextMenuItem from "@components/ContextMenu/components/ContentMenuItem/ContextMenuItem";
+import ContextMenuContent from "@components/ContextMenu/components/ContentMenuContent/ContextMenuContent";
+import ReactionsPicker from "./components/ReactionsPicker/ReactionsPicker";
+import replyIcon from "@assets/reply.svg";
+import type { Message } from "@utils/types";
 
 interface IMessageContextMenu {
   isContextMenuOpen: boolean;
   setIsContextMenuOpen: (open: boolean) => void;
   mousePosition: { x: number; y: number };
-  messageId: string;
-  sentByCurrentUser: boolean;
-  text: string;
-  conversationId: string;
+  message: Message & { sentByCurrentUser: boolean };
 }
 
 const MessageContextMenu = ({
   isContextMenuOpen,
   setIsContextMenuOpen,
   mousePosition,
-  messageId,
-  sentByCurrentUser,
-  text,
-  conversationId,
+  message: { id: messageId, text, conversationId, sender, sentByCurrentUser },
 }: IMessageContextMenu) => {
   const dispatch = useAppDispatch();
 
@@ -45,106 +43,64 @@ const MessageContextMenu = ({
     setIsContextMenuOpen(false);
   };
 
+  const onReply = () => {
+    dispatch(setReplyMessage({ id: messageId, text, sender }));
+    setIsContextMenuOpen(false);
+  };
+
   return (
     <ContextMenu
       isOpen={isContextMenuOpen}
       onClose={() => setIsContextMenuOpen(false)}
       position={mousePosition}
     >
-      <ul className={styles.reactionsList}>
-        <li>
-          <button
-            className={styles.reactionButton}
-            onClick={() => {
-              addReaction({ messageId, content: "👍" });
-              setIsContextMenuOpen(false);
-            }}
-          >
-            👍
-          </button>
-        </li>
-        <li>
-          <button
-            className={styles.reactionButton}
-            onClick={() => {
-              addReaction({ messageId, content: "❤️" });
-              setIsContextMenuOpen(false);
-            }}
-          >
-            ❤️
-          </button>
-        </li>
-        <li>
-          <button
-            className={styles.reactionButton}
-            onClick={() => {
-              addReaction({ messageId, content: "😂" });
-              setIsContextMenuOpen(false);
-            }}
-          >
-            😂
-          </button>
-        </li>
-        <li>
-          <button
-            className={styles.reactionButton}
-            onClick={() => {
-              addReaction({ messageId, content: "😮" });
-              setIsContextMenuOpen(false);
-            }}
-          >
-            😮
-          </button>
-        </li>
-      </ul>
-      <ul className={styles.content}>
-        <li>
-          <button onClick={onCopyMessage}>
-            <img src={copyIcon} alt="Copy message" />
-            <h3>Copy</h3>
-          </button>
-        </li>
+      <ReactionsPicker
+        messageId={messageId}
+        setIsContextMenuOpen={setIsContextMenuOpen}
+      />
+      <ContextMenuContent>
+        <ContextMenuItem onClick={onReply} icon={replyIcon} label="Reply" />
+        <ContextMenuItem
+          onClick={onCopyMessage}
+          icon={copyIcon}
+          label="Copy message"
+        />
         {sentByCurrentUser && (
           <>
-            <li>
-              <button onClick={onEditMessage}>
-                <img src={editIcon} alt="Edit message" />
-                <h3>Edit</h3>
-              </button>
-            </li>
-            <li>
-              <button onClick={onDeleteMessage}>
-                <img src={deleteIcon} alt="Delete message" />
-                <h3>Delete</h3>
-              </button>
-            </li>
+            <ContextMenuItem
+              onClick={onEditMessage}
+              icon={editIcon}
+              label="Edit message"
+            />
+            <ContextMenuItem
+              onClick={onDeleteMessage}
+              icon={deleteIcon}
+              label="Delete message"
+            />
             <Separator />
-            <li>
-              <button
-                onClick={() => {
-                  const message = getMessage({ messageId, conversationId });
-                  if (message) {
-                    dispatch(
-                      openModal({
-                        type: "reactorsList",
-                        props: {
-                          messageId,
-                          conversationId,
-                          groupedReactions: message.reactions,
-                        },
-                      }),
-                    );
-                  }
-                  setIsContextMenuOpen(false);
-                }}
-              >
-                <img src={heart} alt="Reaction icon" />
-                <h3>Reactions</h3>
-              </button>
-            </li>
+            <ContextMenuItem
+              onClick={() => {
+                const message = getMessage({ messageId, conversationId });
+                if (message) {
+                  dispatch(
+                    openModal({
+                      type: "reactorsInfo",
+                      props: {
+                        messageId,
+                        conversationId,
+                        groupedReactions: message.reactions,
+                      },
+                    }),
+                  );
+                }
+                setIsContextMenuOpen(false);
+              }}
+              icon={heart}
+              label="Reactors"
+            />
           </>
         )}
-      </ul>
+      </ContextMenuContent>
     </ContextMenu>
   );
 };

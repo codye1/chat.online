@@ -8,6 +8,7 @@ import Button from "@components/Button/Button";
 import closeIcon from "@assets/close.svg";
 import SearchMenu from "./components/SearchMenu/SearchMenu";
 import ResizableSection from "@components/ResizableSection/ResizableSection";
+import ConversationFoldersList from "./components/ConversationFoldersList/ConversationFoldersList";
 
 const ConversationsList = () => {
   const [searchFocus, setSearchFocus] = useState(false);
@@ -49,7 +50,7 @@ const ConversationsList = () => {
           </Button>
         )}
       </span>
-
+      <ConversationFoldersList />
       {searchFocus && <SearchMenu searchResults={searchResults} />}
       {!searchFocus && <AllConversations />}
     </ResizableSection>
