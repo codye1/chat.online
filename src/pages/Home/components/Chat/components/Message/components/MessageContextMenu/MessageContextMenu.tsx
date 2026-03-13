@@ -8,11 +8,11 @@ import { useAppDispatch } from "@hooks/hooks";
 import { openModal, setEditingMessage, setReplyMessage } from "@redux/global";
 import Separator from "@components/Separator/Separator";
 import getMessage from "@utils/getMessage";
-import ContextMenuItem from "@components/ContextMenu/components/ContentMenuItem/ContextMenuItem";
-import ContextMenuContent from "@components/ContextMenu/components/ContentMenuContent/ContextMenuContent";
 import ReactionsPicker from "./components/ReactionsPicker/ReactionsPicker";
 import replyIcon from "@assets/reply.svg";
 import type { Message } from "@utils/types";
+import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
+import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 
 interface IMessageContextMenu {
   isContextMenuOpen: boolean;
@@ -58,27 +58,27 @@ const MessageContextMenu = ({
         messageId={messageId}
         setIsContextMenuOpen={setIsContextMenuOpen}
       />
-      <ContextMenuContent>
-        <ContextMenuItem onClick={onReply} icon={replyIcon} label="Reply" />
-        <ContextMenuItem
+      <MenuContent>
+        <MenuItem onClick={onReply} icon={replyIcon} label="Reply" />
+        <MenuItem
           onClick={onCopyMessage}
           icon={copyIcon}
           label="Copy message"
         />
         {sentByCurrentUser && (
           <>
-            <ContextMenuItem
+            <MenuItem
               onClick={onEditMessage}
               icon={editIcon}
               label="Edit message"
             />
-            <ContextMenuItem
+            <MenuItem
               onClick={onDeleteMessage}
               icon={deleteIcon}
               label="Delete message"
             />
             <Separator />
-            <ContextMenuItem
+            <MenuItem
               onClick={() => {
                 const message = getMessage({ messageId, conversationId });
                 if (message) {
@@ -100,7 +100,7 @@ const MessageContextMenu = ({
             />
           </>
         )}
-      </ContextMenuContent>
+      </MenuContent>
     </ContextMenu>
   );
 };

@@ -5,11 +5,11 @@ import PreviewItem from "../PreviewItem/PreviewItem";
 import type { SearchResponse } from "@utils/types";
 import styles from "./SearchMenu.module.css";
 import noSearchResults from "@assets/noSearchResult.svg";
-import { useGetConversationsQuery } from "@api/slices/chatSlice";
+import { useConversationsQuery } from "@api/slices/chatSlice";
 
 const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
   const dispatch = useAppDispatch();
-  const { data: conversations } = useGetConversationsQuery();
+  const { data: conversationsState } = useConversationsQuery();
   if (!searchResults) {
     return (
       <div className={styles.noResultsContainer}>
@@ -28,9 +28,9 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
   };
 
   const onUserClick = (recipientId: string) => {
-    console.log(conversations);
-
-    const existingConversation = conversations?.find(
+    const existingConversation = Object.values(
+      conversationsState?.byId || {},
+    ).find(
       (conv) =>
         conv.type === "DIRECT" && conv.otherParticipant.id === recipientId,
     );
@@ -53,7 +53,7 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
           description={item.lastMessage?.text ?? ""}
           meta={{
             lastMessageTime: item.lastMessage?.createdAt.toString() || "",
-            unreadMessages: item.unreadMessages,
+            unreadMessagesCount: item.unreadMessages,
           }}
           onMouseDown={() => onMouseDown(item.id)}
         />

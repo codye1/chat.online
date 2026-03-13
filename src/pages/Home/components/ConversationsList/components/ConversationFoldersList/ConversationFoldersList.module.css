@@ -1,5 +1,5 @@
-.list{
-  padding:0 var(--space-2);
+.list {
+  padding: 0 var(--space-2);
   display: flex;
 
   overflow-x: auto;
@@ -15,7 +15,7 @@
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   cursor: pointer;
   font-size: var(--text-lg);
-  padding:var(--space-3);
+  padding: var(--space-3);
   padding-bottom: var(--space-2);
   &:hover {
     background-color: var(--c-light);

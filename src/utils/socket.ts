@@ -1,6 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import store from "@redux/store";
 import chatSlice from "@api/slices/chatSlice";
+import { updateConversationsState } from "@api/slices/helpers/ConversationsManage";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -59,6 +60,8 @@ const sendMessage = ({
 };
 
 const connectToConversation = (conversationId: string[] | null) => {
+  console.log(conversationId);
+
   socket.emit("conversation:join", { conversationId });
 };
 
@@ -92,14 +95,12 @@ const markMessageAsRead = (
 ) => {
   emitMessageReadDebounced(conversationId, lastReadMessageId);
 
-  store.dispatch(
-    chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
-      const convo = draft.find((c) => c.id === conversationId);
-      if (convo) {
-        convo.unreadMessages = Math.max(0, convo.unreadMessages - 1);
-      }
-    }),
-  );
+  updateConversationsState((draft) => {
+    const convo = draft.byId[conversationId];
+    if (convo) {
+      convo.unreadMessages = Math.max(0, convo.unreadMessages - 1);
+    }
+  });
 
   store.dispatch(
     chatSlice.util.updateQueryData(
@@ -196,10 +197,19 @@ const initializeSocketListeners = (
     console.log("Socket connected successfully");
 
     const state = store.getState();
-    const conversations =
+    const conversationsState =
       chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
 
-    const conversationsIds = conversations?.map((c) => c.id) || [];
+    let conversationsIds: string[] = [];
+
+    if (conversationsState) {
+      conversationsIds = [
+        ...conversationsState.activeIds.pinned,
+        ...conversationsState.activeIds.unpinned,
+        ...conversationsState.archivedIds.pinned,
+        ...conversationsState.archivedIds.unpinned,
+      ];
+    }
 
     if (conversationsIds.length > 0) {
       connectToConversation(conversationsIds);

@@ -1,4 +1,4 @@
-.textarea {
+.textArea {
   margin-top: var(--space-2);
   width: 100%;
   max-width: 100%;
@@ -12,6 +12,6 @@
   font-size: var(--text-base);
 }
 
-.textarea:focus {
+.textArea:focus {
   background-color: transparent;
 }

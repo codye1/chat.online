@@ -62,7 +62,7 @@
 
   cursor: pointer;
 
-  & h3{
+  & h3 {
     font-size: var(--text-sm);
     font-weight: 500;
     margin-left: var(--space-1);
@@ -81,6 +81,4 @@
     overflow: hidden;
     overflow-wrap: anywhere;
   }
-
 }
-

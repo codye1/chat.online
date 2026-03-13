@@ -78,6 +78,10 @@ const ContextMenu = ({
       className={clsx(styles.contextMenu, className)}
       style={{ top: coords.top, left: coords.left }}
       onKeyDown={handleKeyDown}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
     >
       {children}
     </menu>,
@@ -85,4 +89,12 @@ const ContextMenu = ({
   );
 };
 
+const Slot = ({ children }: { children: ReactNode }) => {
+  return <>{children}</>;
+};
+
+ContextMenu.Slot = Slot;
+
 export default ContextMenu;
+export { Slot as ContextMenuSlot };
+export type { IContextMenu };

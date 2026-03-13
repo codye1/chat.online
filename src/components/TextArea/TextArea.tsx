@@ -1,5 +1,6 @@
 import { useRef, type ChangeEvent } from "react";
 import styles from "./TextArea.module.css";
+import clsx from "clsx";
 
 interface ITextArea {
   trackValue?: {
@@ -8,9 +9,19 @@ interface ITextArea {
   };
   maxLength?: number;
   placeholder: string;
+  name: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  className?: string;
 }
 
-const TextArea = ({ trackValue, placeholder, maxLength }: ITextArea) => {
+const TextArea = ({
+  trackValue,
+  placeholder,
+  maxLength,
+  onKeyDown,
+  className,
+  name,
+}: ITextArea) => {
   const ref = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -27,11 +38,13 @@ const TextArea = ({ trackValue, placeholder, maxLength }: ITextArea) => {
     <textarea
       ref={ref}
       value={trackValue?.value}
+      name={name}
       onChange={handleChange}
-      className={styles.textarea}
+      className={clsx(styles.textArea, className)}
       maxLength={maxLength}
       rows={1}
       placeholder={placeholder}
+      onKeyDown={onKeyDown}
     />
   );
 };

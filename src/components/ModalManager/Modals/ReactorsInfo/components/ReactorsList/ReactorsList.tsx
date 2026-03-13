@@ -2,11 +2,8 @@ import Avatar from "@components/Avatar/Avatar";
 import styles from "./ReactorsList.module.css";
 import getDisplayName from "@utils/getDisplayName";
 import formatDate from "@utils/formatDate";
-import { useInView } from "react-intersection-observer";
-import { useEffect, useRef, useState } from "react";
 import type { ReactorListItem } from "@utils/types";
-
-let savingScrollPositionTimeout: number;
+import InfiniteScrolling from "@components/InfinteScrolling/InfinteScrolling";
 
 interface IReactorsList {
   tab: string;
@@ -33,43 +30,8 @@ const ReactorsList = ({
   isLoading,
   onBottomReached,
   tab,
+  hasMore,
 }: IReactorsList) => {
-  const [rootEl, setRootEl] = useState<HTMLUListElement | null>(null);
-  const scrollPositions = useRef<Record<string, number>>({});
-  const prevTabRef = useRef<string>(tab);
-  const { ref, inView } = useInView({
-    root: rootEl,
-    rootMargin: "0px 0px 300px 0px",
-  });
-
-  useEffect(() => {
-    if (inView && onBottomReached) {
-      onBottomReached();
-    }
-  }, [inView, onBottomReached]);
-
-  const onScroll = () => {
-    clearTimeout(savingScrollPositionTimeout);
-    savingScrollPositionTimeout = setTimeout(() => {
-      if (rootEl) {
-        scrollPositions.current[tab] = rootEl.scrollTop;
-        console.log("saving for", tab, scrollPositions.current[tab]);
-      }
-    }, 100);
-  };
-
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      if (rootEl) {
-        if (prevTabRef.current !== tab) {
-          console.log("restoring for", tab, scrollPositions.current[tab]);
-          rootEl.scrollTop = scrollPositions.current[tab] ?? 0;
-          prevTabRef.current = tab;
-        }
-      }
-    });
-  }, [reactors, rootEl]);
-
   if (isLoading) {
     return (
       <ul className={styles.reactorsList}>
@@ -84,9 +46,11 @@ const ReactorsList = ({
     return <div>No reactors available</div>;
   }
   return (
-    <ul className={styles.reactorsList} ref={setRootEl} onScroll={onScroll}>
-      {reactors.map((reactor) => (
-        <li className={styles.reactor} key={reactor.id}>
+    <InfiniteScrolling
+      items={reactors}
+      className={styles.reactorsList}
+      renderItem={(reactor) => (
+        <li className={styles.reactor} key={reactor.reaction.id}>
           <Avatar
             avatarUrl={reactor.avatarUrl}
             width={"50px"}
@@ -100,9 +64,11 @@ const ReactorsList = ({
             {reactor.reaction.content}
           </div>
         </li>
-      ))}
-      <div ref={ref} />
-    </ul>
+      )}
+      listId={tab}
+      hasMore={hasMore}
+      onBottomReached={onBottomReached ?? (() => {})}
+    />
   );
 };
 

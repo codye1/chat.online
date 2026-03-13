@@ -1,3 +1,4 @@
+import type { ICreateFolderModal } from "@components/ModalManager/Modals/CreateFolderModal/CreateFolderModal";
 import type { IProfileViewModal } from "@components/ModalManager/Modals/ProfileViewModal/ProfileViewModal";
 import type { IReactorsInfo } from "@components/ModalManager/Modals/ReactorsInfo/ReactorsInfo";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
@@ -6,7 +7,8 @@ import type { ReplyMessage } from "@utils/types";
 type AvailableModals =
   | { type: "profileView"; props: IProfileViewModal }
   | { type: "editProfile" }
-  | { type: "reactorsInfo"; props: IReactorsInfo };
+  | { type: "reactorsInfo"; props: IReactorsInfo }
+  | (ICreateFolderModal & { type: "createFolder" });
 
 interface EditMessage {
   id: string;

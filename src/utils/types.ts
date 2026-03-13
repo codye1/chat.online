@@ -55,9 +55,15 @@ interface BaseConversationData {
   title: string;
   type: ConversationTypes;
   unreadMessages: number;
+  isArchived: boolean;
+  isMuted: boolean;
   lastMessage: { text: string; createdAt: string; id: string } | null;
   activeUsers: { nickname: string; reason: "typing" | "editing" }[];
 }
+
+type EditableConversationFields = Partial<
+  Pick<BaseConversationData, "isMuted" | "isArchived">
+>;
 
 interface BaseConversation extends BaseConversationData {
   lastReadId: string | null;
@@ -104,6 +110,28 @@ interface UserSearchPreview extends Global {
 
 type GlobalSearchItem = UserSearchPreview | ConversationPreview;
 
+type Folder = {
+  id: string;
+  title: string;
+  position: number;
+  icon?: string;
+  pinnedConversationIds: string[];
+  unpinnedConversationIds: string[];
+};
+
+type ConversationsState = {
+  byId: Record<string, ConversationPreview>;
+  activeIds: {
+    pinned: string[];
+    unpinned: string[];
+  };
+  archivedIds: {
+    pinned: string[];
+    unpinned: string[];
+  };
+  folders: Folder[];
+};
+
 interface SearchResponse {
   conversations: Conversation[];
   global: GlobalSearchItem[];
@@ -122,7 +150,10 @@ export type {
   Global,
   UserSearchPreview,
   GlobalSearchItem,
+  Folder,
+  ConversationsState,
   SearchResponse,
   ConversationPreview,
   ReplyMessage,
+  EditableConversationFields,
 };

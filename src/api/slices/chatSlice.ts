@@ -7,13 +7,16 @@ import socket, {
 } from "@utils/socket";
 import type {
   Conversation,
-  ConversationPreview,
   Message,
   Reaction,
   UserPreview,
   ReactorListItem,
   SearchResponse,
+  ConversationsState,
+  Folder,
+  EditableConversationFields,
 } from "@utils/types";
+import { updateConversationsState } from "./helpers/ConversationsManage";
 
 export interface MessagesResponse {
   items: Message[];
@@ -168,21 +171,9 @@ const chatSlice = api.injectEndpoints({
           );
 
           // Update conversations list cache
-          dispatch(
-            chatSlice.util.updateQueryData(
-              "getConversations",
-              undefined,
-              (draft) => {
-                const index = draft.findIndex((c) => c.id === conversation.id);
-
-                if (index !== -1) {
-                  draft[index] = conversation;
-                } else {
-                  draft.push(conversation);
-                }
-              },
-            ),
-          );
+          updateConversationsState((draft) => {
+            draft.byId[conversation.id] = conversation;
+          });
         };
 
         socket.on("message:read", onMessageRead);
@@ -197,9 +188,31 @@ const chatSlice = api.injectEndpoints({
       },
     }),
 
-    getConversations: builder.query<ConversationPreview[], void>({
-      query: () => `chat/conversations`,
-
+    getConversations: builder.query<
+      ConversationsState,
+      { ids?: string[] } | void
+    >({
+      query: (arg) => {
+        return !arg
+          ? `chat/conversations/init`
+          : {
+              url: `chat/conversations`,
+              params: { ids: arg.ids?.join(",") },
+            };
+      },
+      serializeQueryArgs: () => "getConversations",
+      merge: (currentCache, newItems) => {
+        Object.assign(currentCache.byId, newItems.byId);
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        if (!currentArg) {
+          return false;
+        }
+        if (!previousArg) {
+          return true;
+        }
+        return currentArg.ids !== previousArg.ids;
+      },
       async onCacheEntryAdded(
         _arg,
         {
@@ -208,15 +221,19 @@ const chatSlice = api.injectEndpoints({
           cacheEntryRemoved,
           dispatch,
           getState,
+          getCacheEntry,
         },
       ) {
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
-        updateCachedData((draft) => {
-          const convoIds = draft.map((c) => c.id);
-          connectToConversation(convoIds);
-        });
+
+        const state = getCacheEntry().data;
+
+        if (state) {
+          const conversationIds = Object.keys(state.byId);
+          connectToConversation(conversationIds);
+        }
 
         const onUserActive = ({
           conversationId,
@@ -234,12 +251,14 @@ const chatSlice = api.injectEndpoints({
             return;
           }
           updateCachedData((draft) => {
-            const convo = draft.find((c) => c.id === conversationId);
+            const convo = draft.byId[conversationId];
             if (convo) {
               convo.activeUsers = convo.activeUsers || [];
-              if (!convo.activeUsers.find((u) => u.nickname === nickname)) {
-                convo.activeUsers.push({ nickname, reason });
-              }
+              const isAlreadyActive = convo.activeUsers.find(
+                (u) => u.nickname === nickname,
+              );
+              if (isAlreadyActive) return;
+              convo.activeUsers.push({ nickname, reason });
             }
           });
           dispatch(
@@ -270,7 +289,7 @@ const chatSlice = api.injectEndpoints({
           }
 
           updateCachedData((draft) => {
-            const convo = draft.find((c) => c.id === conversationId);
+            const convo = draft.byId[conversationId];
             if (convo && convo.activeUsers) {
               convo.activeUsers = convo.activeUsers.filter(
                 (u) => u.nickname !== nickname,
@@ -293,10 +312,20 @@ const chatSlice = api.injectEndpoints({
         };
         const onNewMessage = (message: Message) => {
           const state = getState() as RootState;
-          const conversation = state.global.conversationId;
+          const conversationId = state.global.conversationId;
+          const conversationsState =
+            chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+          const conversation = conversationsState?.byId[message.conversationId];
+
+          if (!conversation) {
+            chatSlice.endpoints.getConversations.initiate({
+              ids: [message.conversationId],
+            });
+            return;
+          }
 
           updateCachedData((draft) => {
-            const convo = draft.find((c) => c.id === message.conversationId);
+            const convo = draft.byId[message.conversationId];
 
             if (convo) {
               convo.lastMessage = message;
@@ -323,7 +352,7 @@ const chatSlice = api.injectEndpoints({
             ),
           );
 
-          if (conversation !== message.conversationId) {
+          if (conversationId !== message.conversationId) {
             dispatch(
               chatSlice.util.updateQueryData(
                 "getMessages",
@@ -394,18 +423,12 @@ const chatSlice = api.injectEndpoints({
             ),
           );
 
-          dispatch(
-            chatSlice.util.updateQueryData(
-              "getConversations",
-              undefined,
-              (draft) => {
-                const convo = draft.find((c) => c.id === conversationId);
-                if (convo) {
-                  convo.lastMessage = lastMessageSnapshot;
-                }
-              },
-            ),
-          );
+          updateConversationsState((draft) => {
+            const convo = draft.byId[conversationId];
+            if (convo) {
+              convo.lastMessage = lastMessageSnapshot;
+            }
+          });
         };
 
         const onNewConversation = ({
@@ -419,14 +442,9 @@ const chatSlice = api.injectEndpoints({
           initiator?: string;
           firstMessage: Message;
         }) => {
-          console.log("new");
-
           connectToConversation([conversation.id]);
           updateCachedData((draft) => {
-            const exists = draft.find((c) => c.id === conversation.id);
-            if (!exists) {
-              draft.push(conversation);
-            }
+            draft.byId[conversation.id] = conversation;
           });
           dispatch(
             chatSlice.util.updateQueryData(
@@ -591,20 +609,12 @@ const chatSlice = api.injectEndpoints({
               },
             ),
           );
-          dispatch(
-            chatSlice.util.updateQueryData(
-              "getConversations",
-              undefined,
-              (draft) => {
-                const convo = draft.find(
-                  (c) => c.id === editedMessage.conversationId,
-                );
-                if (convo && convo.lastMessage?.id === editedMessage.id) {
-                  convo.lastMessage = editedMessage;
-                }
-              },
-            ),
-          );
+          updateCachedData((draft) => {
+            const convo = draft.byId[editedMessage.conversationId];
+            if (convo && convo.lastMessage?.id === editedMessage.id) {
+              convo.lastMessage = editedMessage;
+            }
+          });
         };
 
         socket.on("message:edited", onMessageEdited);
@@ -750,6 +760,73 @@ const chatSlice = api.injectEndpoints({
         );
       },
     }),
+    createFolder: builder.mutation<
+      Folder,
+      { title: string; position: number; conversations?: string[] }
+    >({
+      query: ({ title, conversations, position }) => ({
+        url: `chat/folders`,
+        method: "POST",
+        body: { title, conversations, position },
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+
+        dispatch(
+          chatSlice.util.updateQueryData(
+            "getConversations",
+            undefined,
+            (draft) => {
+              draft.folders.push(data);
+            },
+          ),
+        );
+      },
+    }),
+    updatePinnedPosition: builder.mutation<
+      void,
+      {
+        updates: Array<{
+          conversationId: string;
+          newPinnedPosition: number | null;
+        }>;
+        folderId: string;
+      }
+    >({
+      query: ({ updates, folderId }) => ({
+        url: `chat/conversations/pin`,
+        method: "PATCH",
+        body: { updates, folderId },
+      }),
+    }),
+    updateConversationSettings: builder.mutation<
+      void,
+      { conversationId: string; settings: EditableConversationFields }
+    >({
+      query: ({ conversationId, settings }) => ({
+        url: `chat/conversations/${conversationId}/settings`,
+        method: "PATCH",
+        body: settings,
+      }),
+    }),
+    addConversationToFolder: builder.mutation<
+      void,
+      { conversationId: string; folderId: string }
+    >({
+      query: ({ conversationId, folderId }) => ({
+        url: `/chat/folders/${folderId}/conversations/${conversationId}`,
+        method: "POST",
+      }),
+    }),
+    removeConversationFromFolder: builder.mutation<
+      void,
+      { conversationId: string; folderId: string }
+    >({
+      query: ({ conversationId, folderId }) => ({
+        url: `/chat/folders/${folderId}/conversations/${conversationId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -757,8 +834,31 @@ export const {
   useSearchQuery,
   useGetConversationQuery,
   useGetConversationsQuery,
+  useLazyGetConversationsQuery,
   useGetMessagesQuery,
   useGetReactorsQuery,
+  useCreateFolderMutation,
+  useUpdatePinnedPositionMutation,
+  useUpdateConversationSettingsMutation,
 } = chatSlice;
+
+const DEFAULT_CONVERSATIONS_STATE: ConversationsState = {
+  byId: {},
+  activeIds: { pinned: [], unpinned: [] },
+  archivedIds: { pinned: [], unpinned: [] },
+  folders: [],
+};
+
+export const useConversationsQuery = (
+  args?: { ids?: string[] },
+  options?: { refetchOnMountOrArgChange?: boolean },
+) =>
+  useGetConversationsQuery(args ?? undefined, {
+    ...options,
+    selectFromResult: ({ data, ...rest }) => ({
+      data: data ?? DEFAULT_CONVERSATIONS_STATE,
+      ...rest,
+    }),
+  });
 
 export default chatSlice;

@@ -1,22 +1,21 @@
 import Avatar from "@components/Avatar/Avatar";
 import Drawer from "@components/Drawer/Drawer";
 import styles from "./NavigationDrawer.module.css";
-import type { User } from "@utils/types";
 import userCircle from "@assets/userCircle.svg";
 import clsx from "clsx";
 import logoutIcon from "@assets/logout.svg";
 import { useLogoutMutation } from "@api/slices/authSlice";
-import { useAppDispatch } from "@hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { openModal } from "@redux/global";
 
 interface INavigationDrawer {
   onClickOutside: () => void;
-  user: User;
 }
 
-const NavigationDrawer = ({ onClickOutside, user }: INavigationDrawer) => {
+const NavigationDrawer = ({ onClickOutside }: INavigationDrawer) => {
   const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
 
   return (
     <Drawer onClickOutside={onClickOutside} contentClass={styles.drawerContent}>

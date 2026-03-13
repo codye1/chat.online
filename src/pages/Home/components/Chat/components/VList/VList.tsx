@@ -80,7 +80,7 @@ const VList = ({
     count: itemsBuffer?.length || 0,
     getScrollElement: () => vlistRef.current,
     estimateSize: () => 60,
-    overscan: 5,
+    overscan: 10,
     getItemKey: useCallback(
       (index: number) => itemsBuffer?.[index]?.id || index,
       [itemsBuffer],
