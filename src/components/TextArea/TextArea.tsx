@@ -1,8 +1,8 @@
-import { useRef, type ChangeEvent } from "react";
+import { useLayoutEffect, useRef, type ChangeEvent } from "react";
 import styles from "./TextArea.module.css";
 import clsx from "clsx";
 
-interface ITextArea {
+interface ITextarea {
   trackValue?: {
     value: string;
     onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -14,14 +14,14 @@ interface ITextArea {
   className?: string;
 }
 
-const TextArea = ({
+const Textarea = ({
   trackValue,
   placeholder,
   maxLength,
   onKeyDown,
   className,
   name,
-}: ITextArea) => {
+}: ITextarea) => {
   const ref = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -31,6 +31,22 @@ const TextArea = ({
     if (ref.current) {
       ref.current.style.height = "auto";
       ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  }, []);
+
+  const onKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+    if (e.key == "Enter" && !e.shiftKey) {
+      e.preventDefault();
     }
   };
 
@@ -44,9 +60,9 @@ const TextArea = ({
       maxLength={maxLength}
       rows={1}
       placeholder={placeholder}
-      onKeyDown={onKeyDown}
+      onKeyDown={onKeyDownHandler}
     />
   );
 };
 
-export default TextArea;
+export default Textarea;

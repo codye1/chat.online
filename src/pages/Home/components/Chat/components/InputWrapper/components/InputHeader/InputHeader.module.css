@@ -6,6 +6,7 @@
   border-radius: var(--space-3);
   box-shadow: var(--shadow-s);
   padding: var(--space-2) 0;
+  height: var(--height-xl);
   z-index: 50;
   & h2 {
     font-size: var(--text-lg);
@@ -28,6 +29,7 @@
   cursor: pointer;
 
   max-width: 40px;
+  min-width: 40px;
   max-height: 40px;
 
   & img {

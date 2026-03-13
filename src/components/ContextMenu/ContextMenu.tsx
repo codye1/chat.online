@@ -31,15 +31,30 @@ const ContextMenu = ({
 
   useEffect(() => {
     if (!isOpen || !menuRef.current) return;
+    const documentRect = document.documentElement.getBoundingClientRect();
 
     const menu = menuRef.current.getBoundingClientRect();
+
     let top = position.y + OFFSET;
     let left = position.x + OFFSET;
+    const lostPlaceRight =
+      documentRect.width - position.x > menu.width + OFFSET;
+    const lostPlaceBottom =
+      documentRect.height - position.y > menu.height + OFFSET;
+
+    if (!lostPlaceBottom) {
+      top = position.y - menu.height - OFFSET;
+    }
+
+    if (!lostPlaceRight) {
+      left = position.x - menu.width - OFFSET;
+    }
 
     top = Math.max(
       OFFSET,
       Math.min(top, window.innerHeight - menu.height - OFFSET),
     );
+
     left = Math.max(
       OFFSET,
       Math.min(left, window.innerWidth - menu.width - OFFSET),

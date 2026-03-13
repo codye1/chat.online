@@ -1,4 +1,3 @@
-import Input from "@components/Input/Input";
 import styles from "./WriteMessage.module.css";
 import Button from "@components/Button/Button";
 import sendIcon from "@assets/send.svg";
@@ -7,6 +6,7 @@ import InputHeader from "../InputHeader/InputHeader";
 import replyIcon from "@assets/reply.svg";
 import { useAppDispatch } from "@hooks/hooks";
 import { setReplyMessage } from "@redux/global";
+import Textarea from "@components/Textarea/Textarea";
 
 const WriteMessage = () => {
   const {
@@ -30,16 +30,18 @@ const WriteMessage = () => {
           }}
         />
       )}
-      <Input
-        name="message"
-        type="text"
-        placeholder="Type a message..."
-        trackValue={{
-          value: message,
-          onChange: handleWriteMessage,
-        }}
-        onKeyDown={handleEnterKey}
-      />
+      <div>
+        <Textarea
+          trackValue={{
+            value: message,
+            onChange: handleWriteMessage,
+          }}
+          onKeyDown={handleEnterKey}
+          placeholder="Type your message..."
+          name="message"
+          className={styles.textarea}
+        />
+      </div>
       <Button onClick={onSendMessage} disabled={!message.trim()}>
         <img className={styles.sendIcon} src={sendIcon} alt="Send" />
       </Button>

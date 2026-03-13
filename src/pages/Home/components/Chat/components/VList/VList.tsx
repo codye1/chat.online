@@ -169,7 +169,11 @@ const VList = ({
 
   useEffect(() => {
     // attach to bottom when message is sent
-    if (attachToBottom && canAttachToBottomRef.current) {
+    if (
+      attachToBottom &&
+      canAttachToBottomRef.current &&
+      isUserInteractedRef.current
+    ) {
       virtualizer.scrollToIndex(itemsBuffer.length - 1, {
         align: "end",
       });

@@ -33,8 +33,9 @@ const useEditMessage = ({
     isEditingRef.current = false;
   };
 
-  const handleEnterKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && editingValue.trim()) {
+  const handleEnterKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey && editingValue.trim()) {
+      e.preventDefault();
       editMessage({
         newText: editingValue,
         messageId: editingMessage.id,
@@ -47,7 +48,7 @@ const useEditMessage = ({
     }
   };
 
-  const handleEditingValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditingValue = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!conversationId) return;
 
     if (!isEditingRef.current) {

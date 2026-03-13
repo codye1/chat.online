@@ -1,7 +1,6 @@
 import userCircle from "@assets/userCircle.svg";
 import closeIcon from "@assets/close.svg";
 import backIcon from "@assets/back.svg";
-import TextArea from "@components/TextArea/TextArea";
 import at from "@assets/at.svg";
 import Modal from "@components/Modal/Modal";
 
@@ -21,6 +20,7 @@ import EditNameModal from "./components/EditNameModal";
 import AvatarWithUploader from "./components/AvatarWithUploader/AvatarWithUploader";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { closeModal, openModal } from "@redux/global";
+import Textarea from "@components/Textarea/Textarea";
 const EditProfileModal = () => {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -69,9 +69,10 @@ const EditProfileModal = () => {
           <AvatarWithUploader />
           <h2>{getDisplayName(user)}</h2>
           <div className={styles.bioSection}>
-            <TextArea
+            <Textarea
               placeholder="Bio"
               maxLength={70}
+              name="bioValue"
               trackValue={{ value: bioValue, onChange: handleBioChange }}
             />
             <span>{70 - bioValue.length}</span>

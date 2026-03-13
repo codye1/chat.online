@@ -231,7 +231,13 @@ const chatSlice = api.injectEndpoints({
         const state = getCacheEntry().data;
 
         if (state) {
-          const conversationIds = Object.keys(state.byId);
+          const conversationIds = [
+            ...state.activeIds.pinned,
+            ...state.activeIds.unpinned,
+            ...state.archivedIds.pinned,
+            ...state.archivedIds.unpinned,
+          ];
+
           connectToConversation(conversationIds);
         }
 
@@ -442,9 +448,12 @@ const chatSlice = api.injectEndpoints({
           initiator?: string;
           firstMessage: Message;
         }) => {
+          console.log("new");
+
           connectToConversation([conversation.id]);
           updateCachedData((draft) => {
             draft.byId[conversation.id] = conversation;
+            draft.activeIds.unpinned.unshift(conversation.id);
           });
           dispatch(
             chatSlice.util.updateQueryData(

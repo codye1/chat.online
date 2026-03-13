@@ -1,4 +1,3 @@
-import Input from "@components/Input/Input";
 import useEditMessage from "../../hook/useEditMessage";
 import styles from "./EditMessage.module.css";
 import checkIcon from "@assets/check.svg";
@@ -7,6 +6,7 @@ import editIcon from "@assets/edit.svg";
 import { useAppDispatch } from "@hooks/hooks";
 import { setEditingMessage } from "@redux/global";
 import InputHeader from "../InputHeader/InputHeader";
+import Textarea from "@components/Textarea/Textarea";
 
 const EditMessage = ({
   editingMessage,
@@ -34,16 +34,18 @@ const EditMessage = ({
         description={editingMessage.text}
         onCancel={onCancelEdit}
       />
-      <Input
-        name="message"
-        type="text"
-        placeholder="Type a message..."
-        trackValue={{
-          value: editingValue,
-          onChange: handleEditingValue,
-        }}
-        onKeyDown={handleEnterKey}
-      />
+      <div>
+        <Textarea
+          trackValue={{
+            value: editingValue,
+            onChange: handleEditingValue,
+          }}
+          onKeyDown={handleEnterKey}
+          placeholder="Edit your message..."
+          name="editedMessage"
+          className={styles.textarea}
+        />
+      </div>
       <Button
         onClick={onConfirmEdit}
         disabled={!editingValue.trim() || editingValue === editingMessage.text}

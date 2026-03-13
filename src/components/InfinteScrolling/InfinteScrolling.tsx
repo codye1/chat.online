@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useInView } from "react-intersection-observer";
 
 const scrollPositions: Record<string, number> = {};
@@ -28,20 +28,14 @@ const InfiniteScrolling = <T,>({
   dontShowSentinel,
   children,
 }: IInfiniteScrolling<T>) => {
-  const rootRef = useRef<HTMLDivElement | null>(null); // for imperative DOM ops
-  const [rootEl, setRootEl] = useState<HTMLDivElement | null>(null); // for useInView
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const prevListIdRef = useRef(listId);
 
   const { ref: sentinelRef, inView } = useInView({
-    root: rootEl,
+    // eslint-disable-next-line react-hooks/refs
+    root: rootRef.current,
     rootMargin,
   });
-
-  // Callback ref — updates both ref and state
-  const setRoot = (el: HTMLDivElement | null) => {
-    rootRef.current = el;
-    setRootEl(el);
-  };
 
   useEffect(() => {
     if (inView && hasMore) {
@@ -50,7 +44,6 @@ const InfiniteScrolling = <T,>({
   }, [inView, hasMore, onBottomReached]);
 
   useEffect(() => {
-    // ✅ use ref for imperative scroll, not state
     if (rootRef.current && prevListIdRef.current !== listId) {
       rootRef.current.scrollTop = scrollPositions[listId] ?? 0;
       prevListIdRef.current = listId;
@@ -67,7 +60,7 @@ const InfiniteScrolling = <T,>({
   };
 
   return (
-    <div ref={setRoot} onScroll={onScroll} className={clsx(className)}>
+    <div ref={rootRef} onScroll={onScroll} className={clsx(className)}>
       {children}
       {items.map((item, index) => renderItem(item, index))}
       {hasMore && !dontShowSentinel && <div ref={sentinelRef} />}

@@ -3,22 +3,33 @@
   grid-template-columns: 1fr auto;
   gap: var(--space-2);
   width: 100%;
+  & button {
+    align-self: end;
+    height: var(--height-xl);
+  }
 }
 
 .checkIcon {
-  width: calc(var(--height-md) - var(--space-4));
-  height: calc(var(--height-md) - var(--space-4));
+  width: calc(var(--height-xl) - var(--space-4));
+  height: calc(var(--height-xl) - var(--space-4));
 }
 
-.textAreaContainer {
-  position: relative;
-  width: 100%;
-}
+
 
 .textarea{
-  background-color: var(--c-foreground) !important;
-  min-height: var(--height-2xl);
-  & :focus {
-    background-color: var(--c-foreground) !important;
+  background-color: var(--c-light) !important;
+  min-height: var(--height-xl);
+
+  max-height: 400px;
+  overflow-y: auto !important;
+  padding: var(--space-4) var(--space-4) !important;
+  line-height: calc(var(--height-xl) - var(--space-8));
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-s);
+  font-size: var(--text-xl) !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-muted) var(--c-light);
+  &:focus {
+    background-color: var(--c-light) !important;
   }
 }

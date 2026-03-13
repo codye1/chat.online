@@ -30,9 +30,10 @@ const useWriteMessage = () => {
     isTypingRef.current = false;
   };
 
-  const handleEnterKey = (e: KeyboardEvent<HTMLSpanElement>) => {
+  const handleEnterKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (!conversationId) return;
-    if (e.key === "Enter" && message.trim()) {
+    if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+      e.preventDefault();
       sendMessage({
         conversationId,
         text: message,
@@ -45,7 +46,7 @@ const useWriteMessage = () => {
     }
   };
 
-  const handleWriteMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWriteMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!conversationId) return;
 
     if (!isTypingRef.current) {
