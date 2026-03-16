@@ -3,6 +3,8 @@ import EditProfileModal from "./Modals/EditProfileModal/EditProfileModal";
 import ProfileViewModal from "./Modals/ProfileViewModal/ProfileViewModal";
 import ReactorsInfo from "./Modals/ReactorsInfo/ReactorsInfo";
 import CreateFolderModal from "./Modals/CreateFolderModal/CreateFolderModal";
+import PreUploadMediaPreview from "./Modals/PreUploadMediaPreview/PreUploadMediaPreview";
+import Lightbox from "./Modals/Lightbox/Lightbox";
 
 const ModalManager = () => {
   const modal = useAppSelector((state) => state.global.activeModal);
@@ -25,6 +27,10 @@ const ModalManager = () => {
       return (
         <CreateFolderModal selectedConversation={modal.selectedConversation} />
       );
+    case "preUploadMediaPreview":
+      return <PreUploadMediaPreview files={modal.files} />;
+    case "lightbox":
+      return <Lightbox media={modal.media} />;
     default:
       return null;
   }

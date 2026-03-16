@@ -2,6 +2,7 @@ import { io, Socket } from "socket.io-client";
 import store from "@redux/store";
 import chatSlice from "@api/slices/chatSlice";
 import { updateConversationsState } from "@api/slices/helpers/ConversationsManage";
+import type { MessageMedia } from "./types";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -33,10 +34,12 @@ const sendMessage = ({
   conversationId,
   text,
   replyToMessageId,
+  media,
 }: {
   conversationId: string;
   text: string;
   replyToMessageId?: string | null;
+  media?: MessageMedia[];
 }) => {
   if (text.length === 0) return;
   const isTemp = conversationId?.startsWith("tempId");
@@ -47,6 +50,7 @@ const sendMessage = ({
       text,
       replyToMessageId,
       recipientId,
+      media,
     });
   }
 
@@ -55,6 +59,7 @@ const sendMessage = ({
       conversationId,
       text,
       replyToMessageId,
+      media,
     });
   }
 };

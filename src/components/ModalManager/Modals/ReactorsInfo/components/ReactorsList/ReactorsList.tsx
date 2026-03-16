@@ -4,6 +4,7 @@ import getDisplayName from "@utils/getDisplayName";
 import formatDate from "@utils/formatDate";
 import type { ReactorListItem } from "@utils/types";
 import InfiniteScrolling from "@components/InfinteScrolling/InfinteScrolling";
+import Skeleton from "react-loading-skeleton";
 
 interface IReactorsList {
   tab: string;
@@ -17,10 +18,14 @@ const SKELETON_COUNT = 3;
 
 const ReactorSkeleton = () => (
   <li className={styles.reactor}>
-    <div className={styles.skeletonAvatar} />
+    <Skeleton
+      className={styles.skeletonAvatar}
+      baseColor="var(--c-light-x2)"
+      highlightColor="var(--c-light-x3)"
+    />
     <div className={styles.skeletonInfo}>
-      <div className={styles.skeletonLineName} />
-      <div className={styles.skeletonLineDate} />
+      <Skeleton className={styles.skeletonLineName} />
+      <Skeleton className={styles.skeletonLineDate} />
     </div>
   </li>
 );

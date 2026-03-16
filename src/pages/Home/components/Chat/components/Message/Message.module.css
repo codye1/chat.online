@@ -25,33 +25,42 @@
   margin-left: auto;
 }
 
+.textContainer {
+  position: relative;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font-size: var(--text-base);
+  line-height: 1.4;
+}
+
+.metaContainer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  vertical-align: middle;
+  margin-left: var(--space-2);
+
+  float: right;
+  position: relative;
+  top: 4px;
+}
+
+.createdAt {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
 .check {
-  align-self: flex-end;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   opacity: 0.5;
-  fill: red;
-  margin-left: 5px;
 }
 
 .read {
   opacity: 1;
 }
 
-.createdAt {
-  align-self: flex-end;
-  font-size: var(--text-sm);
-  color: var(--c-muted);
-  margin-top: 2px;
-  margin-left: 5px;
-}
-
-.textContainer {
-  display: flex;
-  & :first-child {
-    overflow-wrap: anywhere;
-  }
-}
 
 .rplyContainer {
   display: flex;

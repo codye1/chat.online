@@ -2,13 +2,15 @@ import { createPortal } from "react-dom";
 import styles from "./Modal.module.css";
 import type { ReactNode, KeyboardEvent } from "react";
 import { useEffect, useRef } from "react";
+import clsx from "clsx";
 
 interface IModal {
   children: ReactNode;
   onClickOutside: () => void;
+  className?: string;
 }
 
-const Modal = ({ children, onClickOutside }: IModal) => {
+const Modal = ({ children, onClickOutside, className }: IModal) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const Modal = ({ children, onClickOutside }: IModal) => {
       <div
         ref={contentRef}
         tabIndex={-1}
-        className={styles.modalContent}
+        className={clsx(styles.content, className)}
         style={{ outline: "none" }}
         onClick={(ev) => ev.stopPropagation()}
         onKeyDown={handleKeyDown}

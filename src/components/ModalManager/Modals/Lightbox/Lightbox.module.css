@@ -1,0 +1,39 @@
+.header {
+  position:fixed;
+  display: flex;
+  top:0;
+  justify-content: end;
+  width: 100%;
+  padding:var(--space-2) var(--space-2) 0 0;
+
+  & button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+
+  }
+
+  & img {
+    width: var(--height-md);
+    height: var(--height-md);
+  }
+}
+
+.lightbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: var(--space-5);
+}
+
+.image,
+.video {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - (var(--space-5) * 4));
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}

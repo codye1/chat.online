@@ -1,8 +1,25 @@
 .item {
-  position: relative;
-}
+  cursor: pointer;
+  list-style: none;
+  & img {
+    width: 20px;
+    height: 20px;
+    margin-right: var(--space-2);
+  }
 
-.subContent {
-  position: absolute;
-  top: 0;
+  & button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: var(--space-2);
+    color: var(--c-default);
+
+    &:hover {
+      background-color: var(--c-hover);
+    }
+  }
 }

@@ -1,4 +1,6 @@
 import { type MouseEvent, type ReactNode, useRef, useState } from "react";
+import styles from "./MenuItem.module.css";
+import clsx from "clsx";
 
 interface IMenuItem {
   onClick?: (el: MouseEvent<HTMLButtonElement>) => void;
@@ -43,7 +45,7 @@ const MenuItem = ({
       onMouseEnter={() => subContent && handleOpen()}
       onMouseLeave={() => subContent && setIsSubOpen(false)}
       style={{ position: "relative" }}
-      className={className}
+      className={clsx(styles.item, className)}
     >
       <button onClick={onClick}>
         {icon && <img src={icon} alt={label} />}

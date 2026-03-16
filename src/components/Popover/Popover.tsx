@@ -9,7 +9,7 @@ import {
 import styles from "./Popover.module.css";
 import clsx from "clsx";
 
-export type PopoverPlacement = "top" | "bottom" | "left" | "right" | "mouse";
+export type PopoverPlacement = "top" | "bottom" | "left" | "right";
 
 interface IPopover {
   anchorRef: React.RefObject<HTMLElement | null>;
@@ -18,7 +18,6 @@ interface IPopover {
   children: ReactNode;
   placement?: PopoverPlacement;
   className?: string;
-  mousePosition: { x: number; y: number };
 }
 
 const OFFSET = 8;
@@ -30,7 +29,6 @@ const Popover = ({
   children,
   placement = "bottom",
   className,
-  mousePosition,
 }: IPopover) => {
   const popoverRef = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -61,10 +59,6 @@ const Popover = ({
         top = anchor.top + anchor.height / 2 - popover.height / 2;
         left = anchor.right + OFFSET;
         break;
-      case "mouse":
-        top = mousePosition.y + OFFSET;
-        left = mousePosition.x + OFFSET;
-        break;
     }
 
     top = Math.max(
@@ -77,7 +71,7 @@ const Popover = ({
     );
 
     setCoords({ top, left });
-  }, [isOpen, placement, anchorRef, mousePosition]);
+  }, [isOpen, placement, anchorRef]);
 
   useEffect(() => {
     if (!isOpen) return;

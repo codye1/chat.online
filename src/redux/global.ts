@@ -1,14 +1,18 @@
 import type { ICreateFolderModal } from "@components/ModalManager/Modals/CreateFolderModal/CreateFolderModal";
 import type { IProfileViewModal } from "@components/ModalManager/Modals/ProfileViewModal/ProfileViewModal";
 import type { IReactorsInfo } from "@components/ModalManager/Modals/ReactorsInfo/ReactorsInfo";
+import type { IPreUploadMediaPreview } from "@components/ModalManager/Modals/PreUploadMediaPreview/PreUploadMediaPreview";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ReplyMessage } from "@utils/types";
+import type { ILightbox } from "@components/ModalManager/Modals/Lightbox/Lightbox";
 
 type AvailableModals =
   | { type: "profileView"; props: IProfileViewModal }
   | { type: "editProfile" }
   | { type: "reactorsInfo"; props: IReactorsInfo }
-  | (ICreateFolderModal & { type: "createFolder" });
+  | (ICreateFolderModal & { type: "createFolder" })
+  | (IPreUploadMediaPreview & { type: "preUploadMediaPreview" })
+  | (ILightbox & { type: "lightbox" });
 
 interface EditMessage {
   id: string;

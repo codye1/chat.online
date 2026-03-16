@@ -6,26 +6,19 @@
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: safe center;
   z-index: 1000;
-}
-.modal::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: var(--c-dark);
-  opacity: 0.5;
-  z-index: -1;
+  overflow-y: auto;
+  padding: var(--space-5);
+
+  background-color: color-mix(in srgb, var(--c-dark) 80%, transparent);
 }
 
-.modalContent {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+.content {
   position: relative;
-}
-
-.modalContent {
+  max-width: 100%;
   outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

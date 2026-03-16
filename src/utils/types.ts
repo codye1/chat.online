@@ -37,9 +37,17 @@ interface ReplyMessage {
   sender: UserPreview;
 }
 
+interface MessageMedia {
+  id: string;
+  type: "image" | "video";
+  src: string;
+  filename: string;
+}
+
 interface Message {
   id: string;
   text: string;
+  media: MessageMedia[] | null;
   conversationId: string;
   sender: UserPreview;
   createdAt: string;
@@ -156,4 +164,5 @@ export type {
   ConversationPreview,
   ReplyMessage,
   EditableConversationFields,
+  MessageMedia,
 };

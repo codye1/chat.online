@@ -5,8 +5,16 @@ import useWriteMessage from "../../hook/useWriteMessage";
 import InputHeader from "../InputHeader/InputHeader";
 import replyIcon from "@assets/reply.svg";
 import { useAppDispatch } from "@hooks/hooks";
-import { setReplyMessage } from "@redux/global";
+import { openModal, setReplyMessage } from "@redux/global";
 import Textarea from "@components/Textarea/Textarea";
+import clipIcon from "@assets/clip.svg";
+import { useRef, useState } from "react";
+import Popover from "@components/Popover/Popover";
+import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
+import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
+import photo from "@assets/photo.svg";
+import InputFile from "@components/InputFile";
+let timeoutId: number;
 
 const WriteMessage = () => {
   const {
@@ -17,6 +25,8 @@ const WriteMessage = () => {
     replyMessage,
   } = useWriteMessage();
   const dispatch = useAppDispatch();
+  const clipButtonRef = useRef<HTMLButtonElement>(null);
+  const [showPopover, setShowPopover] = useState(false);
 
   return (
     <div className={styles.inputContainer}>
@@ -30,7 +40,7 @@ const WriteMessage = () => {
           }}
         />
       )}
-      <div>
+      <div className={styles.textareaContainer}>
         <Textarea
           trackValue={{
             value: message,
@@ -41,6 +51,40 @@ const WriteMessage = () => {
           name="message"
           className={styles.textarea}
         />
+        <Button
+          className={styles.clipButton}
+          ref={clipButtonRef}
+          onMouseEnter={() => {
+            clearTimeout(timeoutId);
+            setShowPopover(true);
+          }}
+          onMouseLeave={() => {
+            timeoutId = window.setTimeout(() => setShowPopover(false), 200);
+          }}
+        >
+          <img src={clipIcon} alt="Clip" className={styles.sendIcon} />
+          <Popover
+            anchorRef={clipButtonRef}
+            isOpen={showPopover}
+            onClose={() => setShowPopover(false)}
+            placement="top"
+          >
+            <MenuContent>
+              <MenuItem label="Photo and Video" icon={photo}>
+                <InputFile
+                  allow={["image", "video"]}
+                  multiple
+                  onLoaded={(files) => {
+                    dispatch(
+                      openModal({ type: "preUploadMediaPreview", files }),
+                    );
+                    setShowPopover(false);
+                  }}
+                />
+              </MenuItem>
+            </MenuContent>
+          </Popover>
+        </Button>
       </div>
       <Button onClick={onSendMessage} disabled={!message.trim()}>
         <img className={styles.sendIcon} src={sendIcon} alt="Send" />

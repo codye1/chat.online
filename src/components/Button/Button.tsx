@@ -3,13 +3,9 @@ import styles from "./Button.module.css";
 import Spinner from "@components/Spinner/Spinner";
 import clsx from "clsx";
 
-interface IButton {
+interface IButton extends React.ComponentPropsWithRef<"button"> {
   children: ReactNode;
-  onClick?: () => void;
-  type?: "button" | "submit" | "reset";
   isLoading?: boolean;
-  disabled?: boolean;
-  className?: string;
 }
 
 const Button = ({
@@ -19,9 +15,12 @@ const Button = ({
   isLoading = false,
   disabled = false,
   className,
+  ref,
+  ...rest
 }: IButton) => {
   return (
     <button
+      {...rest}
       className={clsx(styles.btn, className, {
         [styles.disabled]: disabled,
         [styles.loading]: isLoading,
@@ -29,6 +28,7 @@ const Button = ({
       onClick={onClick}
       type={type}
       disabled={isLoading || disabled}
+      ref={ref}
     >
       {isLoading ? <Spinner /> : children}
     </button>

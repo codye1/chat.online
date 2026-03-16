@@ -14,9 +14,7 @@
   height: calc(var(--height-xl) - var(--space-4));
 }
 
-
-
-.textarea{
+.textarea {
   background-color: var(--c-light) !important;
   min-height: var(--height-xl);
 

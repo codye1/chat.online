@@ -6,6 +6,7 @@ import Reactions from "./components/Reactions/Reactions";
 import type { Message as MessageType } from "@utils/types";
 import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
 import getDisplayName from "@utils/getDisplayName";
+import MediaContainer from "./components/MediaContainer/MediaContainer";
 
 export interface IMessage {
   message: MessageType;
@@ -51,6 +52,7 @@ const Message = ({
             [styles.sentByCurrentUser]: isSentByCurrentUser,
           })}
         >
+          {message.media && <MediaContainer mediaItems={message.media} />}
           {/*TODO: make scroll on click (with better messageList)*/}
           {message.replyTo && (
             <div className={styles.rplyContainer}>
@@ -61,20 +63,22 @@ const Message = ({
             </div>
           )}
           <div className={styles.textContainer}>
-            <span>{message.text}</span>
-            <span className={styles.createdAt}>
-              {new Date(message.createdAt).toLocaleString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-            {isSentByCurrentUser && (
-              <img
-                className={clsx(styles.check, { [styles.read]: read })}
-                src={Check}
-                alt=""
-              />
-            )}
+            {message.text}
+            <div className={styles.metaContainer}>
+              <span className={styles.createdAt}>
+                {new Date(message.createdAt).toLocaleString(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+              {isSentByCurrentUser && (
+                <img
+                  className={clsx(styles.check, { [styles.read]: read })}
+                  src={Check}
+                  alt=""
+                />
+              )}
+            </div>
           </div>
           <Reactions reactions={message.reactions} messageId={message.id} />
         </div>

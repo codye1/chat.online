@@ -43,30 +43,7 @@
     color: var(--c-muted);
   }
 }
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--c-light-x2) 25%,
-    var(--c-light-x3) 50%,
-    var(--c-light-x2) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite linear;
-  border-radius: var(--radius-sm);
-}
-
 .skeletonAvatar {
-  composes: skeleton;
   flex-shrink: 0;
   width: 50px;
   height: 50px;
@@ -81,7 +58,6 @@
 }
 
 .skeletonLine {
-  composes: skeleton;
   height: 14px;
   border-radius: var(--radius-sm);
 }
@@ -95,6 +71,7 @@
   composes: skeletonLine;
   width: 40%;
 }
+
 
 .reactionContent {
   margin-left: auto;
