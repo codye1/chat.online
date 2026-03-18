@@ -1,6 +1,8 @@
 import type { User } from "./types";
 
-const getDisplayName = (user: User) => {
+const getDisplayName = (
+  user: Pick<User, "firstName" | "lastName" | "nickname">,
+) => {
   if (user.firstName && user.lastName) {
     return `${user.firstName} ${user.lastName}`;
   }

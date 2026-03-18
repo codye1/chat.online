@@ -1,0 +1,49 @@
+.inputContainer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  width: 100%;
+  margin: var(--space-2) 0;
+  & button {
+    margin: 0;
+  }
+}
+
+.buttonIcon {
+  align-self: flex-end;
+  max-height: var(--height-xl);
+  & img {
+    width: calc(var(--height-xl) - var(--space-4));
+    height: calc(var(--height-xl) - var(--space-4));
+  }
+}
+
+.mediaButton {
+  background-color: transparent;
+  box-shadow: none;
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.textareaContainer {
+  display: flex;
+  align-items: center;
+
+  box-shadow: var(--shadow-s);
+  background-color: var(--c-light);
+
+  border-radius: var(--radius-sm);
+}
+
+.textarea {
+  min-height: var(--height-xl);
+  margin: 0 !important;
+  max-height: 400px;
+  overflow-y: auto !important;
+  padding: var(--space-4) var(--space-4) !important;
+  line-height: calc(var(--height-xl) - var(--space-8));
+  font-size: var(--text-xl) !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-muted) var(--c-light);
+}

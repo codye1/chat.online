@@ -1,5 +1,7 @@
 .resizableSection {
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   & .resizer {
     height: 100%;

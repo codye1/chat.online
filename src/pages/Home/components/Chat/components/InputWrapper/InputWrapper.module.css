@@ -1,11 +1,10 @@
 .inputWrapper {
   display: flex;
   width: 100%;
-  padding: 0 var(--space-5);
+  padding: 0 var(--space-2);
   gap: var(--space-3);
-}
 
-.sendIcon {
-  width: 40px;
-  height: 40px;
+  & button {
+    width: var(--height-xl);
+  }
 }

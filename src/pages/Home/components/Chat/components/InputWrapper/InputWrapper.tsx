@@ -1,27 +1,25 @@
-import Input from "@components/Input/Input";
+import { useAppSelector } from "@hooks/hooks";
+import WriteMessage from "./components/WriteMessage/WriteMessage";
 import styles from "./InputWrapper.module.css";
-import Button from "@components/Button/Button";
-import sendIcon from "@assets/send.svg";
-import useWriteMessage from "./hook/useWriteMessage";
+import EditMessage from "./components/EditMessage/EditMessage";
 
 const InputWrapper = () => {
-  const { message, handleWriteMessage, onSendMessage } = useWriteMessage();
+  const messageToEdit = useAppSelector((state) => state.global.messageToEdit);
+  const conversationId = useAppSelector((state) => state.global.conversationId);
+  const nickname = useAppSelector((state) => state.auth.user.nickname);
 
   return (
-    <span className={styles.inputWrapper}>
-      <Input
-        name="message"
-        type="text"
-        placeholder="Type a message..."
-        trackValue={{
-          value: message,
-          onChange: handleWriteMessage,
-        }}
-      />
-      <Button onClick={onSendMessage} disabled={!message.trim()}>
-        <img className={styles.sendIcon} src={sendIcon} alt="Send" />
-      </Button>
-    </span>
+    <div className={styles.inputWrapper}>
+      {conversationId && messageToEdit ? (
+        <EditMessage
+          messageToEdit={messageToEdit}
+          nickname={nickname}
+          conversationId={conversationId}
+        />
+      ) : (
+        <WriteMessage />
+      )}
+    </div>
   );
 };
 

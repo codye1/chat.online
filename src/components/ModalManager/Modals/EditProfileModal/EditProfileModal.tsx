@@ -1,10 +1,8 @@
 import userCircle from "@assets/userCircle.svg";
 import closeIcon from "@assets/close.svg";
 import backIcon from "@assets/back.svg";
-import TextArea from "@components/TextArea/TextArea";
 import at from "@assets/at.svg";
 import Modal from "@components/Modal/Modal";
-import AvatarWithUploader from "../AvatarWithUploader/AvatarWithUploader";
 
 import {
   startTransition,
@@ -13,27 +11,19 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import type { User } from "@utils/types";
 import { useUpdateUserMutation } from "@api/slices/userSlice";
 import styles from "./EditProfileModal.module.css";
 import editUser from "@actions/editUser";
 import getDisplayName from "@utils/getDisplayName";
 import EditNicknameModal from "./components/EditNickname";
 import EditNameModal from "./components/EditNameModal";
-
-interface IEditProfileModal {
-  user: User;
-  onClickOutside: () => void;
-  onClickClose: () => void;
-  onClickBack: () => void;
-}
-
-const EditProfileModal = ({
-  user,
-  onClickOutside,
-  onClickClose,
-  onClickBack,
-}: IEditProfileModal) => {
+import AvatarWithUploader from "./components/AvatarWithUploader/AvatarWithUploader";
+import { useAppDispatch, useAppSelector } from "@hooks/hooks";
+import { closeModal, openModal } from "@redux/global";
+import Textarea from "@components/Textarea/Textarea";
+const EditProfileModal = () => {
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const [updateUser] = useUpdateUserMutation();
   const [bioValue, setBioValue] = useState(user.biography || "");
   const [viewEditModle, setViewEditModle] = useState<
@@ -60,20 +50,29 @@ const EditProfileModal = ({
   };
   return (
     <>
-      <Modal onClickOutside={onClickOutside}>
-        <button className={styles.backIcon} onClick={onClickBack}>
+      <Modal onClickOutside={() => dispatch(closeModal())}>
+        <button
+          className={styles.backIcon}
+          onClick={() =>
+            dispatch(openModal({ type: "profileView", props: { user } }))
+          }
+        >
           <img src={backIcon} alt="back icon" />
         </button>
-        <button className={styles.closeIcon} onClick={onClickClose}>
+        <button
+          className={styles.closeIcon}
+          onClick={() => dispatch(closeModal())}
+        >
           <img src={closeIcon} alt="close icon" />
         </button>
         <div className={styles.modalHeader}>
           <AvatarWithUploader />
           <h2>{getDisplayName(user)}</h2>
           <div className={styles.bioSection}>
-            <TextArea
+            <Textarea
               placeholder="Bio"
               maxLength={70}
+              name="bioValue"
               trackValue={{ value: bioValue, onChange: handleBioChange }}
             />
             <span>{70 - bioValue.length}</span>

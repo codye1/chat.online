@@ -1,49 +1,130 @@
-import { useGetConversationsQuery } from "@api/slices/chatSlice";
-import { connectToConversation } from "@utils/socket";
 import PreviewItem from "../PreviewItem/PreviewItem";
 import PreviewItemSkeleton from "../PreviewItem/PreviewItemSkeleton";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { setConversation } from "@redux/global";
 import sortConversations from "./utils/sortConversations";
+import ConversationFoldersList from "../ConversationFoldersList/ConversationFoldersList";
+import useFolderConversations from "@hooks/useFolderConversations";
+import { useMemo, useState } from "react";
+import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
+import styles from "./AllConversationsList.module.css";
+import ConversationContextMenu from "../ConversationContextMenu/ConversationContextMenu";
+import archiveAvatar from "@assets/archiveAvatar.png";
+import getArchiveDescription from "@utils/getArchiveDescription";
+import type { views } from "../../ConversationsList";
+import ContextMenu from "@components/ContextMenu/ContextMenu";
 
-const AllConversations = () => {
-  const {
-    data: conversations,
-    isLoading: conversationsLoading,
-    error: conversationsError,
-  } = useGetConversationsQuery();
+interface IAllConversations {
+  setView: (view: views) => void;
+}
+
+const AllConversations = ({ setView }: IAllConversations) => {
+  const [activeFolderId, setActiveFolderId] = useState("ACTIVE");
+  const { pinnedConversations, unpinnedConversations, conversationsState } =
+    useFolderConversations(activeFolderId);
 
   const dispatch = useAppDispatch();
   const { conversationId } = useAppSelector((state) => state.global);
+
+  const showArchive = useMemo(() => {
+    return (
+      activeFolderId === "ACTIVE" &&
+      (conversationsState.archivedIds.pinned.length > 0 ||
+        conversationsState.archivedIds.unpinned.length > 0)
+    );
+  }, [activeFolderId, conversationsState.archivedIds]);
+
   return (
     <>
-      {conversationsLoading && (
-        <>
-          {Array.from({ length: 10 }).map((_, index) => (
-            <PreviewItemSkeleton key={index} />
-          ))}
-        </>
-      )}
-      {conversationsError && <div>Error loading conversations.</div>}
-      {conversations &&
-        sortConversations(conversations).map((conversation) => (
+      <ConversationFoldersList
+        onFolderClick={(id: string) => {
+          setActiveFolderId(id);
+        }}
+        activeFolder={activeFolderId}
+        folders={conversationsState.folders}
+      />
+
+      {conversationsState.loading &&
+        Array.from({ length: 10 }).map((_, index) => (
+          <PreviewItemSkeleton key={index} />
+        ))}
+      {conversationsState.error && <div>Error loading conversations.</div>}
+      <InfiniteScrolling
+        items={[
+          ...Object.values(pinnedConversations),
+          ...sortConversations(unpinnedConversations),
+        ]}
+        renderItem={(conversation) => {
+          const pinPosition = Object.values(pinnedConversations).findIndex(
+            (c) => c.id === conversation.id,
+          );
+          const isPinned = Number(pinPosition) >= 0;
+          const nextPinPosition = Object.keys(pinnedConversations).length;
+          const description = conversation.lastMessage?.text ?? "";
+          const lastMessageTime =
+            conversation.lastMessage?.createdAt.toString() || "";
+          const foldersWhereConversationIs = conversationsState.folders.filter(
+            (folder) => {
+              const pinnedInFolder = folder.pinnedConversationIds.find(
+                (id) => id === conversation.id,
+              );
+              const unpinnedInFolder = folder.unpinnedConversationIds.find(
+                (id) => id === conversation.id,
+              );
+              return Boolean(pinnedInFolder || unpinnedInFolder);
+            },
+          );
+          return (
+            <PreviewItem
+              key={conversation.id}
+              avatarUrl={conversation.avatarUrl}
+              title={conversation.title}
+              description={description}
+              meta={{
+                lastMessageTime,
+                unreadMessagesCount: conversation.unreadMessages,
+              }}
+              isArchived={conversation.isArchived}
+              isActive={conversationId === conversation.id}
+              onClick={() => {
+                dispatch(setConversation({ conversationId: conversation.id }));
+              }}
+              isPinned={isPinned}
+            >
+              <ContextMenu.Slot>
+                <ConversationContextMenu
+                  conversation={conversation}
+                  isPinned={isPinned}
+                  nextPinPosition={nextPinPosition}
+                  activeFolderId={activeFolderId}
+                  conversationsState={conversationsState}
+                  foldersWhereConversationIs={foldersWhereConversationIs}
+                />
+              </ContextMenu.Slot>
+            </PreviewItem>
+          );
+        }}
+        hasMore={conversationsState.hasMore}
+        dontShowSentinel={conversationsState.fetching}
+        listId={activeFolderId}
+        onBottomReached={() => {
+          conversationsState.loadMore();
+        }}
+        className={styles.conversationsList}
+      >
+        {showArchive && (
           <PreviewItem
-            key={conversation.id}
-            avatarUrl={conversation.avatarUrl}
-            title={conversation.title}
-            description={conversation.lastMessage?.text ?? ""}
-            meta={{
-              lastMessageTime:
-                conversation.lastMessage?.createdAt.toString() || "",
-              unreadMessages: conversation.unreadMessages,
-            }}
-            isActive={conversationId === conversation.id}
+            title="Archived"
+            description={getArchiveDescription(conversationsState)}
+            avatarUrl={archiveAvatar}
+            isArchived
+            isActive={false}
             onClick={() => {
-              connectToConversation([conversation.id], conversationId);
-              dispatch(setConversation({ conversationId: conversation.id }));
+              setView("ARCHIVED");
             }}
           />
-        ))}
+        )}
+      </InfiniteScrolling>
     </>
   );
 };

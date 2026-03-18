@@ -1,0 +1,78 @@
+.reactorsList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: var(--space-2);
+  gap: var(--space-2);
+
+  overflow-y: auto;
+  height: 400px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
+
+  overflow-anchor: auto;
+}
+
+.reactor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  cursor: pointer;
+  padding: var(--space-2);
+
+  &:hover {
+    background-color: var(--c-light-x2);
+    border-radius: var(--radius-md);
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+
+  & h3 {
+    font-weight: 500;
+    font-size: var(--text-lg);
+  }
+
+  & h4 {
+    font-weight: 300;
+    font-size: var(--text-base);
+    color: var(--c-muted);
+  }
+}
+.skeletonAvatar {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.skeletonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.skeletonLine {
+  height: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.skeletonLineName {
+  composes: skeletonLine;
+  width: 60%;
+}
+
+.skeletonLineDate {
+  composes: skeletonLine;
+  width: 40%;
+}
+
+.reactionContent {
+  margin-left: auto;
+  font-size: 30px;
+}

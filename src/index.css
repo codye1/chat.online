@@ -22,6 +22,8 @@ body.loading * {
   --c-dark: oklch(0.1 0 264);
   --c-foreground: oklch(0.23 0 264);
   --c-light: oklch(0.3 0 264);
+  --c-light-x2: oklch(0.4 0 264);
+  --c-light-x3: oklch(0.6 0 264);
   --c-hover: oklch(0.35 0 264);
   --c-selected: oklch(0.32 0 264);
   --c-focus: oklch(0.4 0 264);
@@ -42,6 +44,7 @@ body.loading * {
 
   --space-0: 0;
   --space-1: 4px;
+  --space-1_5: 6px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
@@ -50,6 +53,13 @@ body.loading * {
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
+
+  --height-xs: 20px;
+  --height-sm: 32px;
+  --height-md: 40px;
+  --height-lg: 48px;
+  --height-xl: 56px;
+  --height-2xl: 64px;
 
   --text-xs: 12px;
   --text-sm: 14px;

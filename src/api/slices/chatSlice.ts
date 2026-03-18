@@ -1,10 +1,22 @@
 import api from "@api/api";
+import { setConversation } from "@redux/global";
 import type { RootState } from "@redux/store";
 import socket, {
   connectToConversation,
   syncSocketAuthorizationFromStorage,
 } from "@utils/socket";
-import type { Conversation, Message, SearchResponse } from "@utils/types";
+import type {
+  Conversation,
+  Message,
+  Reaction,
+  UserPreview,
+  ReactorListItem,
+  SearchResponse,
+  ConversationsState,
+  Folder,
+  EditableConversationFields,
+} from "@utils/types";
+import { updateConversationsState } from "./helpers/ConversationsManage";
 
 export interface MessagesResponse {
   items: Message[];
@@ -22,6 +34,7 @@ const chatSlice = api.injectEndpoints({
         params: { query },
       }),
     }),
+
     getConversation: builder.query<
       Conversation,
       { recipientId: string | null; conversationId: string | null }
@@ -36,6 +49,37 @@ const chatSlice = api.injectEndpoints({
             : {}),
         },
       }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+
+        if (arg.recipientId) {
+          const isTemp = data.id.startsWith("tempId");
+
+          dispatch(setConversation({ conversationId: data.id }));
+          dispatch(
+            chatSlice.util.upsertQueryData(
+              "getConversation",
+              { recipientId: null, conversationId: data.id },
+              data,
+            ),
+          );
+
+          if (isTemp) {
+            dispatch(
+              chatSlice.util.upsertQueryData(
+                "getMessages",
+                { conversationId: data.id },
+                {
+                  items: [],
+                  hasMoreUp: false,
+                  hasMoreDown: false,
+                  fromUser: false,
+                },
+              ),
+            );
+          }
+        }
+      },
       forceRefetch({ currentArg, previousArg }) {
         if (!currentArg) {
           return false;
@@ -63,8 +107,6 @@ const chatSlice = api.injectEndpoints({
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
-        const state = getState() as RootState;
-        const user = state.auth.user;
 
         const onMessageRead = ({
           lastReadMessage,
@@ -78,11 +120,7 @@ const chatSlice = api.injectEndpoints({
         }) => {
           updateCachedData((draft) => {
             if (draft.id === conversationId) {
-              if (lastReadMessage.senderId === user.id) {
-                draft.lastReadId = lastReadMessage.id;
-              } else {
-                draft.lastReadIdByParticipants = lastReadMessage.id;
-              }
+              draft.lastReadIdByParticipants = lastReadMessage.id;
             }
           });
         };
@@ -104,23 +142,22 @@ const chatSlice = api.injectEndpoints({
           });
         };
 
-        const onUpdateConversation = (conversation: Conversation) => {
+        const onUpdateConversation = ({
+          conversation,
+          recipientId,
+        }: {
+          conversation: Conversation;
+          recipientId: string;
+        }) => {
           // Triggered when a chat was created/found by recipientId
-          // Update cache for the query by recipientId
-          if (conversation.type === "DIRECT") {
-            dispatch(
-              chatSlice.util.updateQueryData(
-                "getConversation",
-                {
-                  recipientId: conversation.otherParticipant.id,
-                  conversationId: null,
-                },
-                () => conversation,
-              ),
-            );
-          }
 
-          // Update cache for the query by conversationId just in case
+          const state = getState() as RootState;
+          const { recipientId: globalRecipientId } = state.global;
+
+          if (globalRecipientId == recipientId) {
+            dispatch(setConversation({ conversationId: conversation.id }));
+          }
+          // Update cache
           dispatch(
             chatSlice.util.updateQueryData(
               "getConversation",
@@ -130,21 +167,9 @@ const chatSlice = api.injectEndpoints({
           );
 
           // Update conversations list cache
-          dispatch(
-            chatSlice.util.updateQueryData(
-              "getConversations",
-              undefined,
-              (draft) => {
-                const index = draft.findIndex((c) => c.id === conversation.id);
-
-                if (index !== -1) {
-                  draft[index] = conversation;
-                } else {
-                  draft.push(conversation);
-                }
-              },
-            ),
-          );
+          updateConversationsState((draft) => {
+            draft.byId[conversation.id] = conversation;
+          });
         };
 
         socket.on("message:read", onMessageRead);
@@ -159,9 +184,31 @@ const chatSlice = api.injectEndpoints({
       },
     }),
 
-    getConversations: builder.query<Conversation[], void>({
-      query: () => `chat/conversations`,
-
+    getConversations: builder.query<
+      ConversationsState,
+      { ids?: string[] } | void
+    >({
+      query: (arg) => {
+        return !arg
+          ? `chat/conversations/init`
+          : {
+              url: `chat/conversations`,
+              params: { ids: arg.ids?.join(",") },
+            };
+      },
+      serializeQueryArgs: () => "getConversations",
+      merge: (currentCache, newItems) => {
+        Object.assign(currentCache.byId, newItems.byId);
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        if (!currentArg) {
+          return false;
+        }
+        if (!previousArg) {
+          return true;
+        }
+        return currentArg.ids !== previousArg.ids;
+      },
       async onCacheEntryAdded(
         _arg,
         {
@@ -170,22 +217,34 @@ const chatSlice = api.injectEndpoints({
           cacheEntryRemoved,
           dispatch,
           getState,
+          getCacheEntry,
         },
       ) {
         await cacheDataLoaded;
 
         syncSocketAuthorizationFromStorage();
-        updateCachedData((draft) => {
-          const convoIds = draft.map((c) => c.id);
-          connectToConversation(convoIds, null);
-        });
 
-        const onUserTyping = ({
+        const state = getCacheEntry().data;
+
+        if (state) {
+          const conversationIds = [
+            ...state.activeIds.pinned,
+            ...state.activeIds.unpinned,
+            ...state.archivedIds.pinned,
+            ...state.archivedIds.unpinned,
+          ];
+
+          connectToConversation(conversationIds);
+        }
+
+        const onUserActive = ({
           conversationId,
           nickname,
+          reason,
         }: {
           conversationId: string;
           nickname: string;
+          reason: "typing" | "editing";
         }) => {
           const state = getState() as RootState;
           const user = state.auth.user;
@@ -194,12 +253,14 @@ const chatSlice = api.injectEndpoints({
             return;
           }
           updateCachedData((draft) => {
-            const convo = draft.find((c) => c.id === conversationId);
+            const convo = draft.byId[conversationId];
             if (convo) {
-              convo.typingUsers = convo.typingUsers || [];
-              if (!convo.typingUsers.includes(nickname)) {
-                convo.typingUsers.push(nickname);
-              }
+              convo.activeUsers = convo.activeUsers || [];
+              const isAlreadyActive = convo.activeUsers.find(
+                (u) => u.nickname === nickname,
+              );
+              if (isAlreadyActive) return;
+              convo.activeUsers.push({ nickname, reason });
             }
           });
           dispatch(
@@ -208,9 +269,9 @@ const chatSlice = api.injectEndpoints({
               { recipientId: null, conversationId },
               (draft) => {
                 if (draft) {
-                  draft.typingUsers = draft.typingUsers || [];
-                  if (!draft.typingUsers.includes(nickname)) {
-                    draft.typingUsers.push(nickname);
+                  draft.activeUsers = draft.activeUsers || [];
+                  if (!draft.activeUsers.find((u) => u.nickname === nickname)) {
+                    draft.activeUsers.push({ nickname, reason });
                   }
                 }
               },
@@ -218,7 +279,7 @@ const chatSlice = api.injectEndpoints({
           );
         };
 
-        const onUserStopTyping = ({
+        const onUserStopActive = ({
           conversationId,
           nickname,
         }: {
@@ -230,10 +291,10 @@ const chatSlice = api.injectEndpoints({
           }
 
           updateCachedData((draft) => {
-            const convo = draft.find((c) => c.id === conversationId);
-            if (convo && convo.typingUsers) {
-              convo.typingUsers = convo.typingUsers.filter(
-                (id) => id !== nickname,
+            const convo = draft.byId[conversationId];
+            if (convo && convo.activeUsers) {
+              convo.activeUsers = convo.activeUsers.filter(
+                (u) => u.nickname !== nickname,
               );
             }
           });
@@ -242,27 +303,36 @@ const chatSlice = api.injectEndpoints({
               "getConversation",
               { recipientId: null, conversationId },
               (draft) => {
-                if (draft && draft.typingUsers) {
-                  draft.typingUsers = draft.typingUsers.filter(
-                    (id) => id !== nickname,
+                if (draft && draft.activeUsers) {
+                  draft.activeUsers = draft.activeUsers.filter(
+                    (id) => id.nickname !== nickname,
                   );
                 }
               },
             ),
           );
         };
-
         const onNewMessage = (message: Message) => {
           const state = getState() as RootState;
-          const conversation = state.global.conversationId;
+          const conversationId = state.global.conversationId;
+          const conversationsState =
+            chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+          const conversation = conversationsState?.byId[message.conversationId];
+
+          if (!conversation) {
+            chatSlice.endpoints.getConversations.initiate({
+              ids: [message.conversationId],
+            });
+            return;
+          }
 
           updateCachedData((draft) => {
-            const convo = draft.find((c) => c.id === message.conversationId);
+            const convo = draft.byId[message.conversationId];
 
             if (convo) {
               convo.lastMessage = message;
 
-              if (state.auth.user.id !== message.senderId) {
+              if (state.auth.user.id !== message.sender.id) {
                 convo.unreadMessages += 1;
               }
             }
@@ -276,7 +346,7 @@ const chatSlice = api.injectEndpoints({
                 if (draft) {
                   draft.lastMessage = message;
 
-                  if (state.auth.user.id !== message.senderId) {
+                  if (state.auth.user.id !== message.sender.id) {
                     draft.unreadMessages += 1;
                   }
                 }
@@ -284,7 +354,7 @@ const chatSlice = api.injectEndpoints({
             ),
           );
 
-          if (conversation !== message.conversationId) {
+          if (conversationId !== message.conversationId) {
             dispatch(
               chatSlice.util.updateQueryData(
                 "getMessages",
@@ -311,29 +381,265 @@ const chatSlice = api.injectEndpoints({
           );
         };
 
-        const onNewConversation = (conversation: Conversation) => {
-          connectToConversation([conversation.id], null);
-          updateCachedData((draft) => {
-            const exists = draft.find((c) => c.id === conversation.id);
-            if (!exists) {
-              draft.push(conversation);
+        const onDeleteMessage = ({
+          conversationId,
+          messageId,
+        }: {
+          conversationId: string;
+          messageId: string;
+        }) => {
+          let lastMessageSnapshot: {
+            text: string;
+            createdAt: string;
+            id: string;
+          } | null = null;
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  draft.items = draft.items.filter((m) => m.id !== messageId);
+                  const last = draft.items[draft.items.length - 1];
+                  if (last) {
+                    lastMessageSnapshot = {
+                      text: last.text,
+                      createdAt: last.createdAt,
+                      id: last.id,
+                    };
+                  }
+                }
+              },
+            ),
+          );
+
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId },
+              (draft) => {
+                if (draft) {
+                  draft.lastMessage = lastMessageSnapshot;
+                }
+              },
+            ),
+          );
+
+          updateConversationsState((draft) => {
+            const convo = draft.byId[conversationId];
+            if (convo) {
+              convo.lastMessage = lastMessageSnapshot;
             }
           });
         };
 
+        const onNewConversation = ({
+          conversation,
+          recipientId,
+          initiator,
+          firstMessage,
+        }: {
+          conversation: Conversation;
+          recipientId: string;
+          initiator?: string;
+          firstMessage: Message;
+        }) => {
+          connectToConversation([conversation.id]);
+          updateCachedData((draft) => {
+            draft.byId[conversation.id] = conversation;
+            draft.activeIds.unpinned.unshift(conversation.id);
+          });
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getConversation",
+              { recipientId: null, conversationId: conversation.id },
+              () => conversation,
+            ),
+          );
+
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId: conversation.id },
+              (draft) => {
+                draft.items = [firstMessage];
+                draft.hasMoreUp = false;
+                draft.hasMoreDown = false;
+              },
+            ),
+          );
+          const state = getState() as RootState;
+          const isTempSelected =
+            state.global.conversationId?.startsWith("tempId");
+          const tempId = state.global.conversationId?.split(":")[1];
+          if (
+            isTempSelected &&
+            (tempId === recipientId || tempId === initiator)
+          ) {
+            dispatch(setConversation({ conversationId: conversation.id }));
+          }
+        };
+
+        const onNewReaction = ({
+          conversationId,
+          messageId,
+          newReaction,
+          prevReaction,
+        }: {
+          conversationId: string;
+          messageId: string;
+          newReaction: Reaction & { user: UserPreview };
+          prevReaction?: Reaction & { user: UserPreview };
+        }) => {
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  const message = draft.items.find((m) => m.id === messageId);
+                  if (message) {
+                    if (prevReaction) {
+                      const prevReactionGroup =
+                        message.reactions[prevReaction.content];
+
+                      if (prevReactionGroup) {
+                        prevReactionGroup.users =
+                          prevReactionGroup.users.filter(
+                            (u) => u.id !== prevReaction.user.id,
+                          );
+                        prevReactionGroup.count -= 1;
+
+                        if (prevReactionGroup.count <= 0) {
+                          delete message.reactions[prevReaction.content];
+                        }
+
+                        const state = getState() as RootState;
+                        if (prevReaction.user.id === state.auth.user.id) {
+                          prevReactionGroup.isActive = false;
+                        }
+                      }
+                    }
+
+                    if (!message.reactions[newReaction.content]) {
+                      message.reactions[newReaction.content] = {
+                        count: 0,
+                        users: [],
+                        isActive: false,
+                      };
+                    }
+
+                    message.reactions[newReaction.content].count += 1;
+
+                    message.reactions[newReaction.content].users.push(
+                      newReaction.user,
+                    );
+
+                    const state = getState() as RootState;
+                    if (newReaction.user.id === state.auth.user.id) {
+                      message.reactions[newReaction.content].isActive = true;
+                    }
+                  }
+                }
+              },
+            ),
+          );
+        };
+
+        const onRemoveReaction = ({
+          conversationId,
+          messageId,
+          removedReaction,
+        }: {
+          conversationId: string;
+          messageId: string;
+          removedReaction: Reaction & { user: UserPreview };
+        }) => {
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  const message = draft.items.find((m) => m.id === messageId);
+
+                  if (message) {
+                    const removedReactionGroup =
+                      message.reactions[removedReaction.content];
+
+                    if (removedReactionGroup) {
+                      removedReactionGroup.users =
+                        removedReactionGroup.users.filter(
+                          (u) => u.id !== removedReaction.user.id,
+                        );
+                      removedReactionGroup.count -= 1;
+                      if (removedReactionGroup.count <= 0) {
+                        delete message.reactions[removedReaction.content];
+                      }
+
+                      const state = getState() as RootState;
+                      if (removedReaction.user.id === state.auth.user.id) {
+                        removedReactionGroup.isActive = false;
+                      }
+                    }
+                  }
+                }
+              },
+            ),
+          );
+        };
+
+        const onMessageEdited = ({
+          editedMessage,
+        }: {
+          editedMessage: Message;
+        }) => {
+          dispatch(
+            chatSlice.util.updateQueryData(
+              "getMessages",
+              { conversationId: editedMessage.conversationId },
+              (draft) => {
+                if (draft && draft.items) {
+                  const messageIndex = draft.items.findIndex(
+                    (m) => m.id === editedMessage.id,
+                  );
+                  if (messageIndex !== -1) {
+                    draft.items[messageIndex] = editedMessage;
+                  }
+                }
+              },
+            ),
+          );
+          updateCachedData((draft) => {
+            const convo = draft.byId[editedMessage.conversationId];
+            if (convo && convo.lastMessage?.id === editedMessage.id) {
+              convo.lastMessage = editedMessage;
+            }
+          });
+        };
+
+        socket.on("message:edited", onMessageEdited);
+        socket.on("reaction:removed", onRemoveReaction);
+        socket.on("reaction:new", onNewReaction);
         socket.on("conversation:new", onNewConversation);
         socket.on("message:new", onNewMessage);
-        socket.on("typing:start", onUserTyping);
-        socket.on("typing:stop", onUserStopTyping);
+        socket.on("message:deleted", onDeleteMessage);
+        socket.on("activity:start", onUserActive);
+        socket.on("activity:stop", onUserStopActive);
 
         await cacheEntryRemoved;
 
+        socket.off("message:edited", onMessageEdited);
+        socket.off("reaction:removed", onRemoveReaction);
+        socket.off("reaction:new", onNewReaction);
         socket.off("message:new", onNewMessage);
+        socket.off("message:deleted", onDeleteMessage);
         socket.off("conversation:new", onNewConversation);
-        socket.off("typing:start", onUserTyping);
-        socket.off("typing:stop", onUserStopTyping);
+        socket.off("activity:start", onUserActive);
+        socket.off("activity:stop", onUserStopActive);
       },
     }),
+
     getMessages: builder.query<
       MessagesResponse,
       {
@@ -341,15 +647,17 @@ const chatSlice = api.injectEndpoints({
         cursor?: string;
         direction?: "UP" | "DOWN";
         jumpToLatest?: boolean;
+        take?: number;
       }
     >({
-      query: ({ conversationId, cursor, direction, jumpToLatest }) => ({
+      query: ({ conversationId, cursor, direction, jumpToLatest, take }) => ({
         url: `chat/conversations/${conversationId}/messages`,
         method: "GET",
         params: {
           cursor,
           direction,
           jumpToLatest,
+          take: take ?? 20,
         },
       }),
       keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
@@ -397,6 +705,129 @@ const chatSlice = api.injectEndpoints({
         );
       },
     }),
+    getReactors: builder.query<
+      { items: ReactorListItem[]; hasMore: boolean },
+      {
+        messageId: string;
+        conversationId: string;
+        reactionContent: string;
+        cursor?: string;
+        take?: number;
+      }
+    >({
+      query: ({
+        messageId,
+        conversationId,
+        reactionContent,
+        cursor,
+        take,
+      }) => ({
+        url: `chat/conversations/${conversationId}/messages/${messageId}/reactors`,
+        method: "GET",
+        params: {
+          ...(reactionContent ? { reactionContent } : {}),
+          ...(cursor ? { cursor } : {}),
+          take: take ?? 20,
+        },
+      }),
+      keepUnusedDataFor: Number.MAX_SAFE_INTEGER,
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        return `${endpointName}-${queryArgs.messageId}-${queryArgs.conversationId}-${queryArgs.reactionContent}`;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        const nextCursor = arg.cursor;
+        const newCursor =
+          newItems.items[newItems.items.length - 1]?.reaction.id;
+
+        if (nextCursor && newCursor && nextCursor !== newCursor) {
+          currentCache.items.push(...newItems.items);
+          currentCache.hasMore = newItems.hasMore;
+        }
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        if (!currentArg) {
+          return false;
+        }
+
+        if (!previousArg) {
+          return true;
+        }
+
+        return (
+          currentArg.messageId !== previousArg.messageId ||
+          currentArg.conversationId !== previousArg.conversationId ||
+          currentArg.reactionContent !== previousArg.reactionContent ||
+          currentArg.cursor !== previousArg.cursor
+        );
+      },
+    }),
+    createFolder: builder.mutation<
+      Folder,
+      { title: string; position: number; conversations?: string[] }
+    >({
+      query: ({ title, conversations, position }) => ({
+        url: `chat/folders`,
+        method: "POST",
+        body: { title, conversations, position },
+      }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+
+        dispatch(
+          chatSlice.util.updateQueryData(
+            "getConversations",
+            undefined,
+            (draft) => {
+              draft.folders.push(data);
+            },
+          ),
+        );
+      },
+    }),
+    updatePinnedPosition: builder.mutation<
+      void,
+      {
+        updates: Array<{
+          conversationId: string;
+          newPinnedPosition: number | null;
+        }>;
+        folderId: string;
+      }
+    >({
+      query: ({ updates, folderId }) => ({
+        url: `chat/conversations/pin`,
+        method: "PATCH",
+        body: { updates, folderId },
+      }),
+    }),
+    updateConversationSettings: builder.mutation<
+      void,
+      { conversationId: string; settings: EditableConversationFields }
+    >({
+      query: ({ conversationId, settings }) => ({
+        url: `chat/conversations/${conversationId}/settings`,
+        method: "PATCH",
+        body: settings,
+      }),
+    }),
+    addConversationToFolder: builder.mutation<
+      void,
+      { conversationId: string; folderId: string }
+    >({
+      query: ({ conversationId, folderId }) => ({
+        url: `/chat/folders/${folderId}/conversations/${conversationId}`,
+        method: "POST",
+      }),
+    }),
+    removeConversationFromFolder: builder.mutation<
+      void,
+      { conversationId: string; folderId: string }
+    >({
+      query: ({ conversationId, folderId }) => ({
+        url: `/chat/folders/${folderId}/conversations/${conversationId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -404,7 +835,31 @@ export const {
   useSearchQuery,
   useGetConversationQuery,
   useGetConversationsQuery,
+  useLazyGetConversationsQuery,
   useGetMessagesQuery,
+  useGetReactorsQuery,
+  useCreateFolderMutation,
+  useUpdatePinnedPositionMutation,
+  useUpdateConversationSettingsMutation,
 } = chatSlice;
+
+const DEFAULT_CONVERSATIONS_STATE: ConversationsState = {
+  byId: {},
+  activeIds: { pinned: [], unpinned: [] },
+  archivedIds: { pinned: [], unpinned: [] },
+  folders: [],
+};
+
+export const useConversationsQuery = (
+  args?: { ids?: string[] },
+  options?: { refetchOnMountOrArgChange?: boolean },
+) =>
+  useGetConversationsQuery(args ?? undefined, {
+    ...options,
+    selectFromResult: ({ data, ...rest }) => ({
+      data: data ?? DEFAULT_CONVERSATIONS_STATE,
+      ...rest,
+    }),
+  });
 
 export default chatSlice;

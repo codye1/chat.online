@@ -1,0 +1,6 @@
+.separator {
+  border: none;
+  background-color: var(--c-border);
+  height: 10px;
+  margin: var(--space-2) 0;
+}

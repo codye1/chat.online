@@ -1,0 +1,37 @@
+.content {
+  border-radius: var(--radius-xl);
+  background-color: var(--c-foreground);
+  width: 350px;
+
+  padding: var(--space-2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+
+  & h2 {
+    font-size: var(--text-xl);
+    font-weight: 500;
+    margin-left: var(--space-2);
+  }
+
+  & button {
+    border-radius: 50%;
+    padding: var(--space-1);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: var(--space-2);
+    & img {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background-color: var(--c-light-x2);
+    }
+  }
+}

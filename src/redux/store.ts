@@ -8,7 +8,7 @@ import api from "../api/api";
 import auth from "./auth";
 import { listenerMiddleware } from "@api/listenerMiddleware";
 import globalSlice from "./global";
-import imageSlice from "@api/slices/imageSlice";
+import imageSlice from "@api/slices/mediaSlice";
 
 export const rootReducer = combineReducers({
   global: globalSlice.reducer,

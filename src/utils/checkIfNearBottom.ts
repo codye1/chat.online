@@ -1,6 +1,6 @@
 const checkIfNearBottom = (
   scrollElement: HTMLElement,
-  threshold: number = 10,
+  threshold: number = 50,
 ) => {
   const { scrollTop, scrollHeight, clientHeight } = scrollElement;
   const distanceFromBottom = scrollHeight - scrollTop - clientHeight;

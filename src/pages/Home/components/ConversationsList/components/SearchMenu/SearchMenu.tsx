@@ -1,14 +1,15 @@
 import { connectToConversation } from "@utils/socket";
-import { useAppDispatch, useAppSelector } from "@hooks/hooks";
+import { useAppDispatch } from "@hooks/hooks";
 import { setConversation, setRecipient } from "@redux/global";
 import PreviewItem from "../PreviewItem/PreviewItem";
 import type { SearchResponse } from "@utils/types";
 import styles from "./SearchMenu.module.css";
 import noSearchResults from "@assets/noSearchResult.svg";
+import { useConversationsQuery } from "@api/slices/chatSlice";
 
 const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
   const dispatch = useAppDispatch();
-  const { conversationId } = useAppSelector((state) => state.global);
+  const { data: conversationsState } = useConversationsQuery();
   if (!searchResults) {
     return (
       <div className={styles.noResultsContainer}>
@@ -22,8 +23,24 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
   }
 
   const onMouseDown = (newConversationId: string) => {
-    connectToConversation([newConversationId], conversationId);
+    connectToConversation([newConversationId]);
     dispatch(setConversation({ conversationId: newConversationId }));
+  };
+
+  const onUserClick = (recipientId: string) => {
+    const existingConversation = Object.values(
+      conversationsState?.byId || {},
+    ).find(
+      (conv) =>
+        conv.type === "DIRECT" && conv.otherParticipant.id === recipientId,
+    );
+
+    if (existingConversation) {
+      connectToConversation([existingConversation.id]);
+      dispatch(setConversation({ conversationId: existingConversation.id }));
+    } else {
+      dispatch(setRecipient({ recipientId }));
+    }
   };
 
   return (
@@ -36,7 +53,7 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
           description={item.lastMessage?.text ?? ""}
           meta={{
             lastMessageTime: item.lastMessage?.createdAt.toString() || "",
-            unreadMessages: item.unreadMessages,
+            unreadMessagesCount: item.unreadMessages,
           }}
           onMouseDown={() => onMouseDown(item.id)}
         />
@@ -53,9 +70,7 @@ const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
                   avatarUrl={global.avatarUrl}
                   title={global.nickname}
                   description={"@" + global.nickname}
-                  onMouseDown={() => {
-                    dispatch(setRecipient({ recipientId: global.id }));
-                  }}
+                  onMouseDown={() => onUserClick(global.id)}
                 />
               );
             }

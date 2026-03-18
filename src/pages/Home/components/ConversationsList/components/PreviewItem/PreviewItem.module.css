@@ -38,7 +38,8 @@
 }
 
 .mainInfo {
-  & p {
+  & p,
+  & h2 {
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -70,4 +71,16 @@
   margin-top: var(--space-1);
   font-size: var(--text-sm);
   font-weight: 700;
+}
+
+.pinnedIcon {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  & img {
+    transform: rotate(45deg);
+    width: 16px;
+    height: 16px;
+  }
 }

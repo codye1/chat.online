@@ -1,7 +1,6 @@
 import Cropper from "react-easy-crop";
 import Button from "@components/Button/Button";
 import type { Area } from "react-easy-crop";
-import { useUploadImageMutation } from "@api/slices/imageSlice";
 import getCroppedImg from "@utils/getCroppedImg";
 import { useState } from "react";
 import Modal from "@components/Modal/Modal";
@@ -12,6 +11,8 @@ import photoCamera from "@assets/photoCamera.svg";
 import { useAppSelector } from "@hooks/hooks";
 import { useUpdateUserMutation } from "@api/slices/userSlice";
 import Spinner from "@components/Spinner/Spinner";
+import InputFile from "@components/InputFile";
+import { useUploadImageMutation } from "@api/slices/mediaSlice";
 
 const AvatarWithUploader = () => {
   const [loadedImage, setLoadedImage] = useState<string | null>(null);
@@ -36,7 +37,7 @@ const AvatarWithUploader = () => {
 
       const result = await uploadImage(croppedImageBase64).unwrap();
 
-      await updateUser({ avatarUrl: result.data.url }).unwrap();
+      await updateUser({ avatarUrl: result.secure_url }).unwrap();
 
       setLoadedImage(null);
     } catch (error) {
@@ -48,21 +49,9 @@ const AvatarWithUploader = () => {
       <Avatar avatarUrl={user.avatarUrl} width={"100px"} height={"100px"}>
         <div className={styles.avatarButton}>
           <img src={photoCamera} alt="photo camera icon" />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  const imageDataUrl = e.target?.result as string;
-                  setLoadedImage(imageDataUrl);
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
+          <InputFile
+            allow={["image"]}
+            onLoaded={({ src }) => setLoadedImage(src)}
           />
         </div>
       </Avatar>

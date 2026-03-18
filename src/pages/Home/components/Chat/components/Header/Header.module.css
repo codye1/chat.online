@@ -6,19 +6,19 @@
   display: flex;
   align-items: center;
 
-  height: 70px;
-
+  height: var(--height-xl);
+  margin-bottom: auto;
   cursor: pointer;
 
   padding: var(--space-2) 0;
   & h1 {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     margin: 0;
     margin-left: var(--space-2);
   }
 
   & h2 {
-    font-size: var(--text-base);
+    font-size: var(--text-sm);
     margin: 0;
     margin-left: var(--space-2);
     color: var(--c-muted);

@@ -1,11 +1,13 @@
 import { io, Socket } from "socket.io-client";
 import store from "@redux/store";
 import chatSlice from "@api/slices/chatSlice";
+import { updateConversationsState } from "@api/slices/helpers/ConversationsManage";
+import type { MessageMedia } from "./types";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-export const socket: Socket = io(API_BASE_URL, {
+const socket: Socket = io(API_BASE_URL, {
   autoConnect: false,
   withCredentials: true,
   auth: {
@@ -18,39 +20,52 @@ export const socket: Socket = io(API_BASE_URL, {
   timeout: 20000,
 });
 
-export const syncSocketAuthorizationFromStorage = () => {
+const syncSocketAuthorizationFromStorage = () => {
   const token = localStorage.getItem("token") || undefined;
 
   socket.auth = token ? { token } : {};
 };
 
-export const setSocketAuthorization = (token?: string | null) => {
+const setSocketAuthorization = (token?: string | null) => {
   socket.auth = token ? { token } : {};
 };
 
-export const sendMessage = ({
+const sendMessage = ({
   conversationId,
-  recipientId,
   text,
+  replyToMessageId,
+  media,
 }: {
-  conversationId: string | null;
-  recipientId: string | null;
+  conversationId: string;
   text: string;
+  replyToMessageId?: string | null;
+  media?: MessageMedia[];
 }) => {
   if (text.length === 0) return;
+  const isTemp = conversationId?.startsWith("tempId");
 
-  socket.emit("message:send", {
-    conversationId,
-    recipientId,
-    text,
-  });
+  if (isTemp) {
+    const recipientId = conversationId.split(":")[1];
+    socket.emit("message:send", {
+      text,
+      replyToMessageId,
+      recipientId,
+      media,
+    });
+  }
+
+  if (!isTemp) {
+    socket.emit("message:send", {
+      conversationId,
+      text,
+      replyToMessageId,
+      media,
+    });
+  }
 };
 
-export const connectToConversation = (
-  conversationId: string[] | null,
-  oldConversationId: string | null,
-) => {
-  socket.emit("conversation:join", { conversationId, oldConversationId });
+const connectToConversation = (conversationId: string[] | null) => {
+  socket.emit("conversation:join", { conversationId });
 };
 
 // i use @id @default(cuid()) so message ids are strings and sortable
@@ -77,20 +92,18 @@ const emitMessageReadDebounced = (() => {
   };
 })();
 
-export const markMessageAsRead = (
+const markMessageAsRead = (
   conversationId: string,
   lastReadMessageId: string,
 ) => {
   emitMessageReadDebounced(conversationId, lastReadMessageId);
 
-  store.dispatch(
-    chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
-      const convo = draft.find((c) => c.id === conversationId);
-      if (convo) {
-        convo.unreadMessages = Math.max(0, convo.unreadMessages - 1);
-      }
-    }),
-  );
+  updateConversationsState((draft) => {
+    const convo = draft.byId[conversationId];
+    if (convo) {
+      convo.unreadMessages = Math.max(0, convo.unreadMessages - 1);
+    }
+  });
 
   store.dispatch(
     chatSlice.util.updateQueryData(
@@ -98,9 +111,50 @@ export const markMessageAsRead = (
       { conversationId, recipientId: null },
       (draft) => {
         draft.unreadMessages = Math.max(0, draft.unreadMessages - 1);
+        draft.lastReadId = lastReadMessageId;
       },
     ),
   );
+};
+
+const addReaction = ({
+  messageId,
+  content,
+}: {
+  messageId: string;
+  content: string;
+}) => {
+  socket.emit("reaction:add", { messageId, content });
+};
+
+const removeReaction = ({ messageId }: { messageId: string }) => {
+  socket.emit("reaction:remove", { messageId });
+};
+
+const deleteMessage = (messageId: string) => {
+  socket.emit("message:delete", { messageId });
+};
+
+const editMessage = ({
+  messageId,
+  conversationId,
+  newText,
+  replaceMedia,
+}: {
+  messageId: string;
+  conversationId: string;
+  newText: string;
+  replaceMedia?: {
+    oldMediaId?: string;
+    newMedia: MessageMedia;
+  };
+}) => {
+  socket.emit("message:edit", {
+    messageId,
+    conversationId,
+    newText,
+    replaceMedia,
+  });
 };
 
 interface SocketListenerCallbacks {
@@ -111,7 +165,7 @@ interface SocketListenerCallbacks {
 
 let pingInterval: number | null = null;
 
-export const initializeSocketListeners = (
+const initializeSocketListeners = (
   callbacks?: SocketListenerCallbacks,
 ): (() => void) => {
   if (pingInterval) {
@@ -156,13 +210,21 @@ export const initializeSocketListeners = (
     console.log("Socket connected successfully");
 
     const state = store.getState();
-    const conversations =
+    const conversationsState =
       chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+    let conversationsIds: string[] = [];
 
-    const conversationsIds = conversations?.map((c) => c.id) || [];
+    if (conversationsState) {
+      conversationsIds = [
+        ...conversationsState.activeIds.pinned,
+        ...conversationsState.activeIds.unpinned,
+        ...conversationsState.archivedIds.pinned,
+        ...conversationsState.archivedIds.unpinned,
+      ];
+    }
 
     if (conversationsIds.length > 0) {
-      connectToConversation(conversationsIds, null);
+      connectToConversation(conversationsIds);
     }
 
     if (pingInterval) {
@@ -211,3 +273,15 @@ export const initializeSocketListeners = (
 };
 
 export default socket;
+export {
+  setSocketAuthorization,
+  sendMessage,
+  deleteMessage,
+  editMessage,
+  connectToConversation,
+  markMessageAsRead,
+  addReaction,
+  removeReaction,
+  initializeSocketListeners,
+  syncSocketAuthorizationFromStorage,
+};

@@ -2,31 +2,27 @@ import Avatar from "@components/Avatar/Avatar";
 import Modal from "@components/Modal/Modal";
 import type { User } from "@utils/types";
 import clsx from "clsx";
-import styles from "./ViewProfileModal.module.css";
+import styles from "./ProfileViewModal.module.css";
 import closeIcon from "@assets/close.svg";
 import edit from "@assets/edit.svg";
 import getDisplayName from "@utils/getDisplayName";
+import { useAppDispatch } from "@hooks/hooks";
+import { closeModal, openModal } from "@redux/global";
 
-interface IViewProfileModal {
+interface IProfileViewModal {
   user: User;
-  onClickOutside: () => void;
-  onClickEdit: () => void;
-  onClickClose: () => void;
 }
 
-const ViewProfileModal = ({
-  user,
-  onClickOutside,
-  onClickEdit,
-  onClickClose,
-}: IViewProfileModal) => {
+const ProfileViewModal = ({ user }: IProfileViewModal) => {
+  const dispatch = useAppDispatch();
+
   return (
-    <Modal onClickOutside={onClickOutside}>
+    <Modal onClickOutside={() => dispatch(closeModal())}>
       <div className={styles.closeIcon}>
-        <button onClick={onClickEdit}>
+        <button onClick={() => dispatch(openModal({ type: "editProfile" }))}>
           <img src={edit} alt="edit icon" />
         </button>
-        <button onClick={onClickClose}>
+        <button onClick={() => dispatch(closeModal())}>
           <img src={closeIcon} alt="close icon" />
         </button>
       </div>
@@ -50,4 +46,5 @@ const ViewProfileModal = ({
   );
 };
 
-export default ViewProfileModal;
+export default ProfileViewModal;
+export type { IProfileViewModal };

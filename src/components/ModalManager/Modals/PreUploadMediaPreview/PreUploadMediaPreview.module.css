@@ -1,0 +1,99 @@
+.content {
+  padding: var(--space-2);
+  height: auto;
+  width: 400px;
+
+  max-height: 80vh;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-muted) transparent;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  gap: var(--space-4);
+  justify-content: space-between;
+  & span {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+}
+
+.closeIcon {
+  height: var(--height-xs);
+  cursor: pointer;
+}
+
+.icon {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  & img {
+    height: var(--height-xs);
+  }
+}
+
+.mediaPreview {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  flex-shrink: 1;
+
+  & > div {
+    width: 100%;
+    flex: 1 calc(50% - 0.5rem);
+    min-width: 0;
+
+    &:not(:only-child) {
+      & img,
+      & video {
+        max-height: 12rem;
+      }
+    }
+  }
+
+  & img,
+  & video {
+    width: 100%;
+    max-height: 24rem;
+    object-fit: cover;
+    object-position: center;
+    border-radius: var(--radius-sm);
+    display: block;
+  }
+}
+
+.captionInput {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  & textarea {
+    margin-top: 0;
+    font-size: var(--text-xl) !important;
+    height: auto;
+  }
+}
+
+.captionAndSend {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.button {
+  margin: 0;
+  height: var(--height-md);
+}
+
+.error {
+  margin-top: var(--space-2);
+  color: var(--c-error);
+  font-size: var(--text-sm);
+}

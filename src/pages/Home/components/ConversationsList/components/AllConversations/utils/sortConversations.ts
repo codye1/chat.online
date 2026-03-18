@@ -1,7 +1,9 @@
-import type { Conversation } from "@utils/types";
+import type { ConversationPreview } from "@utils/types";
 
-const sortConversations = (conversations: Conversation[]) => {
-  return conversations.toSorted((a, b) => {
+const sortConversations = (
+  conversations: Record<string, ConversationPreview>,
+) => {
+  return Object.values(conversations).toSorted((a, b) => {
     const aTime = a.lastMessage
       ? new Date(a.lastMessage.createdAt).getTime()
       : 0;

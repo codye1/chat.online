@@ -1,75 +1,110 @@
-import { useAppSelector } from "@hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@hooks/hooks";
+import { setReplyMessage } from "@redux/global";
 import socket, { sendMessage } from "@utils/socket";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 
 const useWriteMessage = () => {
   const [message, setMessage] = useState("");
   const { nickname } = useAppSelector((state) => state.auth.user);
   const typingTimeoutRef = useRef<number | null>(null);
   const isTypingRef = useRef(false);
-
-  const { conversationId, recipientId } = useAppSelector(
+  const { conversationId, replyMessage } = useAppSelector(
     (state) => state.global,
   );
 
-  useEffect(() => {
-    if (!conversationId && !recipientId) return;
+  const dispatch = useAppDispatch();
 
-    const stopTyping = () => {
-      socket.emit("typing:stop", { conversationId, nickname });
+  const startTyping = () => {
+    if (!conversationId) return;
+    socket.emit("activity:start", {
+      conversationId,
+      nickname,
+      reason: "typing",
+    });
+    isTypingRef.current = true;
+  };
+
+  const stopTyping = useMemo(
+    () => () => {
+      if (!conversationId) return;
+      socket.emit("activity:stop", { conversationId, nickname });
       isTypingRef.current = false;
-    };
+    },
+    [conversationId, nickname],
+  );
 
-    const handleEnterKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && message.trim()) {
-        sendMessage({ conversationId, recipientId, text: message });
-        setMessage("");
-        clearTimeout(typingTimeoutRef.current!);
-        stopTyping();
-      }
-    };
-    window.addEventListener("keydown", handleEnterKey);
+  useEffect(() => {
     return () => {
-      window.removeEventListener("keydown", handleEnterKey);
-      if (typingTimeoutRef.current) {
+      if (typingTimeoutRef.current && isTypingRef.current) {
         clearTimeout(typingTimeoutRef.current);
         stopTyping();
       }
     };
-  }, [conversationId, recipientId, message, nickname]);
+  }, [conversationId, nickname, stopTyping]);
 
-  const handleWriteMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!conversationId && !recipientId) return;
+  const handleEnterKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!conversationId) return;
+    if (e.key === "Enter" && !e.shiftKey && message.trim()) {
+      e.preventDefault();
+      sendMessage({
+        conversationId,
+        text: message,
+        replyToMessageId: replyMessage?.id,
+      });
+      dispatch(setReplyMessage(null));
+      setMessage("");
+      clearTimeout(typingTimeoutRef.current!);
+      stopTyping();
+    }
+  };
+
+  const handleWriteMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (!conversationId) return;
 
     if (!isTypingRef.current) {
-      socket.emit("typing:start", { conversationId, nickname });
-      isTypingRef.current = true;
+      startTyping();
     }
     setMessage(e.target.value);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     typingTimeoutRef.current = window.setTimeout(() => {
-      socket.emit("typing:stop", { conversationId, nickname });
-      isTypingRef.current = false;
+      stopTyping();
     }, 1000);
   };
 
   const onSendMessage = () => {
-    if (!conversationId && !recipientId) return;
+    if (!conversationId) return;
 
     if (message.trim()) {
-      sendMessage({ conversationId, recipientId, text: message });
+      sendMessage({
+        conversationId,
+        text: message,
+        replyToMessageId: replyMessage?.id,
+      });
+      dispatch(setReplyMessage(null));
       setMessage("");
 
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
-        socket.emit("typing:stop", { conversationId, nickname });
-        isTypingRef.current = false;
+        stopTyping();
       }
     }
   };
 
-  return { message, handleWriteMessage, onSendMessage };
+  return {
+    message,
+    handleWriteMessage,
+    onSendMessage,
+    handleEnterKey,
+    replyMessage,
+    setMessage,
+  };
 };
 
 export default useWriteMessage;
