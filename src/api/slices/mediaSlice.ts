@@ -8,8 +8,8 @@ interface UploadMediaResponse {
   original_filename: string;
 }
 
-const CLOUD_NAME = "doazvdxpf";
-const UPLOAD_PRESET = "chat.online";
+const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET;
 
 export const mediaSlice = createApi({
   reducerPath: "mediaSlice",
@@ -17,7 +17,6 @@ export const mediaSlice = createApi({
     baseUrl: `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/`,
   }),
   endpoints: (builder) => ({
-    // Мутація для завантаження масиву файлів
     uploadMedia: builder.mutation<MessageMedia[], File[]>({
       async queryFn(files, _queryApi, _extraOptions, fetchWithBQ) {
         const uploadPromises = files.map(async (file) => {

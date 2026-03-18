@@ -17,7 +17,7 @@ interface ICreateFolderModal {
 
 const CreateFolderModal = ({ selectedConversation }: ICreateFolderModal) => {
   const dispatch = useAppDispatch();
-  const [createFolder, { isLoading }] = useCreateFolderMutation();
+  const [createFolder, { isLoading, error }] = useCreateFolderMutation();
   const [title, setTitle] = useState("");
   const { data: conversationsState } = useConversationsQuery();
   return (
@@ -52,6 +52,11 @@ const CreateFolderModal = ({ selectedConversation }: ICreateFolderModal) => {
             Create
           </Button>
         </div>
+        {error && (
+          <div className={styles.error}>
+            Error creating folder. Please try again.
+          </div>
+        )}
       </MenuContent>
     </Modal>
   );

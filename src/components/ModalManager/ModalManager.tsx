@@ -28,7 +28,12 @@ const ModalManager = () => {
         <CreateFolderModal selectedConversation={modal.selectedConversation} />
       );
     case "preUploadMediaPreview":
-      return <PreUploadMediaPreview files={modal.files} />;
+      return (
+        <PreUploadMediaPreview
+          files={modal.files}
+          initialCaption={modal.initialCaption}
+        />
+      );
     case "lightbox":
       return <Lightbox media={modal.media} />;
     default:

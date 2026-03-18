@@ -139,12 +139,22 @@ const editMessage = ({
   messageId,
   conversationId,
   newText,
+  replaceMedia,
 }: {
   messageId: string;
   conversationId: string;
   newText: string;
+  replaceMedia?: {
+    oldMediaId?: string;
+    newMedia: MessageMedia;
+  };
 }) => {
-  socket.emit("message:edit", { messageId, conversationId, newText });
+  socket.emit("message:edit", {
+    messageId,
+    conversationId,
+    newText,
+    replaceMedia,
+  });
 };
 
 interface SocketListenerCallbacks {

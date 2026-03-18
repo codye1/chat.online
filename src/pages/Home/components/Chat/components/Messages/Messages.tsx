@@ -7,7 +7,6 @@ import VList from "../VList/VList";
 import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";
-import { addReaction } from "@utils/socket";
 import Message from "../Message/Message";
 
 const skeletonItems = Array.from({ length: 20 }, () => ({
@@ -110,9 +109,6 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                 ref={(el) => {
                   trackUnreadMessageRef(el, message);
                   virtualizer.measureElement(el);
-                }}
-                onDoubleClick={() => {
-                  addReaction({ messageId: message.id, content: "👍" });
                 }}
               />
             );

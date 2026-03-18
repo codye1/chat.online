@@ -4,15 +4,15 @@ import styles from "./InputWrapper.module.css";
 import EditMessage from "./components/EditMessage/EditMessage";
 
 const InputWrapper = () => {
-  const editingMessage = useAppSelector((state) => state.global.editingMessage);
+  const messageToEdit = useAppSelector((state) => state.global.messageToEdit);
   const conversationId = useAppSelector((state) => state.global.conversationId);
   const nickname = useAppSelector((state) => state.auth.user.nickname);
 
   return (
     <div className={styles.inputWrapper}>
-      {conversationId && editingMessage ? (
+      {conversationId && messageToEdit ? (
         <EditMessage
-          editingMessage={editingMessage}
+          messageToEdit={messageToEdit}
           nickname={nickname}
           conversationId={conversationId}
         />

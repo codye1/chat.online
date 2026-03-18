@@ -14,6 +14,7 @@ import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import photo from "@assets/photo.svg";
 import InputFile from "@components/InputFile";
+import clsx from "clsx";
 let timeoutId: number;
 
 const WriteMessage = () => {
@@ -23,6 +24,7 @@ const WriteMessage = () => {
     onSendMessage,
     handleEnterKey,
     replyMessage,
+    setMessage,
   } = useWriteMessage();
   const dispatch = useAppDispatch();
   const clipButtonRef = useRef<HTMLButtonElement>(null);
@@ -52,7 +54,7 @@ const WriteMessage = () => {
           className={styles.textarea}
         />
         <Button
-          className={styles.clipButton}
+          className={clsx(styles.buttonIcon, styles.clip)}
           ref={clipButtonRef}
           onMouseEnter={() => {
             clearTimeout(timeoutId);
@@ -76,9 +78,14 @@ const WriteMessage = () => {
                   multiple
                   onLoaded={(files) => {
                     dispatch(
-                      openModal({ type: "preUploadMediaPreview", files }),
+                      openModal({
+                        type: "preUploadMediaPreview",
+                        files,
+                        initialCaption: message,
+                      }),
                     );
                     setShowPopover(false);
+                    setMessage("");
                   }}
                 />
               </MenuItem>
@@ -86,8 +93,12 @@ const WriteMessage = () => {
           </Popover>
         </Button>
       </div>
-      <Button onClick={onSendMessage} disabled={!message.trim()}>
-        <img className={styles.sendIcon} src={sendIcon} alt="Send" />
+      <Button
+        className={styles.buttonIcon}
+        onClick={onSendMessage}
+        disabled={!message.trim()}
+      >
+        <img src={sendIcon} alt="Send" />
       </Button>
     </div>
   );

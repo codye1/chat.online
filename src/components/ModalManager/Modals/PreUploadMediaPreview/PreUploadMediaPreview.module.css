@@ -79,7 +79,7 @@
   }
 }
 
-.footer {
+.captionAndSend {
   display: flex;
   align-items: stretch;
   justify-content: space-between;
@@ -87,7 +87,13 @@
   margin-top: var(--space-3);
 }
 
-.sendButton {
+.button {
   margin: 0;
   height: var(--height-md);
+}
+
+.error {
+  margin-top: var(--space-2);
+  color: var(--c-error);
+  font-size: var(--text-sm);
 }

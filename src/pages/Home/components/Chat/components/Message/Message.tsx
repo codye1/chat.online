@@ -3,7 +3,7 @@ import styles from "./Message.module.css";
 import Check from "@assets/check.svg";
 import { useRef, useState } from "react";
 import Reactions from "./components/Reactions/Reactions";
-import type { Message as MessageType } from "@utils/types";
+import type { MessageMedia, Message as MessageType } from "@utils/types";
 import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
 import getDisplayName from "@utils/getDisplayName";
 import MediaContainer from "./components/MediaContainer/MediaContainer";
@@ -30,6 +30,8 @@ const Message = ({
   const popoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const [contextMenu, setContextMenu] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mediaForContextMenu, setMediaForContextMenu] =
+    useState<MessageMedia>();
 
   return (
     <>
@@ -52,7 +54,6 @@ const Message = ({
             [styles.sentByCurrentUser]: isSentByCurrentUser,
           })}
         >
-          {message.media && <MediaContainer mediaItems={message.media} />}
           {/*TODO: make scroll on click (with better messageList)*/}
           {message.replyTo && (
             <div className={styles.rplyContainer}>
@@ -62,6 +63,18 @@ const Message = ({
               <span className={styles.rplyText}>{message.replyTo.text}</span>
             </div>
           )}
+          {message.media && (
+            <MediaContainer
+              mediaItems={message.media}
+              onMediaItemContextMenu={(e, media) => {
+                e.preventDefault();
+                setMousePosition({ x: e.clientX, y: e.clientY });
+                setContextMenu(true);
+                setMediaForContextMenu(media);
+              }}
+            />
+          )}
+
           <div className={styles.textContainer}>
             {message.text}
             <div className={styles.metaContainer}>
@@ -87,6 +100,8 @@ const Message = ({
         isContextMenuOpen={contextMenu}
         setIsContextMenuOpen={setContextMenu}
         mousePosition={mousePosition}
+        setMediaForContextMenu={setMediaForContextMenu}
+        mediaForContextMenu={mediaForContextMenu}
         message={{ ...message, sentByCurrentUser: isSentByCurrentUser }}
       />
     </>

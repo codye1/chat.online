@@ -3,7 +3,7 @@ import styles from "./ReactorsList.module.css";
 import getDisplayName from "@utils/getDisplayName";
 import formatDate from "@utils/formatDate";
 import type { ReactorListItem } from "@utils/types";
-import InfiniteScrolling from "@components/InfinteScrolling/InfinteScrolling";
+import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import Skeleton from "react-loading-skeleton";
 
 interface IReactorsList {

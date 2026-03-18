@@ -1,4 +1,4 @@
-import InfiniteScrolling from "@components/InfinteScrolling/InfinteScrolling";
+import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import useFolderConversations from "@hooks/useFolderConversations";
 import sortConversations from "../AllConversations/utils/sortConversations";
 import { setConversation } from "@redux/global";

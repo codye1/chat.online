@@ -5,9 +5,16 @@ import { openModal } from "@redux/global";
 
 interface IMediaContainer {
   mediaItems: MessageMedia[];
+  onMediaItemContextMenu: (
+    e: React.MouseEvent<HTMLDivElement>,
+    media: MessageMedia,
+  ) => void;
 }
 
-const MediaContainer = ({ mediaItems }: IMediaContainer) => {
+const MediaContainer = ({
+  mediaItems,
+  onMediaItemContextMenu,
+}: IMediaContainer) => {
   const dispatch = useAppDispatch();
   const onMediaClick = (media: MessageMedia) => {
     dispatch(openModal({ type: "lightbox", media }));
@@ -23,6 +30,11 @@ const MediaContainer = ({ mediaItems }: IMediaContainer) => {
           key={media.id}
           className={styles.mediaItem}
           onClick={() => onMediaClick(media)}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            onMediaItemContextMenu(e, media);
+          }}
+          data-media-id={media.id}
         >
           {media.type === "image" ? (
             <img

@@ -16,7 +16,7 @@ const InputHeader = ({ label, description, icon, onCancel }: IInputHeader) => {
       <button className={styles.icon}>
         <img src={icon} alt={label} />
       </button>
-      <div>
+      <div className={styles.text}>
         <h2>{label}</h2>
         <h3>{description}</h3>
       </div>

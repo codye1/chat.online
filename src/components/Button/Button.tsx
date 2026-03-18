@@ -10,12 +10,10 @@ interface IButton extends React.ComponentPropsWithRef<"button"> {
 
 const Button = ({
   children,
-  onClick,
   type = "button",
   isLoading = false,
   disabled = false,
   className,
-  ref,
   ...rest
 }: IButton) => {
   return (
@@ -25,10 +23,8 @@ const Button = ({
         [styles.disabled]: disabled,
         [styles.loading]: isLoading,
       })}
-      onClick={onClick}
       type={type}
       disabled={isLoading || disabled}
-      ref={ref}
     >
       {isLoading ? <Spinner /> : children}
     </button>

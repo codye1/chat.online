@@ -6,7 +6,7 @@ import sortConversations from "./utils/sortConversations";
 import ConversationFoldersList from "../ConversationFoldersList/ConversationFoldersList";
 import useFolderConversations from "@hooks/useFolderConversations";
 import { useMemo, useState } from "react";
-import InfiniteScrolling from "@components/InfinteScrolling/InfinteScrolling";
+import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import styles from "./AllConversationsList.module.css";
 import ConversationContextMenu from "../ConversationContextMenu/ConversationContextMenu";
 import archiveAvatar from "@assets/archiveAvatar.png";

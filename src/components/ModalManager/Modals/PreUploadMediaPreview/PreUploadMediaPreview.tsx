@@ -3,7 +3,7 @@ import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import Modal from "@components/Modal/Modal";
 import styles from "./PreUploadMediaPreview.module.css";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
-import { closeModal } from "@redux/global";
+import { closeModal, setReplyMessage } from "@redux/global";
 import closeIcon from "@assets/close.svg";
 import { useRef, useState } from "react";
 import Textarea from "@components/Textarea/Textarea";
@@ -14,20 +14,63 @@ import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import plus from "@assets/plus.svg";
 import InputFile from "@components/InputFile";
 import { useUploadMediaMutation } from "@api/slices/mediaSlice";
-import { sendMessage } from "@utils/socket";
+import { editMessage, sendMessage } from "@utils/socket";
 
 interface IPreUploadMediaPreview {
   files: LoadedFile[];
+  initialCaption: string;
 }
 
-const PreUploadMediaPreview = ({ files }: IPreUploadMediaPreview) => {
+const PreUploadMediaPreview = ({
+  files,
+  initialCaption,
+}: IPreUploadMediaPreview) => {
+  const { replyMessage, messageToEdit } = useAppSelector(
+    (state) => state.global,
+  );
   const dispatch = useAppDispatch();
-  const [caption, setCaption] = useState("");
+  const [caption, setCaption] = useState(initialCaption || "");
   const [showOptions, setShowOptions] = useState(false);
   const optionsAnchorRef = useRef<HTMLButtonElement>(null);
   const [loadedFiles, setLoadedFiles] = useState<LoadedFile[]>(files);
-  const [uploadMedia, { isLoading: isUploading }] = useUploadMediaMutation();
+  const [uploadMedia, { isLoading: isUploading, error }] =
+    useUploadMediaMutation();
   const { conversationId } = useAppSelector((state) => state.global);
+
+  const onReplaceMedia = () => {
+    if (messageToEdit === null) return;
+
+    uploadMedia(loadedFiles.map((f) => f.file))
+      .unwrap()
+      .then((results) => {
+        editMessage({
+          conversationId: conversationId!,
+          newText: caption,
+          messageId: messageToEdit!.id,
+          replaceMedia: {
+            oldMediaId: messageToEdit.mediaToEdit?.id,
+            newMedia: results[0],
+          },
+        });
+        dispatch(closeModal());
+        dispatch(setReplyMessage(null));
+      });
+  };
+
+  const onSendMessage = () => {
+    uploadMedia(loadedFiles.map((f) => f.file))
+      .unwrap()
+      .then((results) => {
+        sendMessage({
+          conversationId: conversationId!,
+          text: caption,
+          media: results,
+          replyToMessageId: replyMessage ? replyMessage.id : undefined,
+        });
+        dispatch(closeModal());
+        dispatch(setReplyMessage(null));
+      });
+  };
 
   return (
     <Modal
@@ -46,7 +89,11 @@ const PreUploadMediaPreview = ({ files }: IPreUploadMediaPreview) => {
             >
               <img src={closeIcon} alt="Close" />
             </button>
-            <h2>Send media</h2>
+            {messageToEdit?.mediaToEdit ? (
+              <h2>Replace media</h2>
+            ) : (
+              <h2>Send media</h2>
+            )}
           </span>
           <button
             ref={optionsAnchorRef}
@@ -86,35 +133,34 @@ const PreUploadMediaPreview = ({ files }: IPreUploadMediaPreview) => {
           ))}
         </div>
         <div className={styles.footer}>
-          <div className={styles.captionInput}>
-            <Textarea
-              trackValue={{
-                value: caption,
-                onChange: (e) => setCaption(e.target.value),
-              }}
-              name="caption"
-              placeholder="Add a caption..."
-            />
+          <div className={styles.captionAndSend}>
+            <div className={styles.captionInput}>
+              <Textarea
+                trackValue={{
+                  value: caption,
+                  onChange: (e) => setCaption(e.target.value),
+                }}
+                name="caption"
+                placeholder="Add a caption..."
+              />
+            </div>
+            <Button
+              className={styles.button}
+              isLoading={isUploading}
+              disabled={
+                isUploading || loadedFiles.length === 0 || caption.trim() === ""
+              }
+              onClick={messageToEdit ? onReplaceMedia : onSendMessage}
+            >
+              Save
+            </Button>
           </div>
-          <Button
-            className={styles.sendButton}
-            isLoading={isUploading}
-            disabled={isUploading || loadedFiles.length === 0}
-            onClick={() => {
-              uploadMedia(loadedFiles.map((f) => f.file))
-                .unwrap()
-                .then((results) => {
-                  sendMessage({
-                    conversationId: conversationId!,
-                    text: caption,
-                    media: results,
-                  });
-                  dispatch(closeModal());
-                });
-            }}
-          >
-            Send
-          </Button>
+
+          {error && (
+            <div className={styles.error}>
+              Error uploading media. Please try again.
+            </div>
+          )}
         </div>
       </MenuContent>
     </Modal>

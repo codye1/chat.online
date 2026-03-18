@@ -1,7 +1,13 @@
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { setReplyMessage } from "@redux/global";
 import socket, { sendMessage } from "@utils/socket";
-import { useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 
 const useWriteMessage = () => {
   const [message, setMessage] = useState("");
@@ -24,11 +30,23 @@ const useWriteMessage = () => {
     isTypingRef.current = true;
   };
 
-  const stopTyping = () => {
-    if (!conversationId) return;
-    socket.emit("activity:stop", { conversationId, nickname });
-    isTypingRef.current = false;
-  };
+  const stopTyping = useMemo(
+    () => () => {
+      if (!conversationId) return;
+      socket.emit("activity:stop", { conversationId, nickname });
+      isTypingRef.current = false;
+    },
+    [conversationId, nickname],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current && isTypingRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        stopTyping();
+      }
+    };
+  }, [conversationId, nickname, stopTyping]);
 
   const handleEnterKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (!conversationId) return;
@@ -85,6 +103,7 @@ const useWriteMessage = () => {
     onSendMessage,
     handleEnterKey,
     replyMessage,
+    setMessage,
   };
 };
 

@@ -1,18 +1,25 @@
 import { useAppDispatch } from "@hooks/hooks";
-import { setEditingMessage } from "@redux/global";
+import { setMessageToEdit } from "@redux/global";
 import socket, { editMessage } from "@utils/socket";
-import { useRef, useState, type KeyboardEvent } from "react";
+import type { Message } from "@utils/types";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 
 const useEditMessage = ({
-  editingMessage,
+  messageToEdit,
   nickname,
   conversationId,
 }: {
-  editingMessage: { id: string; text: string };
+  messageToEdit: Message;
   nickname: string;
   conversationId: string;
 }) => {
-  const [editingValue, setEditingValue] = useState(editingMessage.text);
+  const [editingValue, setEditingValue] = useState(messageToEdit.text);
   const editingTimeoutRef = useRef<number | null>(null);
   const isEditingRef = useRef(false);
   const dispatch = useAppDispatch();
@@ -27,21 +34,24 @@ const useEditMessage = ({
     isEditingRef.current = true;
   };
 
-  const stopEditing = () => {
-    if (!conversationId) return;
-    socket.emit("activity:stop", { conversationId, nickname });
-    isEditingRef.current = false;
-  };
+  const stopEditing = useMemo(
+    () => () => {
+      if (!conversationId) return;
+      socket.emit("activity:stop", { conversationId, nickname });
+      isEditingRef.current = false;
+    },
+    [conversationId, nickname],
+  );
 
   const handleEnterKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && editingValue.trim()) {
       e.preventDefault();
       editMessage({
         newText: editingValue,
-        messageId: editingMessage.id,
+        messageId: messageToEdit.id,
         conversationId,
       });
-      dispatch(setEditingMessage(null));
+      dispatch(setMessageToEdit(null));
       setEditingValue("");
       clearTimeout(editingTimeoutRef.current!);
       stopEditing();
@@ -68,11 +78,11 @@ const useEditMessage = ({
     if (editingValue.trim()) {
       editMessage({
         newText: editingValue,
-        messageId: editingMessage.id,
+        messageId: messageToEdit.id,
         conversationId,
       });
       setEditingValue("");
-      dispatch(setEditingMessage(null));
+      dispatch(setMessageToEdit(null));
       if (editingTimeoutRef.current) {
         clearTimeout(editingTimeoutRef.current);
         stopEditing();
@@ -80,7 +90,22 @@ const useEditMessage = ({
     }
   };
 
-  return { editingValue, handleEditingValue, onConfirmEdit, handleEnterKey };
+  useEffect(() => {
+    return () => {
+      if (editingTimeoutRef.current && isEditingRef.current) {
+        clearTimeout(editingTimeoutRef.current);
+        stopEditing();
+      }
+    };
+  }, [conversationId, nickname, stopEditing]);
+
+  return {
+    editingValue,
+    handleEditingValue,
+    onConfirmEdit,
+    handleEnterKey,
+    setEditingValue,
+  };
 };
 
 export default useEditMessage;

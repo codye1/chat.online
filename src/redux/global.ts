@@ -3,7 +3,7 @@ import type { IProfileViewModal } from "@components/ModalManager/Modals/ProfileV
 import type { IReactorsInfo } from "@components/ModalManager/Modals/ReactorsInfo/ReactorsInfo";
 import type { IPreUploadMediaPreview } from "@components/ModalManager/Modals/PreUploadMediaPreview/PreUploadMediaPreview";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { ReplyMessage } from "@utils/types";
+import type { Message, MessageMedia, ReplyMessage } from "@utils/types";
 import type { ILightbox } from "@components/ModalManager/Modals/Lightbox/Lightbox";
 
 type AvailableModals =
@@ -14,15 +14,12 @@ type AvailableModals =
   | (IPreUploadMediaPreview & { type: "preUploadMediaPreview" })
   | (ILightbox & { type: "lightbox" });
 
-interface EditMessage {
-  id: string;
-  text: string;
-}
+type MessageToEdit = Message & { mediaToEdit?: MessageMedia };
 
 interface GlobalState {
   conversationId: string | null;
   recipientId: string | null;
-  editingMessage: EditMessage | null;
+  messageToEdit: MessageToEdit | null;
   replyMessage: ReplyMessage | null;
   activeModal: AvailableModals | null;
 }
@@ -30,7 +27,7 @@ interface GlobalState {
 const initialState: GlobalState = {
   conversationId: null,
   recipientId: null,
-  editingMessage: null,
+  messageToEdit: null,
   replyMessage: null,
   activeModal: null,
 };
@@ -45,19 +42,19 @@ export const globalSlice = createSlice({
     ) {
       state.conversationId = action.payload.conversationId;
       state.recipientId = null;
-      state.editingMessage = null;
+      state.messageToEdit = null;
     },
     setRecipient(state, action: PayloadAction<{ recipientId: string | null }>) {
       state.recipientId = action.payload.recipientId;
       state.conversationId = null;
-      state.editingMessage = null;
+      state.messageToEdit = null;
     },
-    setEditingMessage(state, action: PayloadAction<EditMessage | null>) {
-      state.editingMessage = action.payload;
+    setMessageToEdit(state, action: PayloadAction<MessageToEdit | null>) {
+      state.messageToEdit = action.payload;
       state.replyMessage = null;
     },
     setReplyMessage(state, action: PayloadAction<ReplyMessage | null>) {
-      state.editingMessage = null;
+      state.messageToEdit = null;
       state.replyMessage = action.payload;
     },
     openModal(state, action: PayloadAction<AvailableModals>) {
@@ -72,9 +69,12 @@ export const globalSlice = createSlice({
 export const {
   setConversation,
   setRecipient,
-  setEditingMessage,
+  setMessageToEdit,
   setReplyMessage,
   openModal,
   closeModal,
 } = globalSlice.actions;
+
+export type { AvailableModals, MessageToEdit, GlobalState };
+
 export default globalSlice;

@@ -5,12 +5,11 @@ import editIcon from "@assets/edit.svg";
 import copyIcon from "@assets/copy.svg";
 import heart from "@assets/heart.svg";
 import { useAppDispatch } from "@hooks/hooks";
-import { openModal, setEditingMessage, setReplyMessage } from "@redux/global";
+import { openModal, setMessageToEdit, setReplyMessage } from "@redux/global";
 import Separator from "@components/Separator/Separator";
-import getMessage from "@utils/getMessage";
 import ReactionsPicker from "./components/ReactionsPicker/ReactionsPicker";
 import replyIcon from "@assets/reply.svg";
-import type { Message } from "@utils/types";
+import type { Message, MessageMedia } from "@utils/types";
 import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 
@@ -19,32 +18,45 @@ interface IMessageContextMenu {
   setIsContextMenuOpen: (open: boolean) => void;
   mousePosition: { x: number; y: number };
   message: Message & { sentByCurrentUser: boolean };
+  mediaForContextMenu?: MessageMedia;
+  setMediaForContextMenu: (media?: MessageMedia) => void;
 }
 
 const MessageContextMenu = ({
   isContextMenuOpen,
   setIsContextMenuOpen,
   mousePosition,
-  message: { id: messageId, text, conversationId, sender, sentByCurrentUser },
+  message,
+  mediaForContextMenu,
+  setMediaForContextMenu,
 }: IMessageContextMenu) => {
   const dispatch = useAppDispatch();
 
   const onDeleteMessage = () => {
-    deleteMessage(messageId);
+    deleteMessage(message.id);
   };
 
   const onEditMessage = () => {
-    dispatch(setEditingMessage({ id: messageId, text }));
+    dispatch(
+      setMessageToEdit({ ...message, mediaToEdit: mediaForContextMenu }),
+    );
     setIsContextMenuOpen(false);
+    setMediaForContextMenu(undefined);
   };
 
   const onCopyMessage = () => {
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(message.text);
     setIsContextMenuOpen(false);
   };
 
   const onReply = () => {
-    dispatch(setReplyMessage({ id: messageId, text, sender }));
+    dispatch(
+      setReplyMessage({
+        id: message.id,
+        text: message.text,
+        sender: message.sender,
+      }),
+    );
     setIsContextMenuOpen(false);
   };
 
@@ -55,7 +67,7 @@ const MessageContextMenu = ({
       position={mousePosition}
     >
       <ReactionsPicker
-        messageId={messageId}
+        messageId={message.id}
         setIsContextMenuOpen={setIsContextMenuOpen}
       />
       <MenuContent>
@@ -65,7 +77,7 @@ const MessageContextMenu = ({
           icon={copyIcon}
           label="Copy message"
         />
-        {sentByCurrentUser && (
+        {message.sentByCurrentUser && (
           <>
             <MenuItem
               onClick={onEditMessage}
@@ -78,26 +90,25 @@ const MessageContextMenu = ({
               label="Delete message"
             />
             <Separator />
-            <MenuItem
-              onClick={() => {
-                const message = getMessage({ messageId, conversationId });
-                if (message) {
+            {Object.keys(message.reactions).length > 0 && (
+              <MenuItem
+                onClick={() => {
                   dispatch(
                     openModal({
                       type: "reactorsInfo",
                       props: {
-                        messageId,
-                        conversationId,
+                        messageId: message.id,
+                        conversationId: message.conversationId,
                         groupedReactions: message.reactions,
                       },
                     }),
                   );
-                }
-                setIsContextMenuOpen(false);
-              }}
-              icon={heart}
-              label="Reactors"
-            />
+                  setIsContextMenuOpen(false);
+                }}
+                icon={heart}
+                label="Reactors"
+              />
+            )}
           </>
         )}
       </MenuContent>

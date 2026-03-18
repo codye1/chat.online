@@ -1,6 +1,8 @@
 import { addReaction } from "@utils/socket";
 import styles from "./ReactionsPicker.module.css";
 
+const reactions = ["👍", "❤️", "😂", "😮"];
+
 interface IReactionsPicker {
   messageId: string;
   setIsContextMenuOpen: (isOpen: boolean) => void;
@@ -12,50 +14,19 @@ const ReactionsPicker = ({
 }: IReactionsPicker) => {
   return (
     <ul className={styles.list}>
-      <li>
-        <button
-          className={styles.reactionButton}
-          onClick={() => {
-            addReaction({ messageId, content: "👍" });
-            setIsContextMenuOpen(false);
-          }}
-        >
-          👍
-        </button>
-      </li>
-      <li>
-        <button
-          className={styles.reactionButton}
-          onClick={() => {
-            addReaction({ messageId, content: "❤️" });
-            setIsContextMenuOpen(false);
-          }}
-        >
-          ❤️
-        </button>
-      </li>
-      <li>
-        <button
-          className={styles.reactionButton}
-          onClick={() => {
-            addReaction({ messageId, content: "😂" });
-            setIsContextMenuOpen(false);
-          }}
-        >
-          😂
-        </button>
-      </li>
-      <li>
-        <button
-          className={styles.reactionButton}
-          onClick={() => {
-            addReaction({ messageId, content: "😮" });
-            setIsContextMenuOpen(false);
-          }}
-        >
-          😮
-        </button>
-      </li>
+      {reactions.map((reaction) => (
+        <li key={reaction}>
+          <button
+            className={styles.reactionButton}
+            onClick={() => {
+              addReaction({ messageId, content: reaction });
+              setIsContextMenuOpen(false);
+            }}
+          >
+            {reaction}
+          </button>
+        </li>
+      ))}
     </ul>
   );
 };

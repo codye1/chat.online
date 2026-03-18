@@ -4,26 +4,43 @@ import checkIcon from "@assets/check.svg";
 import Button from "@components/Button/Button";
 import editIcon from "@assets/edit.svg";
 import { useAppDispatch } from "@hooks/hooks";
-import { setEditingMessage } from "@redux/global";
 import InputHeader from "../InputHeader/InputHeader";
 import Textarea from "@components/Textarea/Textarea";
+import editMediaIcon from "@assets/change.svg";
+import clsx from "clsx";
+import { openModal, setMessageToEdit, type MessageToEdit } from "@redux/global";
+import Popover from "@components/Popover/Popover";
+import { useRef, useState } from "react";
+import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
+import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
+import photoIcon from "@assets/photo.svg";
+import InputFile from "@components/InputFile";
+import clipIcon from "@assets/clip.svg";
 
+let timeoutId: number;
 const EditMessage = ({
-  editingMessage,
+  messageToEdit,
   nickname,
   conversationId,
 }: {
-  editingMessage: { id: string; text: string };
+  messageToEdit: MessageToEdit;
   nickname: string;
   conversationId: string;
 }) => {
-  const { editingValue, handleEditingValue, onConfirmEdit, handleEnterKey } =
-    useEditMessage({ editingMessage, nickname, conversationId });
-
+  const {
+    editingValue,
+    handleEditingValue,
+    onConfirmEdit,
+    handleEnterKey,
+    setEditingValue,
+  } = useEditMessage({ messageToEdit, nickname, conversationId });
   const dispatch = useAppDispatch();
 
+  const [showPopover, setShowPopover] = useState(false);
+  const editMediaButtonRef = useRef<HTMLButtonElement>(null);
+
   const onCancelEdit = () => {
-    dispatch(setEditingMessage(null));
+    dispatch(setMessageToEdit(null));
   };
 
   return (
@@ -31,10 +48,10 @@ const EditMessage = ({
       <InputHeader
         icon={editIcon}
         label="Edit Message"
-        description={editingMessage.text}
+        description={messageToEdit.text}
         onCancel={onCancelEdit}
       />
-      <div>
+      <div className={styles.textareaContainer}>
         <Textarea
           trackValue={{
             value: editingValue,
@@ -45,12 +62,57 @@ const EditMessage = ({
           name="editedMessage"
           className={styles.textarea}
         />
+
+        <Button
+          className={clsx(styles.buttonIcon, styles.mediaButton)}
+          ref={editMediaButtonRef}
+          onMouseEnter={() => {
+            clearTimeout(timeoutId);
+            setShowPopover(true);
+          }}
+          onMouseLeave={() => {
+            timeoutId = window.setTimeout(() => setShowPopover(false), 200);
+          }}
+        >
+          {messageToEdit.mediaToEdit ? (
+            <img src={editMediaIcon} alt="Edit media" />
+          ) : (
+            <img src={clipIcon} alt="Add media" />
+          )}
+          <Popover
+            anchorRef={editMediaButtonRef}
+            isOpen={showPopover}
+            onClose={() => setShowPopover(false)}
+            placement="top"
+          >
+            <MenuContent>
+              <MenuItem label="Photo and Video" icon={photoIcon}>
+                <InputFile
+                  allow={["image", "video"]}
+                  multiple
+                  onLoaded={(files) => {
+                    dispatch(
+                      openModal({
+                        type: "preUploadMediaPreview",
+                        files,
+                        initialCaption: editingValue,
+                      }),
+                    );
+                    setShowPopover(false);
+                    setEditingValue("");
+                  }}
+                />
+              </MenuItem>
+            </MenuContent>
+          </Popover>
+        </Button>
       </div>
       <Button
         onClick={onConfirmEdit}
-        disabled={!editingValue.trim() || editingValue === editingMessage.text}
+        disabled={!editingValue.trim() || editingValue === messageToEdit.text}
+        className={styles.buttonIcon}
       >
-        <img className={styles.checkIcon} src={checkIcon} alt="Check" />
+        <img src={checkIcon} alt="Check" />
       </Button>
     </div>
   );

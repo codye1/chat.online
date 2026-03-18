@@ -19,7 +19,7 @@ const EditNicknameModal = ({
   onSubmit,
   isPending,
 }: IEditNameModal) => {
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(user.nickname || "");
 
   return (
     <EditModal

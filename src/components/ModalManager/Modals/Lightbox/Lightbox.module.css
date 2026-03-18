@@ -1,16 +1,15 @@
 .header {
-  position:fixed;
+  position: fixed;
   display: flex;
-  top:0;
+  top: 0;
   justify-content: end;
   width: 100%;
-  padding:var(--space-2) var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-2) 0 0;
 
   & button {
     background-color: transparent;
     border: none;
     cursor: pointer;
-
   }
 
   & img {

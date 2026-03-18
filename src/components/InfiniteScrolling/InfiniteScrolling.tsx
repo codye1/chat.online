@@ -2,9 +2,6 @@ import clsx from "clsx";
 import { useEffect, useRef, type ReactNode } from "react";
 import { useInView } from "react-intersection-observer";
 
-const scrollPositions: Record<string, number> = {};
-let savingScrollPositionTimeout: number;
-
 interface IInfiniteScrolling<T> {
   items: T[];
   renderItem: (item: T, index: number) => ReactNode;
@@ -31,6 +28,9 @@ const InfiniteScrolling = <T,>({
   const rootRef = useRef<HTMLDivElement | null>(null);
   const prevListIdRef = useRef(listId);
 
+  const scrollPositions = useRef<Record<string, number>>({});
+  const timeoutRef = useRef<number | null>(null);
+
   const { ref: sentinelRef, inView } = useInView({
     // eslint-disable-next-line react-hooks/refs
     root: rootRef.current,
@@ -45,16 +45,16 @@ const InfiniteScrolling = <T,>({
 
   useEffect(() => {
     if (rootRef.current && prevListIdRef.current !== listId) {
-      rootRef.current.scrollTop = scrollPositions[listId] ?? 0;
+      rootRef.current.scrollTop = scrollPositions.current[listId] ?? 0;
       prevListIdRef.current = listId;
     }
   }, [listId]);
 
   const onScroll = () => {
-    clearTimeout(savingScrollPositionTimeout);
-    savingScrollPositionTimeout = setTimeout(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
       if (rootRef.current) {
-        scrollPositions[listId] = rootRef.current.scrollTop;
+        scrollPositions.current[listId] = rootRef.current.scrollTop;
       }
     }, 100);
   };
