@@ -9,10 +9,10 @@ import { useMemo, useState } from "react";
 import InfiniteScrolling from "@components/InfinteScrolling/InfinteScrolling";
 import styles from "./AllConversationsList.module.css";
 import ConversationContextMenu from "../ConversationContextMenu/ConversationContextMenu";
-import PreviewContextMenu from "../PreviewItem/PreviewContextMenu";
 import archiveAvatar from "@assets/archiveAvatar.png";
 import getArchiveDescription from "@utils/getArchiveDescription";
 import type { views } from "../../ConversationsList";
+import ContextMenu from "@components/ContextMenu/ContextMenu";
 
 interface IAllConversations {
   setView: (view: views) => void;
@@ -91,7 +91,7 @@ const AllConversations = ({ setView }: IAllConversations) => {
               }}
               isPinned={isPinned}
             >
-              <PreviewContextMenu>
+              <ContextMenu.Slot>
                 <ConversationContextMenu
                   conversation={conversation}
                   isPinned={isPinned}
@@ -100,7 +100,7 @@ const AllConversations = ({ setView }: IAllConversations) => {
                   conversationsState={conversationsState}
                   foldersWhereConversationIs={foldersWhereConversationIs}
                 />
-              </PreviewContextMenu>
+              </ContextMenu.Slot>
             </PreviewItem>
           );
         }}

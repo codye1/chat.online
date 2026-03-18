@@ -1,4 +1,10 @@
-import { type MouseEvent, type ReactNode, useRef, useState } from "react";
+import {
+  type MouseEvent,
+  type ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import styles from "./MenuItem.module.css";
 import clsx from "clsx";
 
@@ -20,29 +26,26 @@ const MenuItem = ({
   children,
 }: IMenuItem) => {
   const [isSubOpen, setIsSubOpen] = useState(false);
-  const [placement, setPlacement] = useState<"right" | "left">("left");
   const itemRef = useRef<HTMLLIElement>(null);
   const subRef = useRef<HTMLDivElement>(null);
 
-  const handleOpen = () => {
+  useLayoutEffect(() => {
     if (!isSubOpen || !itemRef.current || !subRef.current) return;
 
     const itemRect = itemRef.current.getBoundingClientRect();
     const subRect = subRef.current.getBoundingClientRect();
 
     if (itemRect.right + subRect.width > window.innerWidth) {
-      setPlacement("right");
+      subRef.current.style.right = "100%";
     } else {
-      setPlacement("left");
+      subRef.current.style.left = "100%";
     }
-
-    setIsSubOpen(true);
-  };
+  }, [isSubOpen]);
 
   return (
     <li
       ref={itemRef}
-      onMouseEnter={() => subContent && handleOpen()}
+      onMouseEnter={() => subContent && setIsSubOpen(true)}
       onMouseLeave={() => subContent && setIsSubOpen(false)}
       style={{ position: "relative" }}
       className={clsx(styles.item, className)}
@@ -55,10 +58,7 @@ const MenuItem = ({
       </button>
 
       {isSubOpen && subContent && (
-        <div
-          ref={subRef}
-          style={{ [placement]: "100%", top: 0, position: "absolute" }}
-        >
+        <div ref={subRef} style={{ top: 0, position: "absolute" }}>
           {subContent}
         </div>
       )}

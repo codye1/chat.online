@@ -30,9 +30,11 @@ const useFolderConversations = (activeFolderId: string) => {
   const canChangeSliceRef = useRef(true);
 
   useEffect(() => {
+    if (missing.length === 0) return;
+
     fetchConversations({ ids: missing })
       .unwrap()
-      .then(() => {
+      .finally(() => {
         canChangeSliceRef.current = true;
       });
   }, [missing, fetchConversations]);

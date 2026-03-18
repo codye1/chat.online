@@ -32,8 +32,6 @@ const getConversationsSlice = ({
     }
   }
 
-  console.log(unpinned.find((id) => id === "cmml16uih00dgl0v7l2dlr9w2"));
-
   const missing: string[] = [];
   const pinnedConversations: Record<string, ConversationPreview> = {};
   let took = 0;

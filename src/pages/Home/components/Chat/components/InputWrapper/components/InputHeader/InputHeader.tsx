@@ -12,6 +12,7 @@ interface IInputHeader {
 const InputHeader = ({ label, description, icon, onCancel }: IInputHeader) => {
   return (
     <span className={styles.header}>
+      {/*TODO: On click scroll to selected message */}
       <button className={styles.icon}>
         <img src={icon} alt={label} />
       </button>

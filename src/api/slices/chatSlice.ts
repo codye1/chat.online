@@ -118,8 +118,6 @@ const chatSlice = api.injectEndpoints({
           };
           conversationId: string;
         }) => {
-          console.log("message readed" + lastReadMessage.id);
-
           updateCachedData((draft) => {
             if (draft.id === conversationId) {
               draft.lastReadIdByParticipants = lastReadMessage.id;
@@ -159,8 +157,6 @@ const chatSlice = api.injectEndpoints({
           if (globalRecipientId == recipientId) {
             dispatch(setConversation({ conversationId: conversation.id }));
           }
-          console.log(conversation);
-
           // Update cache
           dispatch(
             chatSlice.util.updateQueryData(
@@ -448,8 +444,6 @@ const chatSlice = api.injectEndpoints({
           initiator?: string;
           firstMessage: Message;
         }) => {
-          console.log("new");
-
           connectToConversation([conversation.id]);
           updateCachedData((draft) => {
             draft.byId[conversation.id] = conversation;
@@ -600,8 +594,6 @@ const chatSlice = api.injectEndpoints({
         }: {
           editedMessage: Message;
         }) => {
-          console.log(editedMessage);
-
           dispatch(
             chatSlice.util.updateQueryData(
               "getMessages",

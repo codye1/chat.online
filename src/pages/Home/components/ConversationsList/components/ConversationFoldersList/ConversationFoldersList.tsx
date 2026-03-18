@@ -31,7 +31,7 @@ const ConversationFoldersList = ({
         })}
         onClick={() => onFolderClick("ACTIVE")}
       >
-        All <div className={styles.count}>5</div>
+        All {/*TODO: Add count unread conversations */}
       </li>
       {folders &&
         folders.map((folder) => (

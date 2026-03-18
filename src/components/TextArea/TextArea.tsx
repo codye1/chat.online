@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type ChangeEvent } from "react";
-import styles from "./TextArea.module.css";
+import styles from "./Textarea.module.css";
 import clsx from "clsx";
 
 interface ITextarea {
@@ -28,10 +28,6 @@ const Textarea = ({
     if (trackValue) {
       trackValue.onChange(e);
     }
-    if (ref.current) {
-      ref.current.style.height = "auto";
-      ref.current.style.height = ref.current.scrollHeight + "px";
-    }
   };
 
   useLayoutEffect(() => {
@@ -39,7 +35,7 @@ const Textarea = ({
       ref.current.style.height = "auto";
       ref.current.style.height = ref.current.scrollHeight + "px";
     }
-  }, []);
+  }, [trackValue?.value]);
 
   const onKeyDownHandler = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (onKeyDown) {

@@ -2,9 +2,10 @@ import clsx from "clsx";
 import styles from "./PreviewItem.module.css";
 import Avatar from "@components/Avatar/Avatar";
 import { Children, isValidElement, useState, type ReactNode } from "react";
-import ContextMenu from "@components/ContextMenu/ContextMenu";
+import ContextMenu, {
+  ContextMenuSlot,
+} from "@components/ContextMenu/ContextMenu";
 import pinIcon from "@assets/pin.svg";
-import PreviewContextMenu from "./PreviewContextMenu";
 
 interface IPreviewItem {
   avatarUrl: string | null;
@@ -47,8 +48,7 @@ const PreviewItem = ({
         onClick={onClick}
         onContextMenu={(el) => {
           const hasContextMenu = Children.toArray(children).some(
-            (child) =>
-              isValidElement(child) && child.type === PreviewContextMenu,
+            (child) => isValidElement(child) && child.type === ContextMenuSlot,
           );
           if (!hasContextMenu) return;
           el.preventDefault();
@@ -92,7 +92,7 @@ const PreviewItem = ({
           Children.map(children, (child) => {
             if (
               isValidElement<{ children: ReactNode }>(child) &&
-              child.type === PreviewContextMenu
+              child.type === ContextMenuSlot
             ) {
               if (showContextMenu) {
                 return (

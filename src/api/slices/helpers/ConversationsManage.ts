@@ -15,11 +15,6 @@ const updateConversationsState = (
   );
 };
 
-const getConversationsCache = () => {
-  const state = store.getState();
-  return chatSlice.endpoints.getConversations.select()(state).data;
-};
-
 const updatePinnedPositions = async (
   folderId: string,
   updates: { conversationId: string; newPinnedPosition: number | null }[],
@@ -63,7 +58,12 @@ const updatePinnedPositions = async (
       } else {
         const idx = unpinned.indexOf(id);
         if (idx !== -1) unpinned.splice(idx, 1);
-        pinned.unshift(id);
+
+        if (newPinnedPosition == null) {
+          pinned.unshift(id);
+        } else {
+          pinned.splice(newPinnedPosition, 0, id);
+        }
       }
     });
   });
@@ -160,7 +160,6 @@ const removeFromFolder = async (conversationId: string, folderId: string) => {
 
 export {
   updateConversationsState,
-  getConversationsCache,
   updatePinnedPositions,
   updateConversationSettings,
   addToFolder,

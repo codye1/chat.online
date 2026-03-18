@@ -112,11 +112,6 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   virtualizer.measureElement(el);
                 }}
                 onDoubleClick={() => {
-                  if (window.getSelection()) {
-                    console.log(window.getSelection());
-
-                    return;
-                  }
                   addReaction({ messageId: message.id, content: "👍" });
                 }}
               />

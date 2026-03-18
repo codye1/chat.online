@@ -65,8 +65,6 @@ const sendMessage = ({
 };
 
 const connectToConversation = (conversationId: string[] | null) => {
-  console.log(conversationId);
-
   socket.emit("conversation:join", { conversationId });
 };
 
@@ -204,7 +202,6 @@ const initializeSocketListeners = (
     const state = store.getState();
     const conversationsState =
       chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
-
     let conversationsIds: string[] = [];
 
     if (conversationsState) {

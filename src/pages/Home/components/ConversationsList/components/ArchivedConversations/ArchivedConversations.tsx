@@ -4,8 +4,8 @@ import sortConversations from "../AllConversations/utils/sortConversations";
 import { setConversation } from "@redux/global";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import PreviewItem from "../PreviewItem/PreviewItem";
-import PreviewContextMenu from "../PreviewItem/PreviewContextMenu";
 import ConversationContextMenu from "../ConversationContextMenu/ConversationContextMenu";
+import ContextMenu from "@components/ContextMenu/ContextMenu";
 
 const ArchivedConversations = () => {
   const { unpinnedConversations, pinnedConversations, conversationsState } =
@@ -56,7 +56,7 @@ const ArchivedConversations = () => {
             }}
             isPinned={isPinned}
           >
-            <PreviewContextMenu>
+            <ContextMenu.Slot>
               <ConversationContextMenu
                 conversation={conversation}
                 isPinned={isPinned}
@@ -65,7 +65,7 @@ const ArchivedConversations = () => {
                 conversationsState={conversationsState}
                 foldersWhereConversationIs={foldersWhereConversationIs}
               />
-            </PreviewContextMenu>
+            </ContextMenu.Slot>
           </PreviewItem>
         );
       }}
