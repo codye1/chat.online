@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { setReplyMessage } from "@redux/global";
-import socket, { sendMessage } from "@utils/socket";
+import sendMessage from "@utils/socket/actions/messageActions/sendMessage";
+import socket from "@utils/socket/socket";
 import {
   useEffect,
   useMemo,

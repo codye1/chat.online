@@ -1,4 +1,4 @@
-import type { ConversationsState } from "./types";
+import type { ConversationsState } from "@utils/types";
 
 const getArchiveDescription = (conversationsState: ConversationsState) => {
   const archivedConversationIds = [

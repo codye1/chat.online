@@ -5,7 +5,9 @@ import { authUser, logoutUser } from "@redux/auth";
 import type { AppDispatch, RootState } from "@redux/store";
 import { isAnyOf } from "@reduxjs/toolkit";
 import type { ListenerEffectAPI } from "@reduxjs/toolkit";
-import socket, { syncSocketAuthorizationFromStorage } from "@utils/socket";
+import socket, {
+  syncSocketAuthorizationFromStorage,
+} from "@utils/socket/socket";
 
 export const handleAuthSuccess = (
   response: AuthResponse,

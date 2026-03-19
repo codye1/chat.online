@@ -1,10 +1,10 @@
 import Avatar from "@components/Avatar/Avatar";
 import styles from "./ReactorsList.module.css";
-import getDisplayName from "@utils/getDisplayName";
-import formatDate from "@utils/formatDate";
+import formatDate from "@utils/helpers/formatDate";
 import type { ReactorListItem } from "@utils/types";
 import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import Skeleton from "react-loading-skeleton";
+import getDisplayName from "@utils/helpers/getDisplayName";
 
 interface IReactorsList {
   tab: string;

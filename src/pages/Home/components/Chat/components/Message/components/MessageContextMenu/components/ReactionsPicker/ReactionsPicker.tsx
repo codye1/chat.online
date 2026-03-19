@@ -1,4 +1,4 @@
-import { addReaction } from "@utils/socket";
+import addReaction from "@utils/socket/actions/reactionActions/addReaction";
 import styles from "./ReactionsPicker.module.css";
 
 const reactions = ["👍", "❤️", "😂", "😮"];

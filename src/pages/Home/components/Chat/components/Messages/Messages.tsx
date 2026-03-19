@@ -1,10 +1,10 @@
 import { useAppSelector } from "@hooks/hooks";
 import { useState } from "react";
-import { useGetMessagesQuery } from "@api/slices/chatSlice";
+import { useGetMessagesQuery } from "@api/slices/Chat/chatSlice";
 import type { Conversation } from "@utils/types";
 import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
 import VList from "../VList/VList";
-import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
+import resetUnreadMessagesCount from "@utils/helpers/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";
 import Message from "../Message/Message";

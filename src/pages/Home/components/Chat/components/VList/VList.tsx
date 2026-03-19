@@ -15,7 +15,7 @@ import {
   type VirtualItem,
 } from "@tanstack/react-virtual";
 import ScrollToBottom from "../ScrollToBottom/ScrollToBottom";
-import checkIfNearBottom from "@utils/checkIfNearBottom";
+import checkIfNearBottom from "@utils/helpers/checkIfNearBottom";
 import clsx from "clsx";
 
 interface IVList {

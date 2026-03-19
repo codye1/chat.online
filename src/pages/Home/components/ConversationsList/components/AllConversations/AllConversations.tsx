@@ -10,9 +10,9 @@ import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import styles from "./AllConversationsList.module.css";
 import ConversationContextMenu from "../ConversationContextMenu/ConversationContextMenu";
 import archiveAvatar from "@assets/archiveAvatar.png";
-import getArchiveDescription from "@utils/getArchiveDescription";
 import type { views } from "../../ConversationsList";
 import ContextMenu from "@components/ContextMenu/ContextMenu";
+import getArchiveDescription from "@utils/helpers/getArchiveDescription";
 
 interface IAllConversations {
   setView: (view: views) => void;

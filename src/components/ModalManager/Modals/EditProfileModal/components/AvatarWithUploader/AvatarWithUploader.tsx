@@ -1,7 +1,7 @@
 import Cropper from "react-easy-crop";
 import Button from "@components/Button/Button";
 import type { Area } from "react-easy-crop";
-import getCroppedImg from "@utils/getCroppedImg";
+import getCroppedImg from "@utils/helpers/getCroppedImg";
 import { useState } from "react";
 import Modal from "@components/Modal/Modal";
 import styles from "./AvatarWithUploader.module.css";

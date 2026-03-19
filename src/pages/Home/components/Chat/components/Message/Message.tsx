@@ -5,8 +5,8 @@ import { useRef, useState } from "react";
 import Reactions from "./components/Reactions/Reactions";
 import type { MessageMedia, Message as MessageType } from "@utils/types";
 import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
-import getDisplayName from "@utils/getDisplayName";
 import MediaContainer from "./components/MediaContainer/MediaContainer";
+import getDisplayName from "@utils/helpers/getDisplayName";
 
 export interface IMessage {
   message: MessageType;

@@ -1,8 +1,8 @@
 import {
   useConversationsQuery,
   useLazyGetConversationsQuery,
-} from "@api/slices/chatSlice";
-import getConversationsSlice from "@utils/getConversationsSlice";
+} from "@api/slices/Chat/chatSlice";
+import getConversationsSlice from "@utils/helpers/getConversationsSlice";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const useFolderConversations = (activeFolderId: string) => {

@@ -1,4 +1,4 @@
-import type { ConversationPreview, ConversationsState } from "./types";
+import type { ConversationPreview, ConversationsState } from "@utils/types";
 
 interface IGetConversationsSlice {
   activeFolderId: string;

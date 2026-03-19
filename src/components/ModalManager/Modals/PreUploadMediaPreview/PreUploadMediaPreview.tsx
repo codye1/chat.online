@@ -14,7 +14,8 @@ import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import plus from "@assets/plus.svg";
 import InputFile from "@components/InputFile";
 import { useUploadMediaMutation } from "@api/slices/mediaSlice";
-import { editMessage, sendMessage } from "@utils/socket";
+import sendMessage from "@utils/socket/actions/messageActions/sendMessage";
+import editMessage from "@utils/socket/actions/messageActions/editMessage";
 
 interface IPreUploadMediaPreview {
   files: LoadedFile[];

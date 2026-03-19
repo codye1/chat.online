@@ -14,13 +14,13 @@ import {
 import { useUpdateUserMutation } from "@api/slices/userSlice";
 import styles from "./EditProfileModal.module.css";
 import editUser from "@actions/editUser";
-import getDisplayName from "@utils/getDisplayName";
 import EditNicknameModal from "./components/EditNickname";
 import EditNameModal from "./components/EditNameModal";
 import AvatarWithUploader from "./components/AvatarWithUploader/AvatarWithUploader";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { closeModal, openModal } from "@redux/global";
 import Textarea from "@components/Textarea/Textarea";
+import getDisplayName from "@utils/helpers/getDisplayName";
 const EditProfileModal = () => {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();

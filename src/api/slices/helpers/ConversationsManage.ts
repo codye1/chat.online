@@ -1,9 +1,16 @@
-import store from "@redux/store";
-import chatSlice from "../chatSlice";
+import store, { type RootState } from "@redux/store";
+import chatSlice from "../Chat/chatSlice";
 import type {
+  Conversation,
   ConversationsState,
   EditableConversationFields,
 } from "@utils/types";
+
+const getConversationsState = () => {
+  const state = store.getState() as RootState;
+
+  return chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+};
 
 const updateConversationsState = (
   updateFn: (state: ConversationsState) => void,
@@ -12,6 +19,23 @@ const updateConversationsState = (
     chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
       updateFn(draft);
     }),
+  );
+};
+
+const updateConversation = (
+  conversationId: string,
+  updateFn: (conversation: Conversation) => void,
+) => {
+  store.dispatch(
+    chatSlice.util.updateQueryData(
+      "getConversation",
+      { recipientId: null, conversationId },
+      (draft) => {
+        if (draft) {
+          updateFn(draft);
+        }
+      },
+    ),
   );
 };
 
@@ -164,4 +188,6 @@ export {
   updateConversationSettings,
   addToFolder,
   removeFromFolder,
+  updateConversation,
+  getConversationsState,
 };

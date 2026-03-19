@@ -1,4 +1,4 @@
-import chatSlice from "@api/slices/chatSlice";
+import chatSlice from "@api/slices/Chat/chatSlice";
 import store from "@redux/store";
 const resetUnreadMessagesCount = (conversationId: string) => {
   store.dispatch(

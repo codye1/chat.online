@@ -1,8 +1,8 @@
-import socket from "@utils/socket";
+import socket from "@utils/socket/socket";
 import type { DirectConversation } from "@utils/types";
 import { useEffect, useState } from "react";
 import headerStyles from "../Header.module.css";
-import getOnlineStatus from "@utils/getOnlineStatus";
+import getOnlineStatus from "@utils/helpers/getOnlineStatus";
 import DirectInfoModal from "./DirectInfoModal/DirectInfoModal";
 
 interface IDirectHeader {

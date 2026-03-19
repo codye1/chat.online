@@ -1,6 +1,6 @@
 import styles from "./Chat.module.css";
 import InputWrapper from "./components/InputWrapper/InputWrapper";
-import { useGetConversationQuery } from "@api/slices/chatSlice";
+import { useGetConversationQuery } from "@api/slices/Chat/chatSlice";
 import { useAppSelector } from "@hooks/hooks";
 import Header from "./components/Header/Header";
 import Messages from "./components/Messages/Messages";

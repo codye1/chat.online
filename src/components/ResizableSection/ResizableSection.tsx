@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import styles from "./ResizableSection.module.css";
-import vwToPx from "@utils/vwToPx";
+import vwToPx from "@utils/helpers/vwToPx";
 import clsx from "clsx";
 
 interface IResizableSection {

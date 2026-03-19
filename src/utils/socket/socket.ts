@@ -1,8 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import store from "@redux/store";
-import chatSlice from "@api/slices/chatSlice";
-import { updateConversationsState } from "@api/slices/helpers/ConversationsManage";
-import type { MessageMedia } from "./types";
+import chatSlice from "@api/slices/Chat/chatSlice";
+import connectToConversation from "./actions/conversationActions/connectToConversation";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -28,133 +27,6 @@ const syncSocketAuthorizationFromStorage = () => {
 
 const setSocketAuthorization = (token?: string | null) => {
   socket.auth = token ? { token } : {};
-};
-
-const sendMessage = ({
-  conversationId,
-  text,
-  replyToMessageId,
-  media,
-}: {
-  conversationId: string;
-  text: string;
-  replyToMessageId?: string | null;
-  media?: MessageMedia[];
-}) => {
-  if (text.length === 0) return;
-  const isTemp = conversationId?.startsWith("tempId");
-
-  if (isTemp) {
-    const recipientId = conversationId.split(":")[1];
-    socket.emit("message:send", {
-      text,
-      replyToMessageId,
-      recipientId,
-      media,
-    });
-  }
-
-  if (!isTemp) {
-    socket.emit("message:send", {
-      conversationId,
-      text,
-      replyToMessageId,
-      media,
-    });
-  }
-};
-
-const connectToConversation = (conversationId: string[] | null) => {
-  socket.emit("conversation:join", { conversationId });
-};
-
-// i use @id @default(cuid()) so message ids are strings and sortable
-const emitMessageReadDebounced = (() => {
-  const timeouts: Record<string, number | undefined> = {};
-  const maxIds: Record<string, string> = {};
-
-  return (conversationId: string, lastReadMessageId: string) => {
-    if (!maxIds[conversationId] || lastReadMessageId > maxIds[conversationId]) {
-      maxIds[conversationId] = lastReadMessageId;
-    }
-
-    if (timeouts[conversationId]) {
-      clearTimeout(timeouts[conversationId]);
-    }
-
-    timeouts[conversationId] = window.setTimeout(() => {
-      const maxId = maxIds[conversationId];
-      socket.emit("message:read", { conversationId, lastReadMessageId: maxId });
-
-      delete maxIds[conversationId];
-      delete timeouts[conversationId];
-    }, 500);
-  };
-})();
-
-const markMessageAsRead = (
-  conversationId: string,
-  lastReadMessageId: string,
-) => {
-  emitMessageReadDebounced(conversationId, lastReadMessageId);
-
-  updateConversationsState((draft) => {
-    const convo = draft.byId[conversationId];
-    if (convo) {
-      convo.unreadMessages = Math.max(0, convo.unreadMessages - 1);
-    }
-  });
-
-  store.dispatch(
-    chatSlice.util.updateQueryData(
-      "getConversation",
-      { conversationId, recipientId: null },
-      (draft) => {
-        draft.unreadMessages = Math.max(0, draft.unreadMessages - 1);
-        draft.lastReadId = lastReadMessageId;
-      },
-    ),
-  );
-};
-
-const addReaction = ({
-  messageId,
-  content,
-}: {
-  messageId: string;
-  content: string;
-}) => {
-  socket.emit("reaction:add", { messageId, content });
-};
-
-const removeReaction = ({ messageId }: { messageId: string }) => {
-  socket.emit("reaction:remove", { messageId });
-};
-
-const deleteMessage = (messageId: string) => {
-  socket.emit("message:delete", { messageId });
-};
-
-const editMessage = ({
-  messageId,
-  conversationId,
-  newText,
-  replaceMedia,
-}: {
-  messageId: string;
-  conversationId: string;
-  newText: string;
-  replaceMedia?: {
-    oldMediaId?: string;
-    newMedia: MessageMedia;
-  };
-}) => {
-  socket.emit("message:edit", {
-    messageId,
-    conversationId,
-    newText,
-    replaceMedia,
-  });
 };
 
 interface SocketListenerCallbacks {
@@ -275,13 +147,6 @@ const initializeSocketListeners = (
 export default socket;
 export {
   setSocketAuthorization,
-  sendMessage,
-  deleteMessage,
-  editMessage,
-  connectToConversation,
-  markMessageAsRead,
-  addReaction,
-  removeReaction,
   initializeSocketListeners,
   syncSocketAuthorizationFromStorage,
 };

@@ -4,7 +4,7 @@ import styles from "./DirectInfoModal.module.css";
 import closeIcon from "@assets/close.svg";
 import Avatar from "@components/Avatar/Avatar";
 import clsx from "clsx";
-import getDisplayName from "@utils/getDisplayName";
+import getDisplayName from "@utils/helpers/getDisplayName";
 
 interface IDirectInfoModal {
   conversation: DirectConversation;

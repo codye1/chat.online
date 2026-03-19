@@ -1,5 +1,4 @@
 import ContextMenu from "@components/ContextMenu/ContextMenu";
-import { deleteMessage } from "@utils/socket";
 import deleteIcon from "@assets/delete.svg";
 import editIcon from "@assets/edit.svg";
 import copyIcon from "@assets/copy.svg";
@@ -12,6 +11,7 @@ import replyIcon from "@assets/reply.svg";
 import type { Message, MessageMedia } from "@utils/types";
 import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
+import deleteMessage from "@utils/socket/actions/messageActions/deleteMessage";
 
 interface IMessageContextMenu {
   isContextMenuOpen: boolean;

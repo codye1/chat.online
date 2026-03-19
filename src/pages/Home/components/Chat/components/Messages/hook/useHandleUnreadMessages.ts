@@ -1,7 +1,7 @@
-import { markMessageAsRead } from "@utils/socket";
 import type { Conversation, Message } from "@utils/types";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import useObserver from "@hooks/useObserver";
+import markMessageAsRead from "@utils/socket/actions/messageActions/marckMessageAsRead";
 
 const useHandleUnreadMessages = ({
   conversation,

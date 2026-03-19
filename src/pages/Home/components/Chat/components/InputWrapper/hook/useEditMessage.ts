@@ -1,6 +1,7 @@
 import { useAppDispatch } from "@hooks/hooks";
 import { setMessageToEdit } from "@redux/global";
-import socket, { editMessage } from "@utils/socket";
+import editMessage from "@utils/socket/actions/messageActions/editMessage";
+import socket from "@utils/socket/socket";
 import type { Message } from "@utils/types";
 import {
   useEffect,

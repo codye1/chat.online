@@ -1,7 +1,8 @@
 import type { GroupedReactions } from "@utils/types";
 import styles from "./Reactions.module.css";
 import clsx from "clsx";
-import { addReaction, removeReaction } from "@utils/socket";
+import removeReaction from "@utils/socket/actions/reactionActions/removeReaction";
+import addReaction from "@utils/socket/actions/reactionActions/addReaction";
 
 const Reactions = ({
   reactions,

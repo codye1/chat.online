@@ -1,9 +1,9 @@
-import vwToPx from "@utils/vwToPx";
+import vwToPx from "@utils/helpers/vwToPx";
 import styles from "./ConversationsList.module.css";
 import Input from "@components/Input/Input";
 import { useState } from "react";
 import AllConversations from "./components/AllConversations/AllConversations";
-import { useSearchQuery } from "@api/slices/chatSlice";
+import { useSearchQuery } from "@api/slices/Chat/chatSlice";
 import closeIcon from "@assets/close.svg";
 import SearchMenu from "./components/SearchMenu/SearchMenu";
 import ResizableSection from "@components/ResizableSection/ResizableSection";

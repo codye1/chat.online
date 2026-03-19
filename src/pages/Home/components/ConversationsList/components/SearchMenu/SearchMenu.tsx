@@ -1,11 +1,11 @@
-import { connectToConversation } from "@utils/socket";
 import { useAppDispatch } from "@hooks/hooks";
 import { setConversation, setRecipient } from "@redux/global";
 import PreviewItem from "../PreviewItem/PreviewItem";
 import type { SearchResponse } from "@utils/types";
 import styles from "./SearchMenu.module.css";
 import noSearchResults from "@assets/noSearchResult.svg";
-import { useConversationsQuery } from "@api/slices/chatSlice";
+import { useConversationsQuery } from "@api/slices/Chat/chatSlice";
+import connectToConversation from "@utils/socket/actions/conversationActions/connectToConversation";
 
 const SearchMenu = ({ searchResults }: { searchResults?: SearchResponse }) => {
   const dispatch = useAppDispatch();

@@ -5,9 +5,9 @@ import clsx from "clsx";
 import styles from "./ProfileViewModal.module.css";
 import closeIcon from "@assets/close.svg";
 import edit from "@assets/edit.svg";
-import getDisplayName from "@utils/getDisplayName";
 import { useAppDispatch } from "@hooks/hooks";
 import { closeModal, openModal } from "@redux/global";
+import getDisplayName from "@utils/helpers/getDisplayName";
 
 interface IProfileViewModal {
   user: User;

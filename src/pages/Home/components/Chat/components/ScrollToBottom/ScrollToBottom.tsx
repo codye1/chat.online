@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import chevron from "@assets/chevron.svg";
 import styles from "./ScrollToBottom.module.css";
-import checkIfNearBottom from "@utils/checkIfNearBottom";
+import checkIfNearBottom from "@utils/helpers/checkIfNearBottom";
 
 interface IScrollToBottom {
   component: HTMLDivElement | null;

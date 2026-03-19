@@ -6,7 +6,7 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import authSlice from "./slices/authSlice";
-import getErrorCode from "@utils/getErrorCode";
+import getErrorCode from "@utils/helpers/getErrorCode";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
