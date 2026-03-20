@@ -17,7 +17,6 @@ type UserPreview = {
 };
 
 type Reaction = {
-  id: string;
   content: string;
   createdAt: Date;
   messageId: string;
@@ -47,12 +46,13 @@ interface MessageMedia {
 interface Message {
   id: string;
   text: string;
-  media: MessageMedia[] | null;
+  status: "sending" | "sent" | "delivered" | "failed";
+  media?: MessageMedia[];
   conversationId: string;
   sender: UserPreview;
   createdAt: string;
   reactions: GroupedReactions;
-  replyTo: ReplyMessage | null;
+  replyTo?: ReplyMessage;
 }
 
 type ConversationTypes = "DIRECT" | "GROUP";

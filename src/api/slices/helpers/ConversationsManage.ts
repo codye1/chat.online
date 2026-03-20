@@ -31,9 +31,7 @@ const updateConversation = (
       "getConversation",
       { recipientId: null, conversationId },
       (draft) => {
-        if (draft) {
-          updateFn(draft);
-        }
+        updateFn(draft);
       },
     ),
   );
@@ -182,6 +180,16 @@ const removeFromFolder = async (conversationId: string, folderId: string) => {
     .unwrap();
 };
 
+const upsertConversation = (conversation: Conversation) => {
+  store.dispatch(
+    chatSlice.util.upsertQueryData(
+      "getConversation",
+      { recipientId: null, conversationId: conversation.id },
+      conversation,
+    ),
+  );
+};
+
 export {
   updateConversationsState,
   updatePinnedPositions,
@@ -190,4 +198,5 @@ export {
   removeFromFolder,
   updateConversation,
   getConversationsState,
+  upsertConversation,
 };

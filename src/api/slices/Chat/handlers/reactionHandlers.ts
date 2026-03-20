@@ -1,5 +1,4 @@
 import { updateMessages } from "@api/slices/helpers/MessagesManage";
-import store, { type RootState } from "@redux/store";
 import type { Reaction, UserPreview } from "@utils/types";
 
 interface NewReactionData {
@@ -12,7 +11,6 @@ interface NewReactionData {
 const onNewReaction = (data: NewReactionData) => {
   const { conversationId, messageId, newReaction, prevReaction } = data;
 
-  const { getState } = store;
   updateMessages(conversationId, (messages) => {
     if (messages && messages.items) {
       const message = messages.items.find((m) => m.id === messageId);
@@ -30,10 +28,6 @@ const onNewReaction = (data: NewReactionData) => {
             if (prevReactionGroup.count <= 0) {
               delete message.reactions[prevReaction.content];
             }
-            const state = getState() as RootState;
-            if (prevReaction.user.id === state.auth.user.id) {
-              prevReactionGroup.isActive = false;
-            }
           }
         }
 
@@ -48,11 +42,6 @@ const onNewReaction = (data: NewReactionData) => {
         message.reactions[newReaction.content].count += 1;
 
         message.reactions[newReaction.content].users.push(newReaction.user);
-
-        const state = getState() as RootState;
-        if (newReaction.user.id === state.auth.user.id) {
-          message.reactions[newReaction.content].isActive = true;
-        }
       }
     }
   });
@@ -65,7 +54,6 @@ interface RemoveReactionData {
 
 const onRemoveReaction = (data: RemoveReactionData) => {
   const { conversationId, messageId, removedReaction } = data;
-  const { getState } = store;
 
   updateMessages(conversationId, (messages) => {
     if (messages && messages.items) {
@@ -80,11 +68,6 @@ const onRemoveReaction = (data: RemoveReactionData) => {
           removedReactionGroup.count -= 1;
           if (removedReactionGroup.count <= 0) {
             delete message.reactions[removedReaction.content];
-          }
-
-          const state = getState() as RootState;
-          if (removedReaction.user.id === state.auth.user.id) {
-            removedReactionGroup.isActive = false;
           }
         }
       }

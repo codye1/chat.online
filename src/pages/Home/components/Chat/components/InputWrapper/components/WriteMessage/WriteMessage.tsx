@@ -29,7 +29,6 @@ const WriteMessage = () => {
   const dispatch = useAppDispatch();
   const clipButtonRef = useRef<HTMLButtonElement>(null);
   const [showPopover, setShowPopover] = useState(false);
-
   return (
     <div className={styles.inputContainer}>
       {replyMessage && (

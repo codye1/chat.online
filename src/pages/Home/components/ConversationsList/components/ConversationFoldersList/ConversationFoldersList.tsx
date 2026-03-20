@@ -43,10 +43,10 @@ const ConversationFoldersList = ({
             onClick={() => onFolderClick(folder.id)}
           >
             {folder.title}{" "}
-            <div className={styles.count}>
+            {/*<div className={styles.count}>
               {folder.pinnedConversationIds.length +
                 folder.unpinnedConversationIds.length}
-            </div>
+            </div>*/}
           </li>
         ))}
     </ul>

@@ -1,13 +1,14 @@
 import {
   updateConversation,
   updateConversationsState,
+  upsertConversation,
 } from "@api/slices/helpers/ConversationsManage";
-import { updateMessages } from "@api/slices/helpers/MessagesManage";
 import { setConversation } from "@redux/global";
 import type { RootState } from "@redux/store";
 import store from "@redux/store";
 import connectToConversation from "@utils/socket/actions/conversationActions/connectToConversation";
 import type { Conversation, Message } from "@utils/types";
+import { upsertMessages } from "./messageHandlers";
 
 interface onLastSeenAtUpdateData {
   userId: string;
@@ -71,11 +72,12 @@ const onNewConversation = (data: CreateOnLastSeenAtUpdateData) => {
     draft.byId[conversation.id] = conversation;
     draft.activeIds.unpinned.unshift(conversation.id);
   });
-  updateConversation(conversation.id, () => conversation);
-  updateMessages(conversation.id, (draft) => {
-    draft.items = [firstMessage];
-    draft.hasMoreUp = false;
-    draft.hasMoreDown = false;
+  upsertConversation(conversation);
+  upsertMessages(conversation.id, {
+    items: [firstMessage],
+    hasMoreUp: false,
+    hasMoreDown: false,
+    fromUser: false,
   });
 
   const state = getState() as RootState;

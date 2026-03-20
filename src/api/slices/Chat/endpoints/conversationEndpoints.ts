@@ -14,6 +14,8 @@ import {
   onMessageEdited,
   onMessageRead,
   onNewMessage,
+  onSentMessage,
+  upsertMessages,
 } from "../handlers/messageHandlers";
 import {
   onLastSeenAtUpdate,
@@ -21,9 +23,8 @@ import {
 } from "../handlers/conversationHandlers";
 import { onNewReaction, onRemoveReaction } from "../handlers/reactionHandlers";
 import { onUserActive, onUserStopActive } from "../handlers/activityHandlers";
-import { updateMessages } from "@api/slices/helpers/MessagesManage";
-import { updateConversation } from "@api/slices/helpers/ConversationsManage";
 import connectToConversation from "@utils/socket/actions/conversationActions/connectToConversation";
+import { upsertConversation } from "@api/slices/helpers/ConversationsManage";
 
 const buildConversationEndpoints = (builder: Builder) => ({
   search: builder.query<SearchResponse, { query: string }>({
@@ -54,14 +55,14 @@ const buildConversationEndpoints = (builder: Builder) => ({
         const isTemp = data.id.startsWith("tempId");
 
         dispatch(setConversation({ conversationId: data.id }));
-        updateConversation(data.id, () => data);
 
         if (isTemp) {
-          updateMessages(data.id, (messages) => {
-            messages.items = [];
-            messages.hasMoreUp = false;
-            messages.hasMoreDown = false;
-            messages.fromUser = false;
+          upsertConversation(data);
+          upsertMessages(data.id, {
+            items: [],
+            hasMoreUp: false,
+            hasMoreDown: false,
+            fromUser: false,
           });
         }
       }
@@ -148,6 +149,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
       socket.on("reaction:new", onNewReaction);
       socket.on("conversation:new", onNewConversation);
       socket.on("message:new", onNewMessage);
+      socket.on("message:sent", onSentMessage);
       socket.on("message:deleted", onDeleteMessage);
       socket.on("activity:start", onUserActive);
       socket.on("activity:stop", onUserStopActive);
@@ -158,6 +160,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
       socket.off("reaction:removed", onRemoveReaction);
       socket.off("reaction:new", onNewReaction);
       socket.off("message:new", onNewMessage);
+      socket.off("message:sent", onSentMessage);
       socket.off("message:deleted", onDeleteMessage);
       socket.off("conversation:new", onNewConversation);
       socket.off("activity:start", onUserActive);

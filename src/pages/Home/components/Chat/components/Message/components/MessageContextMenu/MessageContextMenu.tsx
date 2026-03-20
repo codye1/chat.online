@@ -1,4 +1,3 @@
-import ContextMenu from "@components/ContextMenu/ContextMenu";
 import deleteIcon from "@assets/delete.svg";
 import editIcon from "@assets/edit.svg";
 import copyIcon from "@assets/copy.svg";
@@ -14,39 +13,30 @@ import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import deleteMessage from "@utils/socket/actions/messageActions/deleteMessage";
 
 interface IMessageContextMenu {
-  isContextMenuOpen: boolean;
-  setIsContextMenuOpen: (open: boolean) => void;
-  mousePosition: { x: number; y: number };
-  message: Message & { sentByCurrentUser: boolean };
   mediaForContextMenu?: MessageMedia;
   setMediaForContextMenu: (media?: MessageMedia) => void;
+  message: Message & { sentByCurrentUser: boolean };
 }
 
 const MessageContextMenu = ({
-  isContextMenuOpen,
-  setIsContextMenuOpen,
-  mousePosition,
   message,
   mediaForContextMenu,
   setMediaForContextMenu,
 }: IMessageContextMenu) => {
   const dispatch = useAppDispatch();
-
   const onDeleteMessage = () => {
-    deleteMessage(message.id);
+    deleteMessage(message.id, message.conversationId);
   };
 
   const onEditMessage = () => {
     dispatch(
       setMessageToEdit({ ...message, mediaToEdit: mediaForContextMenu }),
     );
-    setIsContextMenuOpen(false);
     setMediaForContextMenu(undefined);
   };
 
   const onCopyMessage = () => {
     navigator.clipboard.writeText(message.text);
-    setIsContextMenuOpen(false);
   };
 
   const onReply = () => {
@@ -57,18 +47,14 @@ const MessageContextMenu = ({
         sender: message.sender,
       }),
     );
-    setIsContextMenuOpen(false);
   };
 
   return (
-    <ContextMenu
-      isOpen={isContextMenuOpen}
-      onClose={() => setIsContextMenuOpen(false)}
-      position={mousePosition}
-    >
+    <>
       <ReactionsPicker
         messageId={message.id}
-        setIsContextMenuOpen={setIsContextMenuOpen}
+        setIsContextMenuOpen={() => {}}
+        conversationId={message.conversationId}
       />
       <MenuContent>
         <MenuItem onClick={onReply} icon={replyIcon} label="Reply" />
@@ -103,7 +89,6 @@ const MessageContextMenu = ({
                       },
                     }),
                   );
-                  setIsContextMenuOpen(false);
                 }}
                 icon={heart}
                 label="Reactors"
@@ -112,7 +97,7 @@ const MessageContextMenu = ({
           </>
         )}
       </MenuContent>
-    </ContextMenu>
+    </>
   );
 };
 

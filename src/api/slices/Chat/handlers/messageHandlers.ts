@@ -8,6 +8,7 @@ import {
   updateConversationsState,
 } from "@api/slices/helpers/ConversationsManage";
 import { updateMessages } from "@api/slices/helpers/MessagesManage";
+import type { MessagesResponse } from "../endpoints/messageEndpoints";
 
 const onNewMessage = (message: Message) => {
   const { getState } = store;
@@ -55,6 +56,18 @@ const onNewMessage = (message: Message) => {
     if (!messages.hasMoreDown) {
       messages.items.push(message);
       messages.fromUser = message.sender.id === state.auth.user.id;
+    }
+  });
+};
+
+const onSentMessage = (data: { tempId: string; message: Message }) => {
+  const { tempId, message } = data;
+  console.log(tempId);
+
+  updateMessages(message.conversationId, (messages) => {
+    const index = messages.items.findIndex((m) => m.id === tempId);
+    if (index !== -1) {
+      Object.assign(messages.items[index], message, { status: "sent" });
     }
   });
 };
@@ -138,4 +151,17 @@ const onDeleteMessage = (data: onDeleteMessageData) => {
   });
 };
 
-export { onNewMessage, onMessageRead, onMessageEdited, onDeleteMessage };
+const upsertMessages = (conversationId: string, messages: MessagesResponse) => {
+  store.dispatch(
+    chatSlice.util.upsertQueryData("getMessages", { conversationId }, messages),
+  );
+};
+
+export {
+  onNewMessage,
+  onSentMessage,
+  onMessageRead,
+  onMessageEdited,
+  onDeleteMessage,
+  upsertMessages,
+};

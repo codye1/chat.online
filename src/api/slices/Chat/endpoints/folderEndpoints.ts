@@ -31,7 +31,7 @@ const buildFolderEndpoints = (builder: Builder) => ({
     }
   >({
     query: ({ updates, folderId }) => ({
-      url: `chat/conversations/pin`,
+      url: `chat/pinned-positions`,
       method: "PATCH",
       body: { updates, folderId },
     }),

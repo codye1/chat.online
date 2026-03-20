@@ -15,9 +15,10 @@ const useWriteMessage = () => {
   const { nickname } = useAppSelector((state) => state.auth.user);
   const typingTimeoutRef = useRef<number | null>(null);
   const isTypingRef = useRef(false);
-  const { conversationId, replyMessage } = useAppSelector(
-    (state) => state.global,
-  );
+  const conversationId = useAppSelector((state) => state.global.conversationId);
+  const recipientId = useAppSelector((state) => state.global.recipientId);
+  const replyMessage = useAppSelector((state) => state.global.replyMessage);
+  const id = conversationId || `tempId:${recipientId}`;
 
   const dispatch = useAppDispatch();
 
@@ -50,11 +51,11 @@ const useWriteMessage = () => {
   }, [conversationId, nickname, stopTyping]);
 
   const handleEnterKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!conversationId) return;
+    if (!conversationId && !recipientId) return;
     if (e.key === "Enter" && !e.shiftKey && message.trim()) {
       e.preventDefault();
       sendMessage({
-        conversationId,
+        conversationId: id,
         text: message,
         replyToMessageId: replyMessage?.id,
       });
@@ -66,7 +67,7 @@ const useWriteMessage = () => {
   };
 
   const handleWriteMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (!conversationId) return;
+    if (!conversationId && !recipientId) return;
 
     if (!isTypingRef.current) {
       startTyping();
@@ -80,11 +81,11 @@ const useWriteMessage = () => {
   };
 
   const onSendMessage = () => {
-    if (!conversationId) return;
+    if (!conversationId && !recipientId) return;
 
     if (message.trim()) {
       sendMessage({
-        conversationId,
+        conversationId: id,
         text: message,
         replyToMessageId: replyMessage?.id,
       });

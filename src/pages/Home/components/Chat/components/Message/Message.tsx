@@ -1,12 +1,13 @@
 import clsx from "clsx";
 import styles from "./Message.module.css";
 import Check from "@assets/check.svg";
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import Reactions from "./components/Reactions/Reactions";
 import type { MessageMedia, Message as MessageType } from "@utils/types";
-import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
 import MediaContainer from "./components/MediaContainer/MediaContainer";
 import getDisplayName from "@utils/helpers/getDisplayName";
+import ContextMenu from "@components/ContextMenu/ContextMenu";
+import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
 
 export interface IMessage {
   message: MessageType;
@@ -14,7 +15,7 @@ export interface IMessage {
   read: boolean;
   ref: (node: Element | null | undefined) => void;
   "data-index": number;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   onDoubleClick?: () => void;
 }
 
@@ -28,7 +29,7 @@ const Message = ({
   onDoubleClick,
 }: IMessage) => {
   const popoverAnchorRef = useRef<HTMLDivElement | null>(null);
-  const [contextMenu, setContextMenu] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [mediaForContextMenu, setMediaForContextMenu] =
     useState<MessageMedia>();
@@ -48,7 +49,7 @@ const Message = ({
           onContextMenu={(e) => {
             e.preventDefault();
             setMousePosition({ x: e.clientX, y: e.clientY });
-            setContextMenu(true);
+            setShowContextMenu(true);
           }}
           className={clsx(styles.message, {
             [styles.sentByCurrentUser]: isSentByCurrentUser,
@@ -69,7 +70,7 @@ const Message = ({
               onMediaItemContextMenu={(e, media) => {
                 e.preventDefault();
                 setMousePosition({ x: e.clientX, y: e.clientY });
-                setContextMenu(true);
+                setShowContextMenu(true);
                 setMediaForContextMenu(media);
               }}
             />
@@ -84,7 +85,7 @@ const Message = ({
                   minute: "2-digit",
                 })}
               </span>
-              {isSentByCurrentUser && (
+              {isSentByCurrentUser && message.status !== "sending" && (
                 <img
                   className={clsx(styles.check, { [styles.read]: read })}
                   src={Check}
@@ -93,17 +94,26 @@ const Message = ({
               )}
             </div>
           </div>
-          <Reactions reactions={message.reactions} messageId={message.id} />
+          <Reactions
+            reactions={message.reactions}
+            messageId={message.id}
+            conversationId={message.conversationId}
+          />
         </div>
       </div>
-      <MessageContextMenu
-        isContextMenuOpen={contextMenu}
-        setIsContextMenuOpen={setContextMenu}
-        mousePosition={mousePosition}
-        setMediaForContextMenu={setMediaForContextMenu}
-        mediaForContextMenu={mediaForContextMenu}
-        message={{ ...message, sentByCurrentUser: isSentByCurrentUser }}
-      />
+      {showContextMenu && (
+        <ContextMenu
+          isOpen={showContextMenu}
+          onClose={() => setShowContextMenu(false)}
+          position={mousePosition}
+        >
+          <MessageContextMenu
+            message={{ ...message, sentByCurrentUser: isSentByCurrentUser }}
+            mediaForContextMenu={mediaForContextMenu}
+            setMediaForContextMenu={setMediaForContextMenu}
+          />
+        </ContextMenu>
+      )}
     </>
   );
 };

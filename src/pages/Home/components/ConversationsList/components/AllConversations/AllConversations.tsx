@@ -24,7 +24,7 @@ const AllConversations = ({ setView }: IAllConversations) => {
     useFolderConversations(activeFolderId);
 
   const dispatch = useAppDispatch();
-  const { conversationId } = useAppSelector((state) => state.global);
+  const conversationId = useAppSelector((state) => state.global.conversationId);
 
   const showArchive = useMemo(() => {
     return (

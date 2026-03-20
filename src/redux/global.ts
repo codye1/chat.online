@@ -40,11 +40,16 @@ export const globalSlice = createSlice({
       state,
       action: PayloadAction<{ conversationId: string | null }>,
     ) {
+      console.log("set conversation");
+      console.log(action.payload.conversationId);
+
       state.conversationId = action.payload.conversationId;
       state.recipientId = null;
       state.messageToEdit = null;
     },
     setRecipient(state, action: PayloadAction<{ recipientId: string | null }>) {
+      console.log("set recipient");
+
       state.recipientId = action.payload.recipientId;
       state.conversationId = null;
       state.messageToEdit = null;

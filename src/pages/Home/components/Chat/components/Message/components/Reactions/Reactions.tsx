@@ -7,9 +7,11 @@ import addReaction from "@utils/socket/actions/reactionActions/addReaction";
 const Reactions = ({
   reactions,
   messageId,
+  conversationId,
 }: {
   reactions: GroupedReactions;
   messageId: string;
+  conversationId: string;
 }) => {
   return (
     <>
@@ -23,9 +25,9 @@ const Reactions = ({
               })}
               onClick={() => {
                 if (group.isActive) {
-                  removeReaction({ messageId });
+                  removeReaction({ messageId, conversationId });
                 } else {
-                  addReaction({ messageId, content: key });
+                  addReaction({ messageId, content: key, conversationId });
                 }
               }}
             >

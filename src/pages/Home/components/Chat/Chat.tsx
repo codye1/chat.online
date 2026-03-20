@@ -6,9 +6,8 @@ import Header from "./components/Header/Header";
 import Messages from "./components/Messages/Messages";
 
 const Chat = () => {
-  const { conversationId, recipientId } = useAppSelector(
-    (state) => state.global,
-  );
+  const conversationId = useAppSelector((state) => state.global.conversationId);
+  const recipientId = useAppSelector((state) => state.global.recipientId);
   const { data, isLoading, error } = useGetConversationQuery(
     { recipientId, conversationId },
     { skip: !conversationId && !recipientId },
