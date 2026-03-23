@@ -88,6 +88,10 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
           }}
           renderItem={(item, itemsBuffer, virtualizer) => {
             const message = itemsBuffer[item.index];
+            const isRead = conversation.lastReadIdByParticipants
+              ? message.id <= conversation.lastReadIdByParticipants
+              : false;
+
             return (
               <Message
                 key={message.id}
@@ -100,14 +104,16 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   width: "100%",
                   transform: `translateY(${item.start}px)`,
                 }}
-                read={
-                  conversation.lastReadIdByParticipants
-                    ? message.id <= conversation.lastReadIdByParticipants
-                    : false
-                }
+                read={isRead}
                 isSentByCurrentUser={message.sender.id === user.id}
                 ref={(el) => {
-                  trackUnreadMessageRef(el, message);
+                  if (
+                    message.status !== "sending" &&
+                    !isRead &&
+                    message.sender.id !== user.id
+                  ) {
+                    trackUnreadMessageRef(el, message);
+                  }
                   virtualizer.measureElement(el);
                 }}
               />

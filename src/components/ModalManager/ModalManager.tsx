@@ -5,9 +5,12 @@ import ReactorsInfo from "./Modals/ReactorsInfo/ReactorsInfo";
 import CreateFolderModal from "./Modals/CreateFolderModal/CreateFolderModal";
 import PreUploadMediaPreview from "./Modals/PreUploadMediaPreview/PreUploadMediaPreview";
 import Lightbox from "./Modals/Lightbox/Lightbox";
+import ErrorModal from "./Modals/ErrorModal/ErrorModal";
+import EditFolder from "./Modals/EditFolder/EditFolder";
 
 const ModalManager = () => {
   const modal = useAppSelector((state) => state.global.activeModal);
+
   if (!modal) return null;
 
   switch (modal.type) {
@@ -36,6 +39,10 @@ const ModalManager = () => {
       );
     case "lightbox":
       return <Lightbox media={modal.media} />;
+    case "error":
+      return <ErrorModal title={modal.title} message={modal.message} />;
+    case "editFolder":
+      return <EditFolder folder={modal.folder} />;
     default:
       return null;
   }

@@ -1,4 +1,4 @@
-import store from "@redux/store";
+import store, { type RootState } from "@redux/store";
 import chatSlice from "../Chat/chatSlice";
 import type { MessagesResponse } from "../Chat/endpoints/messageEndpoints";
 import type { MessageMedia } from "@utils/types";
@@ -66,4 +66,14 @@ const addOptimisticMessage = ({
   return tempId;
 };
 
-export { updateMessages, addOptimisticMessage };
+const getMessages = (conversationId: string) => {
+  const state = store.getState() as RootState;
+  const messagesData = chatSlice.endpoints.getMessages.select({
+    conversationId,
+  })(state)?.data;
+
+  if (!messagesData) return null;
+
+  return messagesData.items;
+};
+export { updateMessages, addOptimisticMessage, getMessages };

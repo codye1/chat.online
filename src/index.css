@@ -18,6 +18,11 @@ body.loading * {
   cursor: wait !important;
 }
 
+.wait,
+.wait * {
+  cursor: wait !important;
+}
+
 :root {
   --c-dark: oklch(0.1 0 264);
   --c-foreground: oklch(0.23 0 264);

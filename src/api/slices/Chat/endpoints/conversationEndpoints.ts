@@ -18,6 +18,7 @@ import {
   upsertMessages,
 } from "../handlers/messageHandlers";
 import {
+  onDeleteConversation,
   onLastSeenAtUpdate,
   onNewConversation,
 } from "../handlers/conversationHandlers";
@@ -144,6 +145,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
         connectToConversation(conversationIds);
       }
 
+      socket.on("conversation:deleted", onDeleteConversation);
       socket.on("message:edited", onMessageEdited);
       socket.on("reaction:removed", onRemoveReaction);
       socket.on("reaction:new", onNewReaction);
@@ -162,6 +164,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
       socket.off("message:new", onNewMessage);
       socket.off("message:sent", onSentMessage);
       socket.off("message:deleted", onDeleteMessage);
+      socket.off("conversation:deleted", onDeleteConversation);
       socket.off("conversation:new", onNewConversation);
       socket.off("activity:start", onUserActive);
       socket.off("activity:stop", onUserStopActive);
@@ -176,6 +179,28 @@ const buildConversationEndpoints = (builder: Builder) => ({
       url: `chat/conversations/${conversationId}/settings`,
       method: "PATCH",
       body: settings,
+    }),
+  }),
+
+  deleteConversation: builder.mutation<void, { conversationId: string }>({
+    query: ({ conversationId }) => ({
+      url: `chat/conversations/${conversationId}`,
+      method: "DELETE",
+    }),
+  }),
+
+  renameFolder: builder.mutation<void, { folderId: string; newTitle: string }>({
+    query: ({ folderId, newTitle }) => ({
+      url: `chat/folders/${folderId}`,
+      method: "PATCH",
+      body: { newTitle },
+    }),
+  }),
+
+  deleteFolder: builder.mutation<void, { folderId: string }>({
+    query: ({ folderId }) => ({
+      url: `chat/folders/${folderId}`,
+      method: "DELETE",
     }),
   }),
 });

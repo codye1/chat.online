@@ -5,6 +5,7 @@ import type {
   ConversationsState,
   EditableConversationFields,
 } from "@utils/types";
+import { setConversation } from "@redux/global";
 
 const getConversationsState = () => {
   const state = store.getState() as RootState;
@@ -190,6 +191,44 @@ const upsertConversation = (conversation: Conversation) => {
   );
 };
 
+const deleteConversationFromState = async ({
+  conversationId,
+}: {
+  conversationId: string;
+}) => {
+  const state = store.getState() as RootState;
+  const activeConversationId = state.global.conversationId;
+
+  if (activeConversationId === conversationId) {
+    store.dispatch(setConversation({ conversationId: null }));
+  }
+
+  updateConversationsState((state) => {
+    delete state.byId[conversationId];
+    state.activeIds.pinned = state.activeIds.pinned.filter(
+      (id) => id !== conversationId,
+    );
+    state.activeIds.unpinned = state.activeIds.unpinned.filter(
+      (id) => id !== conversationId,
+    );
+    state.archivedIds.pinned = state.archivedIds.pinned.filter(
+      (id) => id !== conversationId,
+    );
+    state.archivedIds.unpinned = state.archivedIds.unpinned.filter(
+      (id) => id !== conversationId,
+    );
+
+    state.folders.forEach((folder) => {
+      folder.pinnedConversationIds = folder.pinnedConversationIds.filter(
+        (id) => id !== conversationId,
+      );
+      folder.unpinnedConversationIds = folder.unpinnedConversationIds.filter(
+        (id) => id !== conversationId,
+      );
+    });
+  });
+};
+
 export {
   updateConversationsState,
   updatePinnedPositions,
@@ -199,4 +238,5 @@ export {
   updateConversation,
   getConversationsState,
   upsertConversation,
+  deleteConversationFromState,
 };

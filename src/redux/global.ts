@@ -5,6 +5,8 @@ import type { IPreUploadMediaPreview } from "@components/ModalManager/Modals/Pre
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Message, MessageMedia, ReplyMessage } from "@utils/types";
 import type { ILightbox } from "@components/ModalManager/Modals/Lightbox/Lightbox";
+import type { IErrorModal } from "@components/ModalManager/Modals/ErrorModal/ErrorModal";
+import type { IEditFolder } from "@components/ModalManager/Modals/EditFolder/EditFolder";
 
 type AvailableModals =
   | { type: "profileView"; props: IProfileViewModal }
@@ -12,7 +14,9 @@ type AvailableModals =
   | { type: "reactorsInfo"; props: IReactorsInfo }
   | (ICreateFolderModal & { type: "createFolder" })
   | (IPreUploadMediaPreview & { type: "preUploadMediaPreview" })
-  | (ILightbox & { type: "lightbox" });
+  | (ILightbox & { type: "lightbox" })
+  | (IErrorModal & { type: "error" })
+  | (IEditFolder & { type: "editFolder" });
 
 type MessageToEdit = Message & { mediaToEdit?: MessageMedia };
 

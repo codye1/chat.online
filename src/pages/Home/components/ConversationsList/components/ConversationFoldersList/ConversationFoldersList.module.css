@@ -7,6 +7,8 @@
   &::-webkit-scrollbar {
     display: none;
   }
+
+  border-bottom: calc(var(--space-1) / 2) solid var(--c-border);
 }
 
 .folder {
@@ -41,5 +43,16 @@
   & .count {
     background-color: var(--c-link);
     color: var(--c-default);
+  }
+}
+
+.contextMenu {
+  min-width: 70px !important;
+}
+
+.contextItem {
+  & button {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
   }
 }

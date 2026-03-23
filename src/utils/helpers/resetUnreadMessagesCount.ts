@@ -1,24 +1,17 @@
-import chatSlice from "@api/slices/Chat/chatSlice";
-import store from "@redux/store";
+import {
+  updateConversation,
+  updateConversationsState,
+} from "@api/slices/helpers/ConversationsManage";
 const resetUnreadMessagesCount = (conversationId: string) => {
-  store.dispatch(
-    chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
-      const convo = draft.find((c) => c.id === conversationId);
-      if (convo) {
-        convo.unreadMessages = 0;
-      }
-    }),
-  );
-
-  store.dispatch(
-    chatSlice.util.updateQueryData(
-      "getConversation",
-      { conversationId, recipientId: null },
-      (draft) => {
-        draft.unreadMessages = 0;
-      },
-    ),
-  );
+  updateConversationsState((state) => {
+    const convo = state.byId[conversationId];
+    if (convo) {
+      convo.unreadMessages = 0;
+    }
+  });
+  updateConversation(conversationId, (conversation) => {
+    conversation.unreadMessages = 0;
+  });
 };
 
 export default resetUnreadMessagesCount;

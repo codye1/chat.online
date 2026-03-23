@@ -75,24 +75,26 @@ const MessageContextMenu = ({
               icon={deleteIcon}
               label="Delete message"
             />
-            <Separator />
             {Object.keys(message.reactions).length > 0 && (
-              <MenuItem
-                onClick={() => {
-                  dispatch(
-                    openModal({
-                      type: "reactorsInfo",
-                      props: {
-                        messageId: message.id,
-                        conversationId: message.conversationId,
-                        groupedReactions: message.reactions,
-                      },
-                    }),
-                  );
-                }}
-                icon={heart}
-                label="Reactors"
-              />
+              <>
+                <Separator />
+                <MenuItem
+                  onClick={() => {
+                    dispatch(
+                      openModal({
+                        type: "reactorsInfo",
+                        props: {
+                          messageId: message.id,
+                          conversationId: message.conversationId,
+                          groupedReactions: message.reactions,
+                        },
+                      }),
+                    );
+                  }}
+                  icon={heart}
+                  label="Reactors"
+                />
+              </>
             )}
           </>
         )}

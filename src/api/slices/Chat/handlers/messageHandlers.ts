@@ -82,6 +82,7 @@ interface onMessageReadData {
 
 const onMessageRead = (data: onMessageReadData) => {
   const { lastReadMessage, conversationId } = data;
+  console.log(lastReadMessage);
 
   updateConversation(conversationId, (conversation) => {
     if (conversation) {

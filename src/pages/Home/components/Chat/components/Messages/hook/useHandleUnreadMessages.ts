@@ -27,7 +27,7 @@ const useHandleUnreadMessages = ({
 
   const { setRef } = useObserver(
     handleRead,
-    useMemo(() => ({ threshold: 1 }), []),
+    useMemo(() => ({ threshold: 0.8 }), []),
   );
 
   const trackUnreadMessageRef = (
@@ -36,7 +36,8 @@ const useHandleUnreadMessages = ({
   ) => {
     if (
       node &&
-      (conversation.lastReadId === null || message.id > conversation.lastReadId)
+      (conversation.lastReadId === null ||
+        message.id >= conversation.lastReadId)
     ) {
       setRef(node);
     }

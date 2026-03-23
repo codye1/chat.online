@@ -1,4 +1,5 @@
 import {
+  deleteConversationFromState,
   updateConversation,
   updateConversationsState,
   upsertConversation,
@@ -88,4 +89,21 @@ const onNewConversation = (data: CreateOnLastSeenAtUpdateData) => {
   }
 };
 
-export { onLastSeenAtUpdate, createOnUpdateConversation, onNewConversation };
+const onDeleteConversation = (data: {
+  conversationId: string;
+  initiatorId?: string;
+}) => {
+  const { conversationId, initiatorId } = data;
+  const state = store.getState() as RootState;
+  const userId = state.auth.user.id;
+  if (initiatorId == userId) return;
+
+  deleteConversationFromState({ conversationId });
+};
+
+export {
+  onLastSeenAtUpdate,
+  createOnUpdateConversation,
+  onNewConversation,
+  onDeleteConversation,
+};
