@@ -13,7 +13,7 @@ import Popover from "@components/Popover/Popover";
 import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import photo from "@assets/photo.svg";
-import InputFile from "@components/InputFile";
+import InputFile from "@components/InputFile/InputFile";
 import clsx from "clsx";
 let timeoutId: number;
 

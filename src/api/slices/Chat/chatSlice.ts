@@ -39,6 +39,7 @@ export const {
   useDeleteConversationMutation,
   useRenameFolderMutation,
   useDeleteFolderMutation,
+  useCreateConversationMutation,
 } = chatSlice;
 
 const DEFAULT_CONVERSATIONS_STATE: ConversationsState = {

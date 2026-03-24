@@ -16,7 +16,8 @@ type AvailableModals =
   | (IPreUploadMediaPreview & { type: "preUploadMediaPreview" })
   | (ILightbox & { type: "lightbox" })
   | (IErrorModal & { type: "error" })
-  | (IEditFolder & { type: "editFolder" });
+  | (IEditFolder & { type: "editFolder" })
+  | { type: "createGroup" };
 
 type MessageToEdit = Message & { mediaToEdit?: MessageMedia };
 

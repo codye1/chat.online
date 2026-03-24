@@ -37,19 +37,16 @@ const EditFolder = ({ folder }: IEditFolder) => {
 
         <Button
           onClick={async () => {
-            await renameFolder({ folderId: folder.id, newTitle: title })
-              .unwrap()
-              .then(() => {
-                updateConversationsState((state) => {
-                  const folderToUpdate = state.folders.find(
-                    (f) => f.id === folder.id,
-                  );
-                  if (folderToUpdate) {
-                    folderToUpdate.title = title;
-                  }
-                });
-                dispatch(closeModal());
-              });
+            await renameFolder({ folderId: folder.id, newTitle: title });
+            updateConversationsState((state) => {
+              const folderToUpdate = state.folders.find(
+                (f) => f.id === folder.id,
+              );
+              if (folderToUpdate) {
+                folderToUpdate.title = title;
+              }
+            });
+            dispatch(closeModal());
           }}
           disabled={title === folder.title || title.trim() === ""}
           isLoading={isLoading}

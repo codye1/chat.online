@@ -72,14 +72,8 @@ const useGetContextActions = ({
   const onDeleteClick = async () => {
     if (window.confirm("Are you sure you want to delete this conversation?")) {
       document.body.classList.add("wait");
-      await deleteConversation({ conversationId: conversation.id })
-        .unwrap()
-        .then(() => {
-          deleteConversationFromState({
-            conversationId: conversation.id,
-          });
-        })
-        .catch((error) => {
+      await deleteConversation({ conversationId: conversation.id }).catch(
+        (error) => {
           dispatch(
             openModal({
               type: "error",
@@ -87,10 +81,12 @@ const useGetContextActions = ({
               message: error.data.error.message || "Unexpected error occurred.",
             }),
           );
-        })
-        .finally(() => {
-          document.body.classList.remove("wait");
-        });
+        },
+      );
+      document.body.classList.remove("wait");
+      deleteConversationFromState({
+        conversationId: conversation.id,
+      });
     }
   };
 

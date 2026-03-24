@@ -59,9 +59,9 @@ const createOnUpdateConversation = (data: CreateOnUpdateConversationData) => {
 };
 interface CreateOnLastSeenAtUpdateData {
   conversation: Conversation;
-  recipientId: string;
-  initiator?: string;
-  firstMessage: Message;
+  initiator: string;
+  recipientId?: string;
+  firstMessage?: Message;
 }
 
 const onNewConversation = (data: CreateOnLastSeenAtUpdateData) => {
@@ -75,7 +75,7 @@ const onNewConversation = (data: CreateOnLastSeenAtUpdateData) => {
   });
   upsertConversation(conversation);
   upsertMessages(conversation.id, {
-    items: [firstMessage],
+    items: firstMessage ? [firstMessage] : [],
     hasMoreUp: false,
     hasMoreDown: false,
     fromUser: false,

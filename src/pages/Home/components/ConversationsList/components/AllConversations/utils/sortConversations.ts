@@ -6,10 +6,10 @@ const sortConversations = (
   return Object.values(conversations).toSorted((a, b) => {
     const aTime = a.lastMessage
       ? new Date(a.lastMessage.createdAt).getTime()
-      : 0;
+      : new Date(a.createdAt).getTime();
     const bTime = b.lastMessage
       ? new Date(b.lastMessage.createdAt).getTime()
-      : 0;
+      : new Date(b.createdAt).getTime();
     return bTime - aTime;
   });
 };

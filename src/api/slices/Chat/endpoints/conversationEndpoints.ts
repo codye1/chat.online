@@ -28,10 +28,10 @@ import connectToConversation from "@utils/socket/actions/conversationActions/con
 import { upsertConversation } from "@api/slices/helpers/ConversationsManage";
 
 const buildConversationEndpoints = (builder: Builder) => ({
-  search: builder.query<SearchResponse, { query: string }>({
-    query: ({ query }) => ({
+  search: builder.query<SearchResponse, { query: string; type?: string }>({
+    query: ({ query, type }) => ({
       url: `chat/search`,
-      params: { query },
+      params: { query, type },
     }),
   }),
 
@@ -189,18 +189,19 @@ const buildConversationEndpoints = (builder: Builder) => ({
     }),
   }),
 
-  renameFolder: builder.mutation<void, { folderId: string; newTitle: string }>({
-    query: ({ folderId, newTitle }) => ({
-      url: `chat/folders/${folderId}`,
-      method: "PATCH",
-      body: { newTitle },
-    }),
-  }),
-
-  deleteFolder: builder.mutation<void, { folderId: string }>({
-    query: ({ folderId }) => ({
-      url: `chat/folders/${folderId}`,
-      method: "DELETE",
+  createConversation: builder.mutation<
+    Conversation,
+    {
+      participantIds: string[];
+      title: string;
+      avatarUrl: string | null;
+      type: "DIRECT" | "GROUP";
+    }
+  >({
+    query: ({ participantIds, title, avatarUrl, type }) => ({
+      url: `chat/conversations`,
+      method: "POST",
+      body: { participantIds, title, avatarUrl, type },
     }),
   }),
 });

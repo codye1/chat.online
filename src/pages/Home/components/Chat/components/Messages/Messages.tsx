@@ -97,6 +97,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                 key={message.id}
                 data-index={item.index}
                 message={message}
+                isInGroup={conversation.type === "GROUP"}
                 style={{
                   position: "absolute",
                   top: 0,

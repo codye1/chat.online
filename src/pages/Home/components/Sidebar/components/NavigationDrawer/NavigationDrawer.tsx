@@ -7,6 +7,7 @@ import logoutIcon from "@assets/logout.svg";
 import { useLogoutMutation } from "@api/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
 import { openModal } from "@redux/global";
+import addGroupIcon from "@assets/group.svg";
 
 interface INavigationDrawer {
   onClickOutside: () => void;
@@ -39,6 +40,21 @@ const NavigationDrawer = ({ onClickOutside }: INavigationDrawer) => {
         >
           <img src={userCircle} alt="user circle icon" />
           View profile
+        </button>
+      </section>
+      <section className={styles.drawerSection}>
+        <button
+          onClick={() => {
+            dispatch(
+              openModal({
+                type: "createGroup",
+              }),
+            );
+            onClickOutside();
+          }}
+        >
+          <img src={addGroupIcon} alt="add group icon" />
+          New group
         </button>
       </section>
       <section className={clsx(styles.drawerSection, styles.logout)}>

@@ -1,6 +1,7 @@
 import type { Conversation } from "@utils/types";
 import styles from "./Header.module.css";
 import DirectHeader from "./components/DirectHeader";
+import GroupHeader from "./components/GroupHeader";
 
 interface IHeader {
   conversation: Conversation;
@@ -12,8 +13,10 @@ const Header = ({ conversation }: IHeader) => {
       return (
         <DirectHeader conversation={conversation} className={styles.header} />
       );
-    default:
-      return <h1 className={styles.header}>{conversation.title}</h1>;
+    case "GROUP":
+      return (
+        <GroupHeader conversation={conversation} className={styles.header} />
+      );
   }
 };
 

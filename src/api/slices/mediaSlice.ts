@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { MessageMedia } from "@utils/types";
 
-interface UploadMediaResponse {
+export interface UploadMediaResponse {
   public_id: string;
   secure_url: string;
   resource_type: string;
@@ -75,5 +75,4 @@ export const mediaSlice = createApi({
 });
 
 export const { useUploadMediaMutation, useUploadImageMutation } = mediaSlice;
-
 export default mediaSlice;

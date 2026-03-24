@@ -8,10 +8,12 @@ import MediaContainer from "./components/MediaContainer/MediaContainer";
 import getDisplayName from "@utils/helpers/getDisplayName";
 import ContextMenu from "@components/ContextMenu/ContextMenu";
 import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
+import Avatar from "@components/Avatar/Avatar";
 
 export interface IMessage {
   message: MessageType;
   isSentByCurrentUser: boolean;
+  isInGroup: boolean;
   read: boolean;
   ref: (node: Element | null | undefined) => void;
   "data-index": number;
@@ -22,6 +24,7 @@ export interface IMessage {
 const Message = ({
   message,
   isSentByCurrentUser,
+  isInGroup,
   read,
   ref,
   "data-index": dataIndex,
@@ -43,6 +46,16 @@ const Message = ({
         data-index={dataIndex}
         style={style}
       >
+        {!isSentByCurrentUser && isInGroup && (
+          <div className={styles.avatarWrapper}>
+            <Avatar
+              avatarUrl={message.sender.avatarUrl}
+              width={30}
+              height={30}
+              className={styles.avatar}
+            />
+          </div>
+        )}
         <div
           ref={popoverAnchorRef}
           onDoubleClick={onDoubleClick}
@@ -55,12 +68,17 @@ const Message = ({
             [styles.sentByCurrentUser]: isSentByCurrentUser,
           })}
         >
+          {isInGroup && !isSentByCurrentUser && (
+            <h3 className={styles.authorName}>
+              {getDisplayName(message.sender)}
+            </h3>
+          )}
           {/*TODO: make scroll on click (with better messageList)*/}
           {message.replyTo && (
             <div className={styles.rplyContainer}>
-              <h3 className={styles.rplyAuthor}>
+              <p className={styles.rplyAuthor}>
                 {getDisplayName(message.replyTo.sender)}
-              </h3>
+              </p>
               <span className={styles.rplyText}>{message.replyTo.text}</span>
             </div>
           )}

@@ -1,3 +1,5 @@
+import styles from "./InputFile.module.css";
+
 type FileType = "image" | "video" | "other";
 
 interface LoadedFile {
@@ -83,15 +85,7 @@ const InputFile = ({ allow, multiple = false, onLoaded }: InputFileProps) => {
       accept={accept}
       multiple={multiple}
       onChange={handleChange}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        opacity: 0,
-        cursor: "pointer",
-      }}
+      className={styles.input}
     />
   );
 };

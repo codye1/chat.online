@@ -14,7 +14,7 @@ import { useRef, useState } from "react";
 import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import photoIcon from "@assets/photo.svg";
-import InputFile from "@components/InputFile";
+import InputFile from "@components/InputFile/InputFile";
 import clipIcon from "@assets/clip.svg";
 
 let timeoutId: number;

@@ -55,6 +55,21 @@ const buildFolderEndpoints = (builder: Builder) => ({
       method: "DELETE",
     }),
   }),
+
+  renameFolder: builder.mutation<void, { folderId: string; newTitle: string }>({
+    query: ({ folderId, newTitle }) => ({
+      url: `chat/folders/${folderId}`,
+      method: "PATCH",
+      body: { newTitle },
+    }),
+  }),
+
+  deleteFolder: builder.mutation<void, { folderId: string }>({
+    query: ({ folderId }) => ({
+      url: `chat/folders/${folderId}`,
+      method: "DELETE",
+    }),
+  }),
 });
 
 export default buildFolderEndpoints;

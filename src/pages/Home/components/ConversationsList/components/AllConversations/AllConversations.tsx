@@ -62,7 +62,8 @@ const AllConversations = ({ setView }: IAllConversations) => {
           const nextPinPosition = Object.keys(pinnedConversations).length;
           const description = conversation.lastMessage?.text ?? "";
           const lastMessageTime =
-            conversation.lastMessage?.createdAt.toString() || "";
+            conversation.lastMessage?.createdAt.toString() ||
+            conversation.createdAt.toString();
           const foldersWhereConversationIs = conversationsState.folders.filter(
             (folder) => {
               const pinnedInFolder = folder.pinnedConversationIds.find(

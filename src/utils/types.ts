@@ -46,7 +46,7 @@ interface MessageMedia {
 interface Message {
   id: string;
   text: string;
-  status: "sending" | "sent" | "delivered" | "failed";
+  status: "sending" | "sent" | "failed";
   media?: MessageMedia[];
   conversationId: string;
   sender: UserPreview;
@@ -65,6 +65,7 @@ interface BaseConversationData {
   unreadMessages: number;
   isArchived: boolean;
   isMuted: boolean;
+  createdAt: string;
   lastMessage: { text: string; createdAt: string; id: string } | null;
   activeUsers: { nickname: string; reason: "typing" | "editing" }[];
 }
@@ -86,6 +87,7 @@ interface DirectConversation extends BaseConversation {
 
 interface GroupConversation extends BaseConversation {
   type: "GROUP";
+  participantsCount: number;
 }
 
 type Conversation = DirectConversation | GroupConversation;
@@ -153,6 +155,7 @@ export type {
   GroupedReactions,
   Conversation,
   DirectConversation,
+  GroupConversation,
   ConversationTypes,
   Message,
   Global,

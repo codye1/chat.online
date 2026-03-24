@@ -7,6 +7,7 @@ import PreUploadMediaPreview from "./Modals/PreUploadMediaPreview/PreUploadMedia
 import Lightbox from "./Modals/Lightbox/Lightbox";
 import ErrorModal from "./Modals/ErrorModal/ErrorModal";
 import EditFolder from "./Modals/EditFolder/EditFolder";
+import CreateGroupModal from "./Modals/CreateGroupModal/CreateGroupModal";
 
 const ModalManager = () => {
   const modal = useAppSelector((state) => state.global.activeModal);
@@ -43,6 +44,8 @@ const ModalManager = () => {
       return <ErrorModal title={modal.title} message={modal.message} />;
     case "editFolder":
       return <EditFolder folder={modal.folder} />;
+    case "createGroup":
+      return <CreateGroupModal />;
     default:
       return null;
   }

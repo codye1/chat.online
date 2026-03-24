@@ -66,7 +66,14 @@ const EditProfileModal = () => {
           <img src={closeIcon} alt="close icon" />
         </button>
         <div className={styles.modalHeader}>
-          <AvatarWithUploader />
+          <AvatarWithUploader
+            onUpload={(result) => {
+              updateUser({ avatarUrl: result.secure_url });
+            }}
+            defaultAvatarUrl={user.avatarUrl}
+            width={"100px"}
+            height={"100px"}
+          />
           <h2>{getDisplayName(user)}</h2>
           <div className={styles.bioSection}>
             <Textarea
