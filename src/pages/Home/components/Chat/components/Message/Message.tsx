@@ -9,6 +9,8 @@ import getDisplayName from "@utils/helpers/getDisplayName";
 import ContextMenu from "@components/ContextMenu/ContextMenu";
 import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
 import Avatar from "@components/Avatar/Avatar";
+import { useAppDispatch } from "@hooks/hooks";
+import { openModal } from "@redux/global";
 
 export interface IMessage {
   message: MessageType;
@@ -36,7 +38,7 @@ const Message = ({
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [mediaForContextMenu, setMediaForContextMenu] =
     useState<MessageMedia>();
-
+  const dispatch = useAppDispatch();
   return (
     <>
       <div
@@ -47,7 +49,14 @@ const Message = ({
         style={style}
       >
         {!isSentByCurrentUser && isInGroup && (
-          <div className={styles.avatarWrapper}>
+          <div
+            className={styles.avatarWrapper}
+            onClick={() => {
+              dispatch(
+                openModal({ type: "otherUser", userPreview: message.sender }),
+              );
+            }}
+          >
             <Avatar
               avatarUrl={message.sender.avatarUrl}
               width={30}
@@ -69,7 +78,14 @@ const Message = ({
           })}
         >
           {isInGroup && !isSentByCurrentUser && (
-            <h3 className={styles.authorName}>
+            <h3
+              className={styles.authorName}
+              onClick={() => {
+                dispatch(
+                  openModal({ type: "otherUser", userPreview: message.sender }),
+                );
+              }}
+            >
               {getDisplayName(message.sender)}
             </h3>
           )}

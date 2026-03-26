@@ -15,6 +15,10 @@ import useGetContextActions from "./useGetContextActions";
 import resetUnreadMessagesCount from "@utils/helpers/resetUnreadMessagesCount";
 import markAsReadIcon from "@assets/messageWitchCheck.svg";
 import markMessageAsRead from "@utils/socket/actions/messageActions/marckMessageAsRead";
+import muted from "@assets/muted.svg";
+import unmuted from "@assets/unmuted.svg";
+import { useAppSelector } from "@hooks/hooks";
+import leaveIcon from "@assets/leave.svg";
 
 interface IConversationContextMenu {
   conversation: ConversationPreview;
@@ -39,12 +43,16 @@ const ConversationContextMenu = ({
     onFolderClick,
     onDeleteClick,
     onCreateFolderClick,
+    onMuteClick,
+    onLeaveClick,
   } = useGetContextActions({
     conversation,
     isPinned,
     nextPinPosition,
     activeFolderId,
   });
+  const user = useAppSelector((state) => state.auth.user);
+
   return (
     <MenuContent>
       <MenuItem
@@ -70,6 +78,11 @@ const ConversationContextMenu = ({
           }}
         />
       )}
+      <MenuItem
+        label={conversation.isMuted ? "Unmute" : "Mute"}
+        icon={conversation.isMuted ? unmuted : muted}
+        onClick={onMuteClick}
+      />
       <MenuItem
         label="Add to folder"
         icon={folderArrowIcon}
@@ -107,7 +120,15 @@ const ConversationContextMenu = ({
           </MenuContent>
         }
       />
-      <MenuItem label="Delete" icon={trashIcon} onClick={onDeleteClick} />
+      {conversation.type === "GROUP" && conversation.ownerId === user.id && (
+        <MenuItem label="Delete" icon={trashIcon} onClick={onDeleteClick} />
+      )}
+      {conversation.type === "GROUP" && conversation.ownerId !== user.id && (
+        <MenuItem label="Leave Group" icon={leaveIcon} onClick={onLeaveClick} />
+      )}
+      {conversation.type === "DIRECT" && (
+        <MenuItem label="Delete" icon={trashIcon} onClick={onDeleteClick} />
+      )}
     </MenuContent>
   );
 };

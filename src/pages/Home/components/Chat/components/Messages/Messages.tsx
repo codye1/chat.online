@@ -110,7 +110,6 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                 ref={(el) => {
                   if (
                     message.status !== "sending" &&
-                    !isRead &&
                     message.sender.id !== user.id
                   ) {
                     trackUnreadMessageRef(el, message);

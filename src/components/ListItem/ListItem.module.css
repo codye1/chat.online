@@ -1,0 +1,45 @@
+.item {
+  padding: var(--space-2);
+}
+
+@layer {
+  .item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    padding: var(--space-2);
+
+    &:hover {
+      background-color: var(--c-light-x2);
+    }
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+
+    & h3 {
+      font-weight: 500;
+      font-size: var(--text-lg);
+    }
+
+    & h4 {
+      font-weight: 300;
+      font-size: var(--text-base);
+      color: var(--c-muted);
+    }
+
+    & h3,
+    & h4 {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+
+      overflow-wrap: anywhere;
+    }
+  }
+}

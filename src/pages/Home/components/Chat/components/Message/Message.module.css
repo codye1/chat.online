@@ -11,6 +11,7 @@
 }
 
 .avatarWrapper {
+  cursor: pointer;
   margin-right: var(--space-2);
 }
 
@@ -33,6 +34,10 @@
   flex-direction: column;
   max-width: 50%;
   object-fit: cover;
+
+  & h3 {
+    cursor: pointer;
+  }
 }
 
 .sentByCurrentUser {

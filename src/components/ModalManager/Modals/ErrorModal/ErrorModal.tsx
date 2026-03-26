@@ -7,13 +7,18 @@ import styles from "./ErrorModal.module.css";
 interface IErrorModal {
   title: string;
   message: string;
+  canGoBack?: boolean;
 }
 
-const ErrorModal = ({ title, message }: IErrorModal) => {
+const ErrorModal = ({ title, message, canGoBack }: IErrorModal) => {
   const dispatch = useAppDispatch();
 
   return (
-    <Modal onClickOutside={() => dispatch(closeModal())} closeButton>
+    <Modal
+      onClickOutside={() => dispatch(closeModal())}
+      closeButton
+      backButton={canGoBack}
+    >
       <MenuContent className={styles.content}>
         <h2 style={{ color: "red" }}>{title}</h2>
         <p>{message}</p>

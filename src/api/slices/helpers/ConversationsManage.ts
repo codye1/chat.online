@@ -6,6 +6,7 @@ import type {
   EditableConversationFields,
 } from "@utils/types";
 import { setConversation } from "@redux/global";
+import leaveConversation from "@utils/socket/actions/conversationActions/leaveConversation";
 
 const getConversationsState = () => {
   const state = store.getState() as RootState;
@@ -202,6 +203,8 @@ const deleteConversationFromState = async ({
   if (activeConversationId === conversationId) {
     store.dispatch(setConversation({ conversationId: null }));
   }
+
+  leaveConversation([conversationId]);
 
   updateConversationsState((state) => {
     delete state.byId[conversationId];

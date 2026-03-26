@@ -4,6 +4,7 @@ import type {
   ConversationsState,
   EditableConversationFields,
   SearchResponse,
+  UserPreviewAtConversation,
 } from "@utils/types";
 import { type Builder } from "../chatSlice";
 import socket, {
@@ -21,6 +22,7 @@ import {
   onDeleteConversation,
   onLastSeenAtUpdate,
   onNewConversation,
+  onUserRemovedFromConversation,
 } from "../handlers/conversationHandlers";
 import { onNewReaction, onRemoveReaction } from "../handlers/reactionHandlers";
 import { onUserActive, onUserStopActive } from "../handlers/activityHandlers";
@@ -145,6 +147,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
         connectToConversation(conversationIds);
       }
 
+      socket.on("conversation:userRemoved", onUserRemovedFromConversation);
       socket.on("conversation:deleted", onDeleteConversation);
       socket.on("message:edited", onMessageEdited);
       socket.on("reaction:removed", onRemoveReaction);
@@ -158,6 +161,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
 
       await cacheEntryRemoved;
 
+      socket.off("conversation:userRemoved", onUserRemovedFromConversation);
       socket.off("message:edited", onMessageEdited);
       socket.off("reaction:removed", onRemoveReaction);
       socket.off("reaction:new", onNewReaction);
@@ -202,6 +206,37 @@ const buildConversationEndpoints = (builder: Builder) => ({
       url: `chat/conversations`,
       method: "POST",
       body: { participantIds, title, avatarUrl, type },
+    }),
+  }),
+
+  removeUserFromConversation: builder.mutation<
+    { success: boolean },
+    { conversationId: string; userId: string }
+  >({
+    query: ({ conversationId, userId }) => ({
+      url: `chat/conversations/${conversationId}/participants/${userId}`,
+      method: "DELETE",
+    }),
+  }),
+
+  leaveConversation: builder.mutation<
+    { success: boolean },
+    { conversationId: string }
+  >({
+    query: ({ conversationId }) => ({
+      url: `chat/conversations/${conversationId}/leave`,
+      method: "POST",
+    }),
+  }),
+
+  getConversationParticipants: builder.mutation<
+    { participants: UserPreviewAtConversation[]; hasMore: boolean },
+    { conversationId: string; cursor: string | null; take: number }
+  >({
+    query: ({ conversationId, cursor, take = 10 }) => ({
+      url: `chat/conversations/${conversationId}/participants`,
+      method: "GET",
+      params: { cursor, take },
     }),
   }),
 });

@@ -14,6 +14,7 @@ import Avatar from "@components/Avatar/Avatar";
 import type { UserSearchPreview } from "@utils/types";
 import removeFromSelectedIcon from "@assets/close.svg";
 import AvatarWithUploader from "../EditProfileModal/components/AvatarWithUploader/AvatarWithUploader";
+import ListItem from "@components/ListItem/ListItem";
 
 const CreateGroupModal = () => {
   const dispatch = useAppDispatch();
@@ -84,12 +85,12 @@ const CreateGroupModal = () => {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
-          <div className={styles.searchResults}>
+          <ul className={styles.searchResults}>
             {searchResults && searchResults.global.length > 0 ? (
               searchResults.global.map(
                 (user) =>
                   user.type === "user" && (
-                    <div
+                    <ListItem
                       key={user.id}
                       className={styles.searchResult}
                       onClick={() => {
@@ -104,13 +105,13 @@ const CreateGroupModal = () => {
                         selected={!!selectedUsers.find((u) => u.id === user.id)}
                       />
                       <span>{user.nickname}</span>
-                    </div>
+                    </ListItem>
                   ),
               )
             ) : (
               <p>No results</p>
             )}
-          </div>
+          </ul>
         </div>
         <div className={styles.buttons}>
           <Button>Cancel</Button>

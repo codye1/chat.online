@@ -6,6 +6,7 @@ interface User {
   lastName: string | null;
   firstName: string | null;
   biography: string | null;
+  lastSeenAt: string | null;
 }
 
 type UserPreview = {
@@ -14,6 +15,12 @@ type UserPreview = {
   firstName: string | null;
   lastName: string | null;
   avatarUrl: string | null;
+  lastSeenAt: string | null;
+};
+type Roles = "OWNER" | "PARTICIPANT";
+type UserPreviewAtConversation = UserPreview & {
+  conversationId: string;
+  role: Roles;
 };
 
 type Reaction = {
@@ -21,6 +28,7 @@ type Reaction = {
   createdAt: Date;
   messageId: string;
   userId: string;
+  id: string;
 };
 
 type ReactorListItem = UserPreview & { reaction: Reaction };
@@ -49,7 +57,7 @@ interface Message {
   status: "sending" | "sent" | "failed";
   media?: MessageMedia[];
   conversationId: string;
-  sender: UserPreview;
+  sender: UserPreviewAtConversation;
   createdAt: string;
   reactions: GroupedReactions;
   replyTo?: ReplyMessage;
@@ -88,6 +96,8 @@ interface DirectConversation extends BaseConversation {
 interface GroupConversation extends BaseConversation {
   type: "GROUP";
   participantsCount: number;
+  participants: UserPreviewAtConversation[];
+  ownerId: string;
 }
 
 type Conversation = DirectConversation | GroupConversation;
@@ -101,6 +111,7 @@ interface DirectPreview extends BaseConversationData {
 
 interface GroupPreview extends BaseConversationData {
   type: "GROUP";
+  ownerId: string;
 }
 
 type ConversationPreview = DirectPreview | GroupPreview;
@@ -150,6 +161,7 @@ interface SearchResponse {
 export type {
   User,
   UserPreview,
+  UserPreviewAtConversation,
   Reaction,
   ReactorListItem,
   GroupedReactions,

@@ -1,4 +1,4 @@
-const getOnlineStatus = (lastSeenAt: string | null): string => {
+const getOnlineStatus = (lastSeenAt: string | null | undefined): string => {
   if (!lastSeenAt) return "last seen a long time ago";
 
   const lastSeenDate = new Date(lastSeenAt);

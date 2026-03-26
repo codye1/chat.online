@@ -1,4 +1,7 @@
-import { useDeleteConversationMutation } from "@api/slices/Chat/chatSlice";
+import {
+  useDeleteConversationMutation,
+  useLeaveConversationMutation,
+} from "@api/slices/Chat/chatSlice";
 import {
   addToFolder,
   deleteConversationFromState,
@@ -8,6 +11,7 @@ import {
 } from "@api/slices/helpers/ConversationsManage";
 import { useAppDispatch } from "@hooks/hooks";
 import { openModal } from "@redux/global";
+import getErorMessage from "@utils/helpers/getErrorMessage";
 import type { ConversationPreview } from "@utils/types";
 
 import { type MouseEvent } from "react";
@@ -26,6 +30,7 @@ const useGetContextActions = ({
   activeFolderId,
 }: IUseGetContextActions) => {
   const [deleteConversation] = useDeleteConversationMutation();
+  const [leaveConversation] = useLeaveConversationMutation();
   const dispatch = useAppDispatch();
   const onPinClick = () => {
     const newPinnedPosition = isPinned ? null : nextPinPosition;
@@ -40,6 +45,12 @@ const useGetContextActions = ({
   const onArchiveClick = () => {
     updateConversationSettings(conversation.id, {
       isArchived: !conversation.isArchived,
+    });
+  };
+
+  const onMuteClick = () => {
+    updateConversationSettings(conversation.id, {
+      isMuted: !conversation.isMuted,
     });
   };
 
@@ -72,17 +83,17 @@ const useGetContextActions = ({
   const onDeleteClick = async () => {
     if (window.confirm("Are you sure you want to delete this conversation?")) {
       document.body.classList.add("wait");
-      await deleteConversation({ conversationId: conversation.id }).catch(
-        (error) => {
+      await deleteConversation({ conversationId: conversation.id })
+        .unwrap()
+        .catch((error) => {
           dispatch(
             openModal({
               type: "error",
               title: "Failed to Delete Conversation",
-              message: error.data.error.message || "Unexpected error occurred.",
+              message: getErorMessage(error) || "Unexpected error occurred.",
             }),
           );
-        },
-      );
+        });
       document.body.classList.remove("wait");
       deleteConversationFromState({
         conversationId: conversation.id,
@@ -90,12 +101,38 @@ const useGetContextActions = ({
     }
   };
 
+  const onLeaveClick = async () => {
+    if (window.confirm("Are you sure you want to leave this group?")) {
+      document.body.classList.add("wait");
+      const result = await leaveConversation({
+        conversationId: conversation.id,
+      })
+        .unwrap()
+        .catch((error) => {
+          dispatch(
+            openModal({
+              type: "error",
+              title: "Failed to Leave Conversation",
+              message: getErorMessage(error) || "Unexpected error occurred.",
+            }),
+          );
+        });
+      document.body.classList.remove("wait");
+      if (result?.success) {
+        deleteConversationFromState({
+          conversationId: conversation.id,
+        });
+      }
+    }
+  };
   return {
     onArchiveClick,
     onFolderClick,
     onPinClick,
     onDeleteClick,
     onCreateFolderClick,
+    onMuteClick,
+    onLeaveClick,
   };
 };
 

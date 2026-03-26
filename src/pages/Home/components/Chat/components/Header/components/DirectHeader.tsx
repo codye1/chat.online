@@ -1,9 +1,10 @@
 import socket from "@utils/socket/socket";
 import type { DirectConversation } from "@utils/types";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import headerStyles from "../Header.module.css";
 import getOnlineStatus from "@utils/helpers/getOnlineStatus";
-import DirectInfoModal from "./DirectInfoModal/DirectInfoModal";
+import { useAppDispatch } from "@hooks/hooks";
+import { openModal } from "@redux/global";
 
 interface IDirectHeader {
   conversation: DirectConversation;
@@ -17,11 +18,20 @@ const DirectHeader = ({ conversation, className }: IDirectHeader) => {
       socket.emit("unsubscribe:lastSeenAt", conversation.otherParticipant.id);
     };
   }, [conversation.otherParticipant.id]);
-
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   return (
-    <header className={className} onClick={() => setInfoModalOpen(true)}>
+    <header
+      className={className}
+      onClick={() =>
+        dispatch(
+          openModal({
+            type: "otherUser",
+            userPreview: conversation.otherParticipant,
+          }),
+        )
+      }
+    >
       <span>
         <h1>{conversation.title}</h1>
         {conversation.activeUsers.length > 0 && (
@@ -33,13 +43,6 @@ const DirectHeader = ({ conversation, className }: IDirectHeader) => {
           <h2>{getOnlineStatus(conversation.lastSeenAt)}</h2>
         )}
       </span>
-
-      {infoModalOpen && (
-        <DirectInfoModal
-          conversation={conversation}
-          onClickClose={() => setInfoModalOpen(false)}
-        />
-      )}
     </header>
   );
 };

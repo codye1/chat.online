@@ -93,12 +93,28 @@ const onDeleteConversation = (data: {
   conversationId: string;
   initiatorId?: string;
 }) => {
-  const { conversationId, initiatorId } = data;
-  const state = store.getState() as RootState;
-  const userId = state.auth.user.id;
-  if (initiatorId == userId) return;
+  const { conversationId } = data;
 
   deleteConversationFromState({ conversationId });
+};
+
+const onUserRemovedFromConversation = (data: {
+  conversationId: string;
+  userId: string;
+  participantsCount: number;
+}) => {
+  const { conversationId, userId, participantsCount } = data;
+  const state = store.getState() as RootState;
+  const user = state.auth.user;
+  if (user.id === userId) {
+    deleteConversationFromState({ conversationId });
+  }
+  updateConversation(conversationId, (prev) => {
+    if (prev.type === "GROUP") {
+      prev.participants = prev.participants.filter((p) => p.id !== userId);
+      prev.participantsCount = participantsCount;
+    }
+  });
 };
 
 export {
@@ -106,4 +122,5 @@ export {
   createOnUpdateConversation,
   onNewConversation,
   onDeleteConversation,
+  onUserRemovedFromConversation,
 };

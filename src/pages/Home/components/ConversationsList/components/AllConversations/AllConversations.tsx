@@ -91,6 +91,7 @@ const AllConversations = ({ setView }: IAllConversations) => {
                 dispatch(setConversation({ conversationId: conversation.id }));
               }}
               isPinned={isPinned}
+              isMuted={conversation.isMuted}
             >
               <ContextMenu.Slot>
                 <ConversationContextMenu

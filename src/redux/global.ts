@@ -7,6 +7,9 @@ import type { Message, MessageMedia, ReplyMessage } from "@utils/types";
 import type { ILightbox } from "@components/ModalManager/Modals/Lightbox/Lightbox";
 import type { IErrorModal } from "@components/ModalManager/Modals/ErrorModal/ErrorModal";
 import type { IEditFolder } from "@components/ModalManager/Modals/EditFolder/EditFolder";
+import type { IOtherUserModal } from "@components/ModalManager/Modals/OtherUserModal/OtherUserModal";
+import type { IGroupInfo } from "@components/ModalManager/Modals/GroupInfo/GroupInfo";
+import type { IWarningModal } from "@components/ModalManager/Modals/WarningModal/WarningModal";
 
 type AvailableModals =
   | { type: "profileView"; props: IProfileViewModal }
@@ -17,7 +20,10 @@ type AvailableModals =
   | (ILightbox & { type: "lightbox" })
   | (IErrorModal & { type: "error" })
   | (IEditFolder & { type: "editFolder" })
-  | { type: "createGroup" };
+  | { type: "createGroup" }
+  | (IOtherUserModal & { type: "otherUser" })
+  | (IGroupInfo & { type: "groupInfo" })
+  | (IWarningModal & { type: "warning" });
 
 type MessageToEdit = Message & { mediaToEdit?: MessageMedia };
 
@@ -26,7 +32,7 @@ interface GlobalState {
   recipientId: string | null;
   messageToEdit: MessageToEdit | null;
   replyMessage: ReplyMessage | null;
-  activeModal: AvailableModals | null;
+  modalStack: AvailableModals[];
 }
 
 const initialState: GlobalState = {
@@ -34,7 +40,7 @@ const initialState: GlobalState = {
   recipientId: null,
   messageToEdit: null,
   replyMessage: null,
-  activeModal: null,
+  modalStack: [],
 };
 
 export const globalSlice = createSlice({
@@ -45,9 +51,6 @@ export const globalSlice = createSlice({
       state,
       action: PayloadAction<{ conversationId: string | null }>,
     ) {
-      console.log("set conversation");
-      console.log(action.payload.conversationId);
-
       state.conversationId = action.payload.conversationId;
       state.recipientId = null;
       state.messageToEdit = null;
@@ -68,10 +71,16 @@ export const globalSlice = createSlice({
       state.replyMessage = action.payload;
     },
     openModal(state, action: PayloadAction<AvailableModals>) {
-      state.activeModal = action.payload;
+      state.modalStack = [action.payload];
+    },
+    pushModal(state, action: PayloadAction<AvailableModals>) {
+      state.modalStack.push(action.payload);
+    },
+    popModal(state) {
+      state.modalStack.pop();
     },
     closeModal(state) {
-      state.activeModal = null;
+      state.modalStack = [];
     },
   },
 });
@@ -83,6 +92,8 @@ export const {
   setReplyMessage,
   openModal,
   closeModal,
+  pushModal,
+  popModal,
 } = globalSlice.actions;
 
 export type { AvailableModals, MessageToEdit, GlobalState };

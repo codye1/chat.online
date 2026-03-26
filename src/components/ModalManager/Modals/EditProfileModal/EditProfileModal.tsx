@@ -1,6 +1,4 @@
 import userCircle from "@assets/userCircle.svg";
-import closeIcon from "@assets/close.svg";
-import backIcon from "@assets/back.svg";
 import at from "@assets/at.svg";
 import Modal from "@components/Modal/Modal";
 
@@ -18,10 +16,16 @@ import EditNicknameModal from "./components/EditNickname";
 import EditNameModal from "./components/EditNameModal";
 import AvatarWithUploader from "./components/AvatarWithUploader/AvatarWithUploader";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
-import { closeModal, openModal } from "@redux/global";
+import { closeModal, popModal } from "@redux/global";
 import Textarea from "@components/Textarea/Textarea";
 import getDisplayName from "@utils/helpers/getDisplayName";
-const EditProfileModal = () => {
+import ViewControls from "@components/ViewModalConstructor/ViewControls/ViewControls";
+import ViewHeader from "@components/ViewModalConstructor/ViewHeader/ViewHeader";
+interface IEditProfileModal {
+  canGoBack?: boolean;
+}
+
+const EditProfileModal = ({ canGoBack }: IEditProfileModal) => {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [updateUser] = useUpdateUserMutation();
@@ -51,21 +55,11 @@ const EditProfileModal = () => {
   return (
     <>
       <Modal onClickOutside={() => dispatch(closeModal())}>
-        <button
-          className={styles.backIcon}
-          onClick={() =>
-            dispatch(openModal({ type: "profileView", props: { user } }))
-          }
-        >
-          <img src={backIcon} alt="back icon" />
-        </button>
-        <button
-          className={styles.closeIcon}
-          onClick={() => dispatch(closeModal())}
-        >
-          <img src={closeIcon} alt="close icon" />
-        </button>
-        <div className={styles.modalHeader}>
+        <ViewHeader>
+          <ViewControls
+            onClose={() => dispatch(closeModal())}
+            onBack={canGoBack ? () => dispatch(popModal()) : undefined}
+          />
           <AvatarWithUploader
             onUpload={(result) => {
               updateUser({ avatarUrl: result.secure_url });
@@ -74,7 +68,9 @@ const EditProfileModal = () => {
             width={"100px"}
             height={"100px"}
           />
+
           <h2>{getDisplayName(user)}</h2>
+
           <div className={styles.bioSection}>
             <Textarea
               placeholder="Bio"
@@ -84,7 +80,7 @@ const EditProfileModal = () => {
             />
             <span>{70 - bioValue.length}</span>
           </div>
-        </div>
+        </ViewHeader>
         <div className={styles.modalBody}>
           <button
             className={styles.editModalButton}

@@ -16,22 +16,6 @@
   }
 }
 
-.backIcon {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: var(--space-4);
-  display: flex;
-  justify-content: flex-end;
-  background-color: transparent;
-  border: none;
-  & img {
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-  }
-}
-
 .modalHeader {
   background-color: var(--c-accent);
   width: 300px;

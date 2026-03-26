@@ -10,9 +10,12 @@ const userSlice = api.injectEndpoints({
         body,
       }),
     }),
+    getUser: builder.query<User, string>({
+      query: (id) => `user/${id}`,
+    }),
   }),
 });
 
-export const { useUpdateUserMutation } = userSlice;
+export const { useUpdateUserMutation, useGetUserQuery } = userSlice;
 
 export default userSlice;
