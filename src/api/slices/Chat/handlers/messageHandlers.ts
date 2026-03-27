@@ -12,6 +12,7 @@ import type { MessagesResponse } from "../endpoints/messageEndpoints";
 
 const onNewMessage = (message: Message) => {
   const { getState } = store;
+  console.log(message);
 
   const state = getState() as RootState;
   const conversationId = state.global.conversationId;

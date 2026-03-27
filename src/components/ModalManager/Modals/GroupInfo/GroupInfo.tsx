@@ -2,11 +2,8 @@ import Avatar from "@components/Avatar/Avatar";
 import Modal from "@components/Modal/Modal";
 import ViewHeader from "@components/ViewModalConstructor/ViewHeader/ViewHeader";
 import { useAppDispatch, useAppSelector } from "@hooks/hooks";
-import { closeModal, pushModal } from "@redux/global";
-import type {
-  GroupConversation,
-  UserPreviewAtConversation,
-} from "@utils/types";
+import { closeModal, pushModal, setConversation } from "@redux/global";
+import type { GroupConversation } from "@utils/types";
 import styles from "./GroupInfo.module.css";
 import ViewBody from "@components/ViewModalConstructor/ViewBody/ViewBody";
 import groupIcon from "@assets/group.svg";
@@ -16,12 +13,18 @@ import getOnlineStatus from "@utils/helpers/getOnlineStatus";
 import {
   useGetConversationParticipantsMutation,
   useGetConversationQuery,
-  useRemoveUserFromConversationMutation,
 } from "@api/slices/Chat/chatSlice";
-import getErorMessage from "@utils/helpers/getErrorMessage";
 import { updateConversation } from "@api/slices/helpers/ConversationsManage";
 import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import { useState } from "react";
+import useGetConversationActions from "@hooks/useGetConversationActions";
+import ViewHeaderButton from "@components/ViewModalConstructor/ViewHeaderButton/ViewHeaderButton";
+import unmutedIcon from "@assets/unmuted.svg";
+import mutedIcon from "@assets/muted.svg";
+import deleteIcon from "@assets/trash.svg";
+import leaveIcon from "@assets/leave.svg";
+import messageIcon from "@assets/message.svg";
+import addUserIcon from "@assets/addUser.svg";
 
 interface IGroupInfo {
   initialConversation: GroupConversation;
@@ -30,7 +33,6 @@ interface IGroupInfo {
 const GroupInfo = ({ initialConversation }: IGroupInfo) => {
   const dispatch = useAppDispatch();
   const userId = useAppSelector((state) => state.auth.user.id);
-  const [removeUserFromConversation] = useRemoveUserFromConversationMutation();
   const [canLoadMoreParticipants, setCanLoadMoreParticipants] = useState(true);
   const [getConversationParticipants] =
     useGetConversationParticipantsMutation();
@@ -43,35 +45,14 @@ const GroupInfo = ({ initialConversation }: IGroupInfo) => {
 
   const isUserOwner = conversation.ownerId === userId;
 
-  const handleRemoveParticipant = async (
-    participant: UserPreviewAtConversation,
-  ) => {
-    const result = await removeUserFromConversation({
-      conversationId: conversation.id,
-      userId: participant.id,
-    })
-      .unwrap()
-      .catch((err) => {
-        dispatch(
-          pushModal({
-            type: "error",
-            title: "Failed to remove user",
-            message: getErorMessage(err) || "Something went wrong",
-          }),
-        );
-      });
-
-    if (result?.success) {
-      updateConversation(conversation.id, (prev) => {
-        if (prev.type === "GROUP") {
-          prev.participants = prev.participants.filter(
-            (p) => p.id !== participant.id,
-          );
-          prev.participantsCount -= 1;
-        }
-      });
-    }
-  };
+  const {
+    toggleMute,
+    handleDeleteConversation,
+    handleLeaveConversation,
+    handleRemoveParticipant,
+  } = useGetConversationActions({
+    conversation,
+  });
 
   return (
     <Modal onClickOutside={() => dispatch(closeModal())} closeButton>
@@ -85,13 +66,59 @@ const GroupInfo = ({ initialConversation }: IGroupInfo) => {
           <h2>{conversation.title}</h2>
           <h3>{conversation.participantsCount} participants</h3>
         </div>
-        <div className={styles.headerButtons}></div>
+        <div className={styles.headerButtons}>
+          <ViewHeaderButton
+            title="Message"
+            icon={messageIcon}
+            onClick={() => {
+              dispatch(closeModal());
+              dispatch(setConversation({ conversationId: conversation.id }));
+            }}
+          />
+          <ViewHeaderButton
+            title={conversation.isMuted ? "Unmute" : "Mute"}
+            icon={conversation.isMuted ? mutedIcon : unmutedIcon}
+            onClick={toggleMute}
+          />
+
+          {isUserOwner ? (
+            <ViewHeaderButton
+              title="Delete"
+              icon={deleteIcon}
+              onClick={handleDeleteConversation}
+            />
+          ) : (
+            <ViewHeaderButton
+              title="Leave"
+              icon={leaveIcon}
+              onClick={handleLeaveConversation}
+            />
+          )}
+        </div>
       </ViewHeader>
       <ViewBody>
         <section className={styles.participantsSection}>
           <span className={styles.participantsHeader}>
             <img src={groupIcon} alt="Group Icon" />
             <h2>{conversation.participantsCount} participants</h2>
+
+            <button
+              className={styles.addButton}
+              onClick={() =>
+                dispatch(
+                  pushModal({
+                    type: "addParticipants",
+                    conversation: conversation,
+                    usersInConversation: conversation.participants.map((p) => ({
+                      ...p,
+                      type: "user",
+                    })),
+                  }),
+                )
+              }
+            >
+              <img src={addUserIcon} alt="Add User" />
+            </button>
           </span>
           <InfiniteScrolling
             listId={`groupInfo-${conversation.id}-participants`}

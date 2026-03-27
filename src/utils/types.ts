@@ -122,11 +122,8 @@ interface Global {
   type: "user";
 }
 
-interface UserSearchPreview extends Global {
+interface UserSearchPreview extends Global, UserPreview {
   type: "user";
-  id: string;
-  nickname: string;
-  avatarUrl: string | null;
 }
 
 type GlobalSearchItem = UserSearchPreview | ConversationPreview;
@@ -180,4 +177,5 @@ export type {
   ReplyMessage,
   EditableConversationFields,
   MessageMedia,
+  Roles,
 };

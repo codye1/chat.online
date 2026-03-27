@@ -11,6 +11,7 @@ import CreateGroupModal from "./Modals/CreateGroupModal/CreateGroupModal";
 import OtherUserModal from "./Modals/OtherUserModal/OtherUserModal";
 import GroupInfo from "./Modals/GroupInfo/GroupInfo";
 import WarningModal from "./Modals/WarningModal/WarningModal";
+import AddParticipants from "./Modals/AddParticipants/AddParticipants";
 
 const ModalManager = () => {
   const modalStack = useAppSelector((state) => state.global.modalStack);
@@ -73,6 +74,14 @@ const ModalManager = () => {
       );
     case "groupInfo":
       return <GroupInfo initialConversation={modal.initialConversation} />;
+    case "addParticipants":
+      return (
+        <AddParticipants
+          conversation={modal.conversation}
+          canGoBack={canGoBack}
+          usersInConversation={modal.usersInConversation}
+        />
+      );
     default:
       return null;
   }

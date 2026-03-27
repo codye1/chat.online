@@ -11,7 +11,6 @@ import checkIcon from "@assets/check.svg";
 import type { ConversationPreview, ConversationsState } from "@utils/types";
 import styles from "./ConversationContextMenu.module.css";
 import trashIcon from "@assets/trash.svg";
-import useGetContextActions from "./useGetContextActions";
 import resetUnreadMessagesCount from "@utils/helpers/resetUnreadMessagesCount";
 import markAsReadIcon from "@assets/messageWitchCheck.svg";
 import markMessageAsRead from "@utils/socket/actions/messageActions/marckMessageAsRead";
@@ -19,6 +18,7 @@ import muted from "@assets/muted.svg";
 import unmuted from "@assets/unmuted.svg";
 import { useAppSelector } from "@hooks/hooks";
 import leaveIcon from "@assets/leave.svg";
+import useGetConversationActions from "@hooks/useGetConversationActions";
 
 interface IConversationContextMenu {
   conversation: ConversationPreview;
@@ -38,19 +38,17 @@ const ConversationContextMenu = ({
   foldersWhereConversationIs,
 }: IConversationContextMenu) => {
   const {
-    onPinClick,
-    onArchiveClick,
-    onFolderClick,
-    onDeleteClick,
-    onCreateFolderClick,
-    onMuteClick,
-    onLeaveClick,
-  } = useGetContextActions({
+    togglePin,
+    toggleArchive,
+    toggleMute,
+    toggleFolder,
+    handleDeleteConversation,
+    handleLeaveConversation,
+    createFolder,
+  } = useGetConversationActions({
     conversation,
-    isPinned,
-    nextPinPosition,
-    activeFolderId,
   });
+
   const user = useAppSelector((state) => state.auth.user);
 
   return (
@@ -58,14 +56,14 @@ const ConversationContextMenu = ({
       <MenuItem
         label={isPinned ? "Unpin" : "Pin"}
         icon={isPinned ? unpinIcon : pinIcon}
-        onClick={onPinClick}
+        onClick={() => togglePin({ isPinned, nextPinPosition, activeFolderId })}
       />
       <MenuItem
         label={conversation.isArchived ? "Unarchive" : "Archive"}
         icon={
           conversation.isArchived ? archiveArrowUpIcon : archiveArrowDownIcon
         }
-        onClick={onArchiveClick}
+        onClick={toggleArchive}
       />
       {conversation.unreadMessages > 0 && (
         <MenuItem
@@ -81,7 +79,7 @@ const ConversationContextMenu = ({
       <MenuItem
         label={conversation.isMuted ? "Unmute" : "Mute"}
         icon={conversation.isMuted ? unmuted : muted}
-        onClick={onMuteClick}
+        onClick={toggleMute}
       />
       <MenuItem
         label="Add to folder"
@@ -98,7 +96,7 @@ const ConversationContextMenu = ({
                   label={folder.title}
                   icon={folderIcon}
                   onClick={(event) =>
-                    onFolderClick({ event, isInFolder, folderId: folder.id })
+                    toggleFolder({ event, isInFolder, folderId: folder.id })
                   }
                 >
                   {isInFolder && (
@@ -115,19 +113,31 @@ const ConversationContextMenu = ({
               key="create-folder"
               label="Create Folder"
               icon={folderPlusIcon}
-              onClick={onCreateFolderClick}
+              onClick={createFolder}
             />
           </MenuContent>
         }
       />
       {conversation.type === "GROUP" && conversation.ownerId === user.id && (
-        <MenuItem label="Delete" icon={trashIcon} onClick={onDeleteClick} />
+        <MenuItem
+          label="Delete"
+          icon={trashIcon}
+          onClick={handleDeleteConversation}
+        />
       )}
       {conversation.type === "GROUP" && conversation.ownerId !== user.id && (
-        <MenuItem label="Leave Group" icon={leaveIcon} onClick={onLeaveClick} />
+        <MenuItem
+          label="Leave Group"
+          icon={leaveIcon}
+          onClick={handleLeaveConversation}
+        />
       )}
       {conversation.type === "DIRECT" && (
-        <MenuItem label="Delete" icon={trashIcon} onClick={onDeleteClick} />
+        <MenuItem
+          label="Delete"
+          icon={trashIcon}
+          onClick={handleDeleteConversation}
+        />
       )}
     </MenuContent>
   );

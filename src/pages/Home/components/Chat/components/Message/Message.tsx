@@ -135,7 +135,7 @@ const Message = ({
           />
         </div>
       </div>
-      {showContextMenu && (
+      {showContextMenu && message.status !== "sending" && (
         <ContextMenu
           isOpen={showContextMenu}
           onClose={() => setShowContextMenu(false)}

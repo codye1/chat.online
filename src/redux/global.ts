@@ -10,6 +10,7 @@ import type { IEditFolder } from "@components/ModalManager/Modals/EditFolder/Edi
 import type { IOtherUserModal } from "@components/ModalManager/Modals/OtherUserModal/OtherUserModal";
 import type { IGroupInfo } from "@components/ModalManager/Modals/GroupInfo/GroupInfo";
 import type { IWarningModal } from "@components/ModalManager/Modals/WarningModal/WarningModal";
+import type { IAddParticipants } from "@components/ModalManager/Modals/AddParticipants/AddParticipants";
 
 type AvailableModals =
   | { type: "profileView"; props: IProfileViewModal }
@@ -23,7 +24,8 @@ type AvailableModals =
   | { type: "createGroup" }
   | (IOtherUserModal & { type: "otherUser" })
   | (IGroupInfo & { type: "groupInfo" })
-  | (IWarningModal & { type: "warning" });
+  | (IWarningModal & { type: "warning" })
+  | (IAddParticipants & { type: "addParticipants" });
 
 type MessageToEdit = Message & { mediaToEdit?: MessageMedia };
 

@@ -11,6 +11,7 @@ interface IAvatar {
   children?: ReactNode;
   className?: string;
   selected?: boolean;
+  selectedColor?: string;
 }
 
 const Avatar = ({
@@ -20,13 +21,20 @@ const Avatar = ({
   children,
   className,
   selected,
+  selectedColor,
 }: IAvatar) => {
   return avatarUrl ? (
     <div
       className={clsx(styles.avatar, className, {
         [styles.selected]: selected,
       })}
-      style={{ width, height }}
+      style={
+        {
+          width,
+          height,
+          "--selected-color": selectedColor,
+        } as React.CSSProperties
+      }
     >
       <img src={avatarUrl} alt="User avatar" className={styles.avatarImg} />
       {children}
@@ -39,7 +47,13 @@ const Avatar = ({
       className={clsx(styles.placeholderIcon, styles.avatar, className, {
         [styles.selected]: selected,
       })}
-      style={{ width, height }}
+      style={
+        {
+          width,
+          height,
+          "--selected-color": selectedColor,
+        } as React.CSSProperties
+      }
     >
       <img src={userIcon} alt="User icon" className={styles.avatarImg} />
       {selected && (

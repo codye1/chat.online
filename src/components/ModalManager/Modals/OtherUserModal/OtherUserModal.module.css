@@ -31,3 +31,9 @@
     color: var(--c-muted);
   }
 }
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}

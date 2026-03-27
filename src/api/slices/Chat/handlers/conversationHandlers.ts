@@ -117,10 +117,27 @@ const onUserRemovedFromConversation = (data: {
   });
 };
 
+interface OnParticipantAddedToConversationData {
+  conversationId: string;
+  participantsCount: number;
+}
+
+const onParticipantAddedToConversation = (
+  data: OnParticipantAddedToConversationData,
+) => {
+  const { conversationId, participantsCount } = data;
+  updateConversation(conversationId, (prev) => {
+    if (prev.type === "GROUP") {
+      prev.participantsCount = participantsCount;
+    }
+  });
+};
+
 export {
   onLastSeenAtUpdate,
   createOnUpdateConversation,
   onNewConversation,
   onDeleteConversation,
   onUserRemovedFromConversation,
+  onParticipantAddedToConversation,
 };

@@ -43,6 +43,7 @@ export const {
   useRemoveUserFromConversationMutation,
   useLeaveConversationMutation,
   useGetConversationParticipantsMutation,
+  useAddParticipantToConversationMutation,
 } = chatSlice;
 
 const DEFAULT_CONVERSATIONS_STATE: ConversationsState = {

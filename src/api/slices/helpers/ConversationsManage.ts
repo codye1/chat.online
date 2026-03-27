@@ -131,6 +131,10 @@ const updateConversationSettings = async (
     }
   });
 
+  updateConversation(conversationId, (conversation) => {
+    Object.assign(conversation, settings);
+  });
+
   await store
     .dispatch(
       chatSlice.endpoints.updateConversationSettings.initiate({

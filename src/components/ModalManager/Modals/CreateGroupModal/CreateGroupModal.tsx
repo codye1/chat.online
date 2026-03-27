@@ -6,23 +6,13 @@ import styles from "./CreateGroupModal.module.css";
 import InputWithLabel from "@components/InputWithLabel/InputWithLabel";
 import Button from "@components/Button/Button";
 import { useState } from "react";
-import {
-  useCreateConversationMutation,
-  useSearchQuery,
-} from "@api/slices/Chat/chatSlice";
-import Avatar from "@components/Avatar/Avatar";
+import { useCreateConversationMutation } from "@api/slices/Chat/chatSlice";
 import type { UserSearchPreview } from "@utils/types";
-import removeFromSelectedIcon from "@assets/close.svg";
 import AvatarWithUploader from "../EditProfileModal/components/AvatarWithUploader/AvatarWithUploader";
-import ListItem from "@components/ListItem/ListItem";
+import ParticipantsPicker from "@components/ParticipantsPicker/ParticipantsPicker";
 
 const CreateGroupModal = () => {
   const dispatch = useAppDispatch();
-  const [searchValue, setSearchValue] = useState("");
-  const { data: searchResults } = useSearchQuery(
-    { query: searchValue, type: "users" },
-    { skip: searchValue.trim().length === 0, refetchOnMountOrArgChange: true },
-  );
   const [selectedUsers, setSelectedUsers] = useState<UserSearchPreview[]>([]);
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -55,68 +45,19 @@ const CreateGroupModal = () => {
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-        <div className={styles.addParticipants}>
-          <div className={styles.selectedUsers}>
-            {selectedUsers.map((user) => (
-              <div key={user.id} className={styles.selectedUser}>
-                <Avatar
-                  key={user.id}
-                  avatarUrl={user.avatarUrl}
-                  width={30}
-                  height={30}
-                />
-                <span>{user.nickname}</span>
-                <img
-                  src={removeFromSelectedIcon}
-                  alt="Remove"
-                  className={styles.removeIcon}
-                  onClick={() => {
-                    setSelectedUsers((prev) =>
-                      prev.filter((u) => u.id !== user.id),
-                    );
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-          <InputWithLabel
-            label="Add participants"
-            name="participants"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <ul className={styles.searchResults}>
-            {searchResults && searchResults.global.length > 0 ? (
-              searchResults.global.map(
-                (user) =>
-                  user.type === "user" && (
-                    <ListItem
-                      key={user.id}
-                      className={styles.searchResult}
-                      onClick={() => {
-                        if (!selectedUsers.find((u) => u.id === user.id)) {
-                          setSelectedUsers((prev) => [...prev, user]);
-                        }
-                      }}
-                    >
-                      <Avatar
-                        avatarUrl={user.avatarUrl}
-                        className={styles.avatar}
-                        selected={!!selectedUsers.find((u) => u.id === user.id)}
-                      />
-                      <span>{user.nickname}</span>
-                    </ListItem>
-                  ),
-              )
-            ) : (
-              <p>No results</p>
-            )}
-          </ul>
-        </div>
+        <ParticipantsPicker
+          selectedUsers={selectedUsers}
+          onSelectedUsersChange={setSelectedUsers}
+        />
         <div className={styles.buttons}>
           <Button>Cancel</Button>
           <Button
-            disabled={title.trim().length === 0 || selectedUsers.length === 0}
+            disabled={
+              title.trim().length === 0 ||
+              selectedUsers.length === 0 ||
+              uploadedImg === null ||
+              isLoading
+            }
             onClick={async () => {
               await createConversation({
                 title,

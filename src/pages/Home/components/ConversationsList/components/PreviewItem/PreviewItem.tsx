@@ -44,7 +44,6 @@ const PreviewItem = ({
     x: 0,
     y: 0,
   });
-  console.log(isActive);
 
   return (
     <ListItem

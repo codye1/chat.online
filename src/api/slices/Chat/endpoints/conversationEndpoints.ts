@@ -22,6 +22,7 @@ import {
   onDeleteConversation,
   onLastSeenAtUpdate,
   onNewConversation,
+  onParticipantAddedToConversation,
   onUserRemovedFromConversation,
 } from "../handlers/conversationHandlers";
 import { onNewReaction, onRemoveReaction } from "../handlers/reactionHandlers";
@@ -147,6 +148,10 @@ const buildConversationEndpoints = (builder: Builder) => ({
         connectToConversation(conversationIds);
       }
 
+      socket.on(
+        "conversation:participantsAdded",
+        onParticipantAddedToConversation,
+      );
       socket.on("conversation:userRemoved", onUserRemovedFromConversation);
       socket.on("conversation:deleted", onDeleteConversation);
       socket.on("message:edited", onMessageEdited);
@@ -161,6 +166,10 @@ const buildConversationEndpoints = (builder: Builder) => ({
 
       await cacheEntryRemoved;
 
+      socket.off(
+        "conversation:participantsAdded",
+        onParticipantAddedToConversation,
+      );
       socket.off("conversation:userRemoved", onUserRemovedFromConversation);
       socket.off("message:edited", onMessageEdited);
       socket.off("reaction:removed", onRemoveReaction);
@@ -237,6 +246,17 @@ const buildConversationEndpoints = (builder: Builder) => ({
       url: `chat/conversations/${conversationId}/participants`,
       method: "GET",
       params: { cursor, take },
+    }),
+  }),
+
+  addParticipantToConversation: builder.mutation<
+    { success: boolean },
+    { conversationId: string; participantIds: string[] }
+  >({
+    query: ({ conversationId, participantIds }) => ({
+      url: `chat/conversations/${conversationId}/participants`,
+      method: "POST",
+      body: { participantIds },
     }),
   }),
 });

@@ -11,14 +11,19 @@ import burgerIcon from "@assets/burger.svg";
 import NavigationDrawer from "../Sidebar/components/NavigationDrawer/NavigationDrawer";
 import back from "@assets/back.svg";
 import ArchivedConversations from "./components/ArchivedConversations/ArchivedConversations";
+import useDebounce from "@hooks/useDebounce";
 export type views = "CONVERSATIONS" | "SEARCH" | "ARCHIVED";
 
 const ConversationsList = () => {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [showDrawer, setShowDrawer] = useState(false);
   const { data: searchResults } = useSearchQuery(
-    { query: search },
-    { skip: search.trim().length === 0, refetchOnMountOrArgChange: true },
+    { query: debouncedSearch },
+    {
+      skip: debouncedSearch.trim().length === 0,
+      refetchOnMountOrArgChange: true,
+    },
   );
   const [view, setView] = useState<views>("CONVERSATIONS");
 

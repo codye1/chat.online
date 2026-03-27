@@ -9,7 +9,7 @@
 }
 
 .selected {
-  border: 2px solid var(--c-link);
+  border: 2px solid var(--selected-color, var(--c-link));
 }
 
 .avatarImg {
@@ -29,5 +29,5 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: var(--c-link);
+  background-color: var(--selected-color, var(--c-link));
 }
