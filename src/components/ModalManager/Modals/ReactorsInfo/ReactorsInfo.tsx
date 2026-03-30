@@ -6,13 +6,13 @@ import styles from "./ReactorsInfo.module.css";
 import { useMemo, useState } from "react";
 import ReactorsList from "./components/ReactorsList/ReactorsList";
 import GroupedReactions from "./components/GroupedReactions/GroupedReactions";
-import { useGetReactorsQuery } from "@api/slices/chatSlice";
+import { useGetReactorsQuery } from "@api/slices/Chat/chatSlice";
 import close from "@assets/close.svg";
-
 interface IReactorsInfo {
   messageId: string;
   conversationId: string;
   groupedReactions: GroupedReactionsType;
+  canGoBack?: boolean;
 }
 
 const ReactorsInfo = ({

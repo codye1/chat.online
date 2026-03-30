@@ -24,7 +24,6 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    margin: var(--space-2);
     & img {
       width: 20px;
       height: 20px;

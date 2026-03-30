@@ -22,3 +22,25 @@
   flex-direction: column;
   align-items: center;
 }
+
+.closeButton,
+.backButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: var(--space-2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  z-index: 10;
+  & img {
+    width: var(--height-xs);
+    height: var(--height-xs);
+  }
+}
+
+.backButton {
+  right: auto;
+  left: 0;
+}

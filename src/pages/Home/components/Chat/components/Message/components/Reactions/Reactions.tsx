@@ -1,14 +1,17 @@
 import type { GroupedReactions } from "@utils/types";
 import styles from "./Reactions.module.css";
 import clsx from "clsx";
-import { addReaction, removeReaction } from "@utils/socket";
+import removeReaction from "@utils/socket/actions/reactionActions/removeReaction";
+import addReaction from "@utils/socket/actions/reactionActions/addReaction";
 
 const Reactions = ({
   reactions,
   messageId,
+  conversationId,
 }: {
   reactions: GroupedReactions;
   messageId: string;
+  conversationId: string;
 }) => {
   return (
     <>
@@ -22,9 +25,9 @@ const Reactions = ({
               })}
               onClick={() => {
                 if (group.isActive) {
-                  removeReaction({ messageId });
+                  removeReaction({ messageId, conversationId });
                 } else {
-                  addReaction({ messageId, content: key });
+                  addReaction({ messageId, content: key, conversationId });
                 }
               }}
             >

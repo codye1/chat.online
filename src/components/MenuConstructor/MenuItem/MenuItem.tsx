@@ -40,6 +40,14 @@ const MenuItem = ({
     } else {
       subRef.current.style.left = "100%";
     }
+
+    if (itemRect.top + subRect.height > window.innerHeight) {
+      subRef.current.style.bottom = "0";
+      subRef.current.style.top = "auto";
+    } else {
+      subRef.current.style.top = "0";
+      subRef.current.style.bottom = "auto";
+    }
   }, [isSubOpen]);
 
   return (

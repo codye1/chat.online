@@ -9,7 +9,7 @@ import Button from "@components/Button/Button";
 import {
   useCreateFolderMutation,
   useConversationsQuery,
-} from "@api/slices/chatSlice";
+} from "@api/slices/Chat/chatSlice";
 
 interface ICreateFolderModal {
   selectedConversation?: string;

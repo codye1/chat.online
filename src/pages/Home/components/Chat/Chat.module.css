@@ -17,3 +17,9 @@
   font-weight: 700;
   padding: var(--space-8);
 }
+
+@media (max-width: 768px) {
+  .chat {
+    min-width: 100vw;
+  }
+}

@@ -1,0 +1,33 @@
+.content {
+  padding: var(--space-5);
+  width: 350px;
+}
+
+.inputsContainer {
+  display: flex;
+  align-items: center;
+}
+
+.avatarUploader {
+  position: relative;
+  margin-right: var(--space-4);
+
+  min-width: 75px;
+  height: 75px;
+}
+
+.avatarUploaderButton {
+  width: 30px;
+  height: 30px;
+}
+
+.titleInput {
+  width: 100%;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+  gap: var(--space-4);
+}

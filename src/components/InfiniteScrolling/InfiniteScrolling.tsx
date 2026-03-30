@@ -25,7 +25,7 @@ const InfiniteScrolling = <T,>({
   dontShowSentinel,
   children,
 }: IInfiniteScrolling<T>) => {
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLUListElement | null>(null);
   const prevListIdRef = useRef(listId);
 
   const scrollPositions = useRef<Record<string, number>>({});
@@ -60,11 +60,11 @@ const InfiniteScrolling = <T,>({
   };
 
   return (
-    <div ref={rootRef} onScroll={onScroll} className={clsx(className)}>
+    <ul ref={rootRef} onScroll={onScroll} className={clsx(className)}>
       {children}
       {items.map((item, index) => renderItem(item, index))}
       {hasMore && !dontShowSentinel && <div ref={sentinelRef} />}
-    </div>
+    </ul>
   );
 };
 

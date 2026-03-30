@@ -1,9 +1,18 @@
-import store from "@redux/store";
-import chatSlice from "../chatSlice";
+import store, { type RootState } from "@redux/store";
+import chatSlice from "../Chat/chatSlice";
 import type {
+  Conversation,
   ConversationsState,
   EditableConversationFields,
 } from "@utils/types";
+import { setConversation } from "@redux/global";
+import leaveConversation from "@utils/socket/actions/conversationActions/leaveConversation";
+
+const getConversationsState = () => {
+  const state = store.getState() as RootState;
+
+  return chatSlice.endpoints.getConversations.select(undefined)(state)?.data;
+};
 
 const updateConversationsState = (
   updateFn: (state: ConversationsState) => void,
@@ -12,6 +21,21 @@ const updateConversationsState = (
     chatSlice.util.updateQueryData("getConversations", undefined, (draft) => {
       updateFn(draft);
     }),
+  );
+};
+
+const updateConversation = (
+  conversationId: string,
+  updateFn: (conversation: Conversation) => void,
+) => {
+  store.dispatch(
+    chatSlice.util.updateQueryData(
+      "getConversation",
+      { recipientId: null, conversationId },
+      (draft) => {
+        updateFn(draft);
+      },
+    ),
   );
 };
 
@@ -107,6 +131,10 @@ const updateConversationSettings = async (
     }
   });
 
+  updateConversation(conversationId, (conversation) => {
+    Object.assign(conversation, settings);
+  });
+
   await store
     .dispatch(
       chatSlice.endpoints.updateConversationSettings.initiate({
@@ -158,10 +186,64 @@ const removeFromFolder = async (conversationId: string, folderId: string) => {
     .unwrap();
 };
 
+const upsertConversation = (conversation: Conversation) => {
+  store.dispatch(
+    chatSlice.util.upsertQueryData(
+      "getConversation",
+      { recipientId: null, conversationId: conversation.id },
+      conversation,
+    ),
+  );
+};
+
+const deleteConversationFromState = ({
+  conversationId,
+}: {
+  conversationId: string;
+}) => {
+  const state = store.getState() as RootState;
+  const activeConversationId = state.global.conversationId;
+
+  if (activeConversationId === conversationId) {
+    store.dispatch(setConversation({ conversationId: null }));
+  }
+
+  leaveConversation([conversationId]);
+
+  updateConversationsState((state) => {
+    delete state.byId[conversationId];
+    state.activeIds.pinned = state.activeIds.pinned.filter(
+      (id) => id !== conversationId,
+    );
+    state.activeIds.unpinned = state.activeIds.unpinned.filter(
+      (id) => id !== conversationId,
+    );
+    state.archivedIds.pinned = state.archivedIds.pinned.filter(
+      (id) => id !== conversationId,
+    );
+    state.archivedIds.unpinned = state.archivedIds.unpinned.filter(
+      (id) => id !== conversationId,
+    );
+
+    state.folders.forEach((folder) => {
+      folder.pinnedConversationIds = folder.pinnedConversationIds.filter(
+        (id) => id !== conversationId,
+      );
+      folder.unpinnedConversationIds = folder.unpinnedConversationIds.filter(
+        (id) => id !== conversationId,
+      );
+    });
+  });
+};
+
 export {
   updateConversationsState,
   updatePinnedPositions,
   updateConversationSettings,
   addToFolder,
   removeFromFolder,
+  updateConversation,
+  getConversationsState,
+  upsertConversation,
+  deleteConversationFromState,
 };

@@ -1,4 +1,4 @@
-import type { LoadedFile } from "@components/InputFile";
+import type { LoadedFile } from "@components/InputFile/InputFile";
 import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import Modal from "@components/Modal/Modal";
 import styles from "./PreUploadMediaPreview.module.css";
@@ -12,9 +12,10 @@ import threePointsIcon from "@assets/threePointLeader.svg";
 import Popover from "@components/Popover/Popover";
 import MenuItem from "@components/MenuConstructor/MenuItem/MenuItem";
 import plus from "@assets/plus.svg";
-import InputFile from "@components/InputFile";
+import InputFile from "@components/InputFile/InputFile";
 import { useUploadMediaMutation } from "@api/slices/mediaSlice";
-import { editMessage, sendMessage } from "@utils/socket";
+import sendMessage from "@utils/socket/actions/messageActions/sendMessage";
+import editMessage from "@utils/socket/actions/messageActions/editMessage";
 
 interface IPreUploadMediaPreview {
   files: LoadedFile[];

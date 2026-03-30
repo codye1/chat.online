@@ -1,9 +1,9 @@
-import vwToPx from "@utils/vwToPx";
+import vwToPx from "@utils/helpers/vwToPx";
 import styles from "./ConversationsList.module.css";
 import Input from "@components/Input/Input";
 import { useState } from "react";
 import AllConversations from "./components/AllConversations/AllConversations";
-import { useSearchQuery } from "@api/slices/chatSlice";
+import { useSearchQuery } from "@api/slices/Chat/chatSlice";
 import closeIcon from "@assets/close.svg";
 import SearchMenu from "./components/SearchMenu/SearchMenu";
 import ResizableSection from "@components/ResizableSection/ResizableSection";
@@ -11,14 +11,24 @@ import burgerIcon from "@assets/burger.svg";
 import NavigationDrawer from "../Sidebar/components/NavigationDrawer/NavigationDrawer";
 import back from "@assets/back.svg";
 import ArchivedConversations from "./components/ArchivedConversations/ArchivedConversations";
+import useDebounce from "@hooks/useDebounce";
+import { useAppSelector } from "@hooks/hooks";
+import clsx from "clsx";
 export type views = "CONVERSATIONS" | "SEARCH" | "ARCHIVED";
 
 const ConversationsList = () => {
+  const conversationListOpen = useAppSelector(
+    (state) => state.global.conversationsListOpen,
+  );
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [showDrawer, setShowDrawer] = useState(false);
   const { data: searchResults } = useSearchQuery(
-    { query: search },
-    { skip: search.trim().length === 0, refetchOnMountOrArgChange: true },
+    { query: debouncedSearch },
+    {
+      skip: debouncedSearch.trim().length === 0,
+      refetchOnMountOrArgChange: true,
+    },
   );
   const [view, setView] = useState<views>("CONVERSATIONS");
 
@@ -33,8 +43,11 @@ const ConversationsList = () => {
 
   return (
     <ResizableSection
-      maxWidth={vwToPx(65)}
-      className={styles.conversationsList}
+      maxWidth={vwToPx(35)}
+      className={clsx(
+        styles.conversationsList,
+        !conversationListOpen && styles.closed,
+      )}
     >
       {view === "ARCHIVED" ? (
         <div

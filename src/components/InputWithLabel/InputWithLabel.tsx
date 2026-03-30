@@ -11,7 +11,8 @@ interface InputWithLabelProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   defaultValue?: string;
-  errors?: string[];
+  errors?: string[] | string;
+  className?: string;
 }
 
 const InputWithLabel = ({
@@ -22,6 +23,7 @@ const InputWithLabel = ({
   onChange,
   placeholder = "",
   errors,
+  className,
 }: InputWithLabelProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -32,7 +34,7 @@ const InputWithLabel = ({
   };
 
   return (
-    <div className={styles.inputWithLabel}>
+    <div className={clsx(styles.inputWithLabel, className)}>
       <label
         className={clsx(
           styles.label,

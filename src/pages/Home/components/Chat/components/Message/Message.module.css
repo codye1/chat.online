@@ -4,6 +4,22 @@
   left: 0;
 
   width: 100%;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.avatarWrapper {
+  cursor: pointer;
+  margin-right: var(--space-2);
+}
+
+.authorName {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-bottom: var(--space-1);
+  color: var(--c-link);
 }
 
 .message {
@@ -16,8 +32,12 @@
   display: flex;
   box-shadow: var(--shadow-s);
   flex-direction: column;
-  max-width: 50%;
+  max-width: 90%;
   object-fit: cover;
+
+  & h3 {
+    cursor: pointer;
+  }
 }
 
 .sentByCurrentUser {

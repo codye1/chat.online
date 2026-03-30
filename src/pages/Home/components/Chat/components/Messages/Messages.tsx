@@ -1,10 +1,10 @@
 import { useAppSelector } from "@hooks/hooks";
 import { useState } from "react";
-import { useGetMessagesQuery } from "@api/slices/chatSlice";
+import { useGetMessagesQuery } from "@api/slices/Chat/chatSlice";
 import type { Conversation } from "@utils/types";
 import useHandleUnreadMessages from "./hook/useHandleUnreadMessages";
 import VList from "../VList/VList";
-import resetUnreadMessagesCount from "@utils/resetUnreadMessagesCount";
+import resetUnreadMessagesCount from "@utils/helpers/resetUnreadMessagesCount";
 import styles from "./Messages.module.css";
 import MessageSkeleton from "../Message/MessageSkeleton";
 import Message from "../Message/Message";
@@ -45,7 +45,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
       {data && (
         <VList
           items={data.items}
-          itemsFetching={isFetching}
+          itemsFetching={isFetching || isLoading}
           listId={conversation.id}
           hasMoreUp={!!data?.hasMoreUp}
           hasMoreDown={!!data?.hasMoreDown}
@@ -88,11 +88,16 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
           }}
           renderItem={(item, itemsBuffer, virtualizer) => {
             const message = itemsBuffer[item.index];
+            const isRead = conversation.lastReadIdByParticipants
+              ? message.id <= conversation.lastReadIdByParticipants
+              : false;
+
             return (
               <Message
                 key={message.id}
                 data-index={item.index}
                 message={message}
+                isInGroup={conversation.type === "GROUP"}
                 style={{
                   position: "absolute",
                   top: 0,
@@ -100,14 +105,15 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                   width: "100%",
                   transform: `translateY(${item.start}px)`,
                 }}
-                read={
-                  conversation.lastReadIdByParticipants
-                    ? message.id <= conversation.lastReadIdByParticipants
-                    : false
-                }
+                read={isRead}
                 isSentByCurrentUser={message.sender.id === user.id}
                 ref={(el) => {
-                  trackUnreadMessageRef(el, message);
+                  if (
+                    message.status !== "sending" &&
+                    message.sender.id !== user.id
+                  ) {
+                    trackUnreadMessageRef(el, message);
+                  }
                   virtualizer.measureElement(el);
                 }}
               />

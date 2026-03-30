@@ -1,0 +1,15 @@
+.headerButton {
+  display: flex;
+  flex-direction: column;
+
+  font-weight: 300;
+  font-size: var(--text-sm);
+
+  width: 70px;
+  height: 70px;
+
+  & img {
+    width: 25px;
+    height: 25px;
+  }
+}

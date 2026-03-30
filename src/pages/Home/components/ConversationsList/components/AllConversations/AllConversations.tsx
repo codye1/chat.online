@@ -10,9 +10,9 @@ import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import styles from "./AllConversationsList.module.css";
 import ConversationContextMenu from "../ConversationContextMenu/ConversationContextMenu";
 import archiveAvatar from "@assets/archiveAvatar.png";
-import getArchiveDescription from "@utils/getArchiveDescription";
 import type { views } from "../../ConversationsList";
 import ContextMenu from "@components/ContextMenu/ContextMenu";
+import getArchiveDescription from "@utils/helpers/getArchiveDescription";
 
 interface IAllConversations {
   setView: (view: views) => void;
@@ -24,7 +24,7 @@ const AllConversations = ({ setView }: IAllConversations) => {
     useFolderConversations(activeFolderId);
 
   const dispatch = useAppDispatch();
-  const { conversationId } = useAppSelector((state) => state.global);
+  const conversationId = useAppSelector((state) => state.global.conversationId);
 
   const showArchive = useMemo(() => {
     return (
@@ -62,7 +62,8 @@ const AllConversations = ({ setView }: IAllConversations) => {
           const nextPinPosition = Object.keys(pinnedConversations).length;
           const description = conversation.lastMessage?.text ?? "";
           const lastMessageTime =
-            conversation.lastMessage?.createdAt.toString() || "";
+            conversation.lastMessage?.createdAt.toString() ||
+            conversation.createdAt.toString();
           const foldersWhereConversationIs = conversationsState.folders.filter(
             (folder) => {
               const pinnedInFolder = folder.pinnedConversationIds.find(
@@ -90,6 +91,7 @@ const AllConversations = ({ setView }: IAllConversations) => {
                 dispatch(setConversation({ conversationId: conversation.id }));
               }}
               isPinned={isPinned}
+              isMuted={conversation.isMuted}
             >
               <ContextMenu.Slot>
                 <ConversationContextMenu

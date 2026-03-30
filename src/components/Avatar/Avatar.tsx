@@ -2,26 +2,63 @@ import type { ReactNode } from "react";
 import styles from "./Avatar.module.css";
 import userIcon from "@assets/user.svg";
 import clsx from "clsx";
+import check from "@assets/check.svg";
 
 interface IAvatar {
   avatarUrl: string | null;
   width?: string | number;
   height?: string | number;
   children?: ReactNode;
+  className?: string;
+  selected?: boolean;
+  selectedColor?: string;
 }
 
-const Avatar = ({ avatarUrl, width, height, children }: IAvatar) => {
+const Avatar = ({
+  avatarUrl,
+  width,
+  height,
+  children,
+  className,
+  selected,
+  selectedColor,
+}: IAvatar) => {
   return avatarUrl ? (
-    <div className={styles.avatar} style={{ width, height }}>
-      <img src={avatarUrl} alt="User avatar" />
+    <div
+      className={clsx(styles.avatar, className, {
+        [styles.selected]: selected,
+      })}
+      style={
+        {
+          width,
+          height,
+          "--selected-color": selectedColor,
+        } as React.CSSProperties
+      }
+    >
+      <img src={avatarUrl} alt="User avatar" className={styles.avatarImg} />
       {children}
+      {selected && (
+        <img src={check} alt="Selected" className={styles.selectedIcon} />
+      )}
     </div>
   ) : (
     <div
-      className={clsx(styles.placeholderIcon, styles.avatar)}
-      style={{ width, height }}
+      className={clsx(styles.placeholderIcon, styles.avatar, className, {
+        [styles.selected]: selected,
+      })}
+      style={
+        {
+          width,
+          height,
+          "--selected-color": selectedColor,
+        } as React.CSSProperties
+      }
     >
-      <img src={userIcon} alt="User icon" />
+      <img src={userIcon} alt="User icon" className={styles.avatarImg} />
+      {selected && (
+        <img src={check} alt="Selected" className={styles.selectedIcon} />
+      )}
       {children}
     </div>
   );

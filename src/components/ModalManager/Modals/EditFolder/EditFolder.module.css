@@ -1,0 +1,8 @@
+.content {
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+
+  & button {
+    margin-left: auto;
+  }
+}

@@ -1,10 +1,14 @@
 import Avatar from "@components/Avatar/Avatar";
 import styles from "./ReactorsList.module.css";
-import getDisplayName from "@utils/getDisplayName";
-import formatDate from "@utils/formatDate";
+import formatDate from "@utils/helpers/formatDate";
 import type { ReactorListItem } from "@utils/types";
 import InfiniteScrolling from "@components/InfiniteScrolling/InfiniteScrolling";
 import Skeleton from "react-loading-skeleton";
+import getDisplayName from "@utils/helpers/getDisplayName";
+import ListItem from "@components/ListItem/ListItem";
+import ListItemInfo from "@components/ListItem/ListItemInfo";
+import { useAppDispatch } from "@hooks/hooks";
+import { pushModal } from "@redux/global";
 
 interface IReactorsList {
   tab: string;
@@ -37,6 +41,8 @@ const ReactorsList = ({
   tab,
   hasMore,
 }: IReactorsList) => {
+  const dispatch = useAppDispatch();
+
   if (isLoading) {
     return (
       <ul className={styles.reactorsList}>
@@ -55,20 +61,26 @@ const ReactorsList = ({
       items={reactors}
       className={styles.reactorsList}
       renderItem={(reactor) => (
-        <li className={styles.reactor} key={reactor.reaction.id}>
+        <ListItem
+          className={styles.reactor}
+          key={reactor.reaction.id}
+          onClick={() => {
+            dispatch(pushModal({ type: "otherUser", userPreview: reactor }));
+          }}
+        >
           <Avatar
             avatarUrl={reactor.avatarUrl}
             width={"50px"}
             height={"50px"}
           />
-          <div className={styles.info}>
-            <h3 className={styles.displayName}>{getDisplayName(reactor)}</h3>
-            <h4>{formatDate(reactor.reaction.createdAt)}</h4>
-          </div>
+          <ListItemInfo
+            title={getDisplayName(reactor)}
+            subtitle={formatDate(reactor.reaction.createdAt)}
+          />
           <div className={styles.reactionContent}>
             {reactor.reaction.content}
           </div>
-        </li>
+        </ListItem>
       )}
       listId={tab}
       hasMore={hasMore}

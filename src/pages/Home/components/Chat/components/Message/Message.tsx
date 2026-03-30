@@ -1,26 +1,32 @@
 import clsx from "clsx";
 import styles from "./Message.module.css";
 import Check from "@assets/check.svg";
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import Reactions from "./components/Reactions/Reactions";
 import type { MessageMedia, Message as MessageType } from "@utils/types";
-import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
-import getDisplayName from "@utils/getDisplayName";
 import MediaContainer from "./components/MediaContainer/MediaContainer";
+import getDisplayName from "@utils/helpers/getDisplayName";
+import ContextMenu from "@components/ContextMenu/ContextMenu";
+import MessageContextMenu from "./components/MessageContextMenu/MessageContextMenu";
+import Avatar from "@components/Avatar/Avatar";
+import { useAppDispatch } from "@hooks/hooks";
+import { openModal } from "@redux/global";
 
 export interface IMessage {
   message: MessageType;
   isSentByCurrentUser: boolean;
+  isInGroup: boolean;
   read: boolean;
   ref: (node: Element | null | undefined) => void;
   "data-index": number;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   onDoubleClick?: () => void;
 }
 
 const Message = ({
   message,
   isSentByCurrentUser,
+  isInGroup,
   read,
   ref,
   "data-index": dataIndex,
@@ -28,11 +34,11 @@ const Message = ({
   onDoubleClick,
 }: IMessage) => {
   const popoverAnchorRef = useRef<HTMLDivElement | null>(null);
-  const [contextMenu, setContextMenu] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [mediaForContextMenu, setMediaForContextMenu] =
     useState<MessageMedia>();
-
+  const dispatch = useAppDispatch();
   return (
     <>
       <div
@@ -42,24 +48,53 @@ const Message = ({
         data-index={dataIndex}
         style={style}
       >
+        {!isSentByCurrentUser && isInGroup && (
+          <div
+            className={styles.avatarWrapper}
+            onClick={() => {
+              dispatch(
+                openModal({ type: "otherUser", userPreview: message.sender }),
+              );
+            }}
+          >
+            <Avatar
+              avatarUrl={message.sender.avatarUrl}
+              width={30}
+              height={30}
+              className={styles.avatar}
+            />
+          </div>
+        )}
         <div
           ref={popoverAnchorRef}
           onDoubleClick={onDoubleClick}
           onContextMenu={(e) => {
             e.preventDefault();
             setMousePosition({ x: e.clientX, y: e.clientY });
-            setContextMenu(true);
+            setShowContextMenu(true);
           }}
           className={clsx(styles.message, {
             [styles.sentByCurrentUser]: isSentByCurrentUser,
           })}
         >
+          {isInGroup && !isSentByCurrentUser && (
+            <h3
+              className={styles.authorName}
+              onClick={() => {
+                dispatch(
+                  openModal({ type: "otherUser", userPreview: message.sender }),
+                );
+              }}
+            >
+              {getDisplayName(message.sender)}
+            </h3>
+          )}
           {/*TODO: make scroll on click (with better messageList)*/}
           {message.replyTo && (
             <div className={styles.rplyContainer}>
-              <h3 className={styles.rplyAuthor}>
+              <p className={styles.rplyAuthor}>
                 {getDisplayName(message.replyTo.sender)}
-              </h3>
+              </p>
               <span className={styles.rplyText}>{message.replyTo.text}</span>
             </div>
           )}
@@ -69,7 +104,7 @@ const Message = ({
               onMediaItemContextMenu={(e, media) => {
                 e.preventDefault();
                 setMousePosition({ x: e.clientX, y: e.clientY });
-                setContextMenu(true);
+                setShowContextMenu(true);
                 setMediaForContextMenu(media);
               }}
             />
@@ -84,7 +119,7 @@ const Message = ({
                   minute: "2-digit",
                 })}
               </span>
-              {isSentByCurrentUser && (
+              {isSentByCurrentUser && message.status !== "sending" && (
                 <img
                   className={clsx(styles.check, { [styles.read]: read })}
                   src={Check}
@@ -93,17 +128,26 @@ const Message = ({
               )}
             </div>
           </div>
-          <Reactions reactions={message.reactions} messageId={message.id} />
+          <Reactions
+            reactions={message.reactions}
+            messageId={message.id}
+            conversationId={message.conversationId}
+          />
         </div>
       </div>
-      <MessageContextMenu
-        isContextMenuOpen={contextMenu}
-        setIsContextMenuOpen={setContextMenu}
-        mousePosition={mousePosition}
-        setMediaForContextMenu={setMediaForContextMenu}
-        mediaForContextMenu={mediaForContextMenu}
-        message={{ ...message, sentByCurrentUser: isSentByCurrentUser }}
-      />
+      {showContextMenu && message.status !== "sending" && (
+        <ContextMenu
+          isOpen={showContextMenu}
+          onClose={() => setShowContextMenu(false)}
+          position={mousePosition}
+        >
+          <MessageContextMenu
+            message={{ ...message, sentByCurrentUser: isSentByCurrentUser }}
+            mediaForContextMenu={mediaForContextMenu}
+            setMediaForContextMenu={setMediaForContextMenu}
+          />
+        </ContextMenu>
+      )}
     </>
   );
 };

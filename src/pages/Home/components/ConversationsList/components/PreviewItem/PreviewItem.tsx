@@ -6,6 +6,8 @@ import ContextMenu, {
   ContextMenuSlot,
 } from "@components/ContextMenu/ContextMenu";
 import pinIcon from "@assets/pin.svg";
+import ListItem from "@components/ListItem/ListItem";
+import ListItemInfo from "@components/ListItem/ListItemInfo";
 
 interface IPreviewItem {
   avatarUrl: string | null;
@@ -17,6 +19,7 @@ interface IPreviewItem {
     unreadMessagesCount: number;
   };
   isPinned?: boolean;
+  isMuted?: boolean;
   onClick?: () => void;
   onMouseDown?: () => void;
   isActive?: boolean;
@@ -33,6 +36,7 @@ const PreviewItem = ({
   onMouseDown,
   isActive,
   isPinned,
+  isMuted,
   children,
 }: IPreviewItem) => {
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -42,75 +46,67 @@ const PreviewItem = ({
   });
 
   return (
-    <>
-      <div
-        className={clsx(styles.previewItem, { [styles.active]: isActive })}
-        onClick={onClick}
-        onContextMenu={(el) => {
-          const hasContextMenu = Children.toArray(children).some(
-            (child) => isValidElement(child) && child.type === ContextMenuSlot,
-          );
-          if (!hasContextMenu) return;
-          el.preventDefault();
-          setShowContextMenu(true);
-          setContextMenuPosition({ x: el.clientX, y: el.clientY });
-        }}
-        onMouseDown={onMouseDown}
-      >
-        <div className={styles.icon}>
-          <Avatar avatarUrl={avatarUrl} />
-        </div>
-        <div className={styles.details}>
-          <div className={styles.mainInfo}>
-            <h2>{title}</h2>
-            <p>{description}</p>
-          </div>
+    <ListItem
+      className={clsx({ [styles.active]: isActive })}
+      onClick={onClick}
+      onContextMenu={(el) => {
+        const hasContextMenu = Children.toArray(children).some(
+          (child) => isValidElement(child) && child.type === ContextMenuSlot,
+        );
+        if (!hasContextMenu) return;
+        el.preventDefault();
+        setShowContextMenu(true);
+        setContextMenuPosition({ x: el.clientX, y: el.clientY });
+      }}
+      onMouseDown={onMouseDown}
+    >
+      <Avatar avatarUrl={avatarUrl} />
+      <ListItemInfo title={title} subtitle={description} />
+      {meta && (
+        <div className={styles.meta}>
+          <p>
+            {new Date(meta.lastMessageTime).toLocaleString(undefined, {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+          {meta.unreadMessagesCount > 0 && (
+            <span
+              className={clsx(styles.unreadCount, { [styles.muted]: isMuted })}
+            >
+              {meta.unreadMessagesCount}
+            </span>
+          )}
 
-          {meta && (
-            <div className={styles.meta}>
-              <p>
-                {new Date(meta.lastMessageTime).toLocaleString(undefined, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-              {meta.unreadMessagesCount > 0 && (
-                <span className={styles.unreadMessages}>
-                  {meta.unreadMessagesCount}
-                </span>
-              )}
-
-              {isPinned && meta.unreadMessagesCount === 0 && (
-                <span className={styles.pinnedIcon}>
-                  <img src={pinIcon} alt="Pinned" />
-                </span>
-              )}
-            </div>
+          {isPinned && meta.unreadMessagesCount === 0 && (
+            <span className={styles.pinnedIcon}>
+              <img src={pinIcon} alt="Pinned" />
+            </span>
           )}
         </div>
-        {children &&
-          Children.map(children, (child) => {
-            if (
-              isValidElement<{ children: ReactNode }>(child) &&
-              child.type === ContextMenuSlot
-            ) {
-              if (showContextMenu) {
-                return (
-                  <ContextMenu
-                    isOpen={showContextMenu}
-                    onClose={() => setShowContextMenu(false)}
-                    position={contextMenuPosition}
-                  >
-                    {child}
-                  </ContextMenu>
-                );
-              }
-              return null;
+      )}
+      {children &&
+        Children.map(children, (child) => {
+          if (
+            isValidElement<{ children: ReactNode }>(child) &&
+            child.type === ContextMenuSlot
+          ) {
+            if (showContextMenu) {
+              return (
+                <ContextMenu
+                  isOpen={showContextMenu}
+                  onClose={() => setShowContextMenu(false)}
+                  position={contextMenuPosition}
+                >
+                  {child}
+                </ContextMenu>
+              );
             }
-            return child;
-          })}
-      </div>
-    </>
+            return null;
+          }
+          return child;
+        })}
+    </ListItem>
   );
 };
 

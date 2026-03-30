@@ -1,13 +1,14 @@
-import Avatar from "@components/Avatar/Avatar";
 import Modal from "@components/Modal/Modal";
 import type { User } from "@utils/types";
-import clsx from "clsx";
 import styles from "./ProfileViewModal.module.css";
-import closeIcon from "@assets/close.svg";
-import edit from "@assets/edit.svg";
-import getDisplayName from "@utils/getDisplayName";
 import { useAppDispatch } from "@hooks/hooks";
-import { closeModal, openModal } from "@redux/global";
+import { closeModal, pushModal } from "@redux/global";
+import getDisplayName from "@utils/helpers/getDisplayName";
+import ViewHeader from "@components/ViewModalConstructor/ViewHeader/ViewHeader";
+import ViewControls from "@components/ViewModalConstructor/ViewControls/ViewControls";
+import ViewBody from "@components/ViewModalConstructor/ViewBody/ViewBody";
+import ViewDetail from "@components/ViewModalConstructor/ViewDetail/ViewDetail";
+import Avatar from "@components/Avatar/Avatar";
 
 interface IProfileViewModal {
   user: User;
@@ -18,30 +19,21 @@ const ProfileViewModal = ({ user }: IProfileViewModal) => {
 
   return (
     <Modal onClickOutside={() => dispatch(closeModal())}>
-      <div className={styles.closeIcon}>
-        <button onClick={() => dispatch(openModal({ type: "editProfile" }))}>
-          <img src={edit} alt="edit icon" />
-        </button>
-        <button onClick={() => dispatch(closeModal())}>
-          <img src={closeIcon} alt="close icon" />
-        </button>
-      </div>
-      <div className={styles.modalHeader}>
+      <ViewHeader>
+        <ViewControls
+          onClose={() => dispatch(closeModal())}
+          onEdit={() => dispatch(pushModal({ type: "editProfile" }))}
+        />
         <Avatar avatarUrl={user.avatarUrl} width={"100px"} height={"100px"} />
         <h2>{getDisplayName(user)}</h2>
-      </div>
-      <div className={clsx(styles.modalBody, styles.profileModalBody)}>
+      </ViewHeader>
+      <ViewBody className={styles.profileModalBody}>
         {user.biography && (
-          <>
-            <h3>{user.biography}</h3>
-            <label>bio</label>
-          </>
+          <ViewDetail label="biography" value={user.biography} />
         )}
-        <h3 className={styles.link}>{user.email}</h3>
-        <label>email</label>
-        <h3 className={styles.link}>@{user.nickname}</h3>
-        <label>nickname</label>
-      </div>
+        <ViewDetail label="email" value={user.email} link />
+        <ViewDetail label="nickname" value={user.nickname} link />
+      </ViewBody>
     </Modal>
   );
 };

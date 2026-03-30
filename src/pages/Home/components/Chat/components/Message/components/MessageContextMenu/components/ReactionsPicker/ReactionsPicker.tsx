@@ -1,4 +1,4 @@
-import { addReaction } from "@utils/socket";
+import addReaction from "@utils/socket/actions/reactionActions/addReaction";
 import styles from "./ReactionsPicker.module.css";
 
 const reactions = ["👍", "❤️", "😂", "😮"];
@@ -6,11 +6,13 @@ const reactions = ["👍", "❤️", "😂", "😮"];
 interface IReactionsPicker {
   messageId: string;
   setIsContextMenuOpen: (isOpen: boolean) => void;
+  conversationId: string;
 }
 
 const ReactionsPicker = ({
   messageId,
   setIsContextMenuOpen,
+  conversationId,
 }: IReactionsPicker) => {
   return (
     <ul className={styles.list}>
@@ -19,7 +21,11 @@ const ReactionsPicker = ({
           <button
             className={styles.reactionButton}
             onClick={() => {
-              addReaction({ messageId, content: reaction });
+              addReaction({
+                messageId,
+                content: reaction,
+                conversationId: conversationId,
+              });
               setIsContextMenuOpen(false);
             }}
           >
