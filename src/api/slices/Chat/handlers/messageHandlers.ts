@@ -9,10 +9,11 @@ import {
 } from "@api/slices/helpers/ConversationsManage";
 import { updateMessages } from "@api/slices/helpers/MessagesManage";
 import type { MessagesResponse } from "../endpoints/messageEndpoints";
+import { addToastWithTimeout } from "@redux/global";
+import getDisplayName from "@utils/helpers/getDisplayName";
 
 const onNewMessage = (message: Message) => {
   const { getState } = store;
-  console.log(message);
 
   const state = getState() as RootState;
   const conversationId = state.global.conversationId;
@@ -34,6 +35,19 @@ const onNewMessage = (message: Message) => {
 
       if (state.auth.user.id !== message.sender.id) {
         convo.unreadMessages += 1;
+
+        store.dispatch(
+          addToastWithTimeout({
+            id: crypto.randomUUID(),
+            type: "newMessage",
+            newMessage: {
+              sender: getDisplayName(message.sender),
+              text: message.text,
+              conversationId: message.conversationId,
+            },
+            duration: 3000,
+          }),
+        );
       }
     }
   });
@@ -63,7 +77,6 @@ const onNewMessage = (message: Message) => {
 
 const onSentMessage = (data: { tempId: string; message: Message }) => {
   const { tempId, message } = data;
-  console.log(tempId);
 
   updateMessages(message.conversationId, (messages) => {
     const index = messages.items.findIndex((m) => m.id === tempId);
@@ -83,7 +96,6 @@ interface onMessageReadData {
 
 const onMessageRead = (data: onMessageReadData) => {
   const { lastReadMessage, conversationId } = data;
-  console.log(lastReadMessage);
 
   updateConversation(conversationId, (conversation) => {
     if (conversation) {

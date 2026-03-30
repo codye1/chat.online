@@ -11,6 +11,8 @@ import type { IOtherUserModal } from "@components/ModalManager/Modals/OtherUserM
 import type { IGroupInfo } from "@components/ModalManager/Modals/GroupInfo/GroupInfo";
 import type { IWarningModal } from "@components/ModalManager/Modals/WarningModal/WarningModal";
 import type { IAddParticipants } from "@components/ModalManager/Modals/AddParticipants/AddParticipants";
+import type { IConfirmation } from "@components/ModalManager/Modals/Confirmation/Confirmation";
+import type { AppDispatch } from "./store";
 
 type AvailableModals =
   | { type: "profileView"; props: IProfileViewModal }
@@ -25,9 +27,31 @@ type AvailableModals =
   | (IOtherUserModal & { type: "otherUser" })
   | (IGroupInfo & { type: "groupInfo" })
   | (IWarningModal & { type: "warning" })
-  | (IAddParticipants & { type: "addParticipants" });
+  | (IAddParticipants & { type: "addParticipants" })
+  | (IConfirmation & { type: "confirmation" });
 
 type MessageToEdit = Message & { mediaToEdit?: MessageMedia };
+
+interface NewMessageToast {
+  id: string;
+  type: "newMessage";
+  newMessage: {
+    sender: string;
+    text: string;
+    conversationId: string;
+  };
+  duration: number;
+}
+
+interface DefaultToast {
+  id: string;
+  type: "info" | "error" | "success";
+  message: string;
+  from?: string;
+  duration: number;
+}
+
+type Toast = NewMessageToast | DefaultToast;
 
 interface GlobalState {
   conversationId: string | null;
@@ -35,6 +59,8 @@ interface GlobalState {
   messageToEdit: MessageToEdit | null;
   replyMessage: ReplyMessage | null;
   modalStack: AvailableModals[];
+  conversationsListOpen: boolean;
+  toasts: Toast[];
 }
 
 const initialState: GlobalState = {
@@ -43,6 +69,8 @@ const initialState: GlobalState = {
   messageToEdit: null,
   replyMessage: null,
   modalStack: [],
+  conversationsListOpen: true,
+  toasts: [],
 };
 
 export const globalSlice = createSlice({
@@ -58,8 +86,6 @@ export const globalSlice = createSlice({
       state.messageToEdit = null;
     },
     setRecipient(state, action: PayloadAction<{ recipientId: string | null }>) {
-      console.log("set recipient");
-
       state.recipientId = action.payload.recipientId;
       state.conversationId = null;
       state.messageToEdit = null;
@@ -84,8 +110,28 @@ export const globalSlice = createSlice({
     closeModal(state) {
       state.modalStack = [];
     },
+    toggleConversationsList(state) {
+      state.conversationsListOpen = !state.conversationsListOpen;
+    },
+    addToast(state, action: PayloadAction<Toast>) {
+      state.toasts.push(action.payload);
+    },
+    removeToast(state, action: PayloadAction<{ id: string }>) {
+      state.toasts = state.toasts.filter(
+        (toast) => toast.id !== action.payload.id,
+      );
+    },
   },
 });
+
+export const addToastWithTimeout =
+  (toast: Toast) => (dispatch: AppDispatch) => {
+    dispatch(addToast({ ...toast }));
+
+    setTimeout(() => {
+      dispatch(removeToast({ id: toast.id }));
+    }, toast.duration);
+  };
 
 export const {
   setConversation,
@@ -96,6 +142,9 @@ export const {
   closeModal,
   pushModal,
   popModal,
+  toggleConversationsList,
+  addToast,
+  removeToast,
 } = globalSlice.actions;
 
 export type { AvailableModals, MessageToEdit, GlobalState };

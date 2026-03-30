@@ -1,7 +1,7 @@
 import store, { type RootState } from "@redux/store";
 import chatSlice from "../Chat/chatSlice";
 import type { MessagesResponse } from "../Chat/endpoints/messageEndpoints";
-import type { MessageMedia } from "@utils/types";
+import type { MessageMedia, Roles } from "@utils/types";
 import { updateConversationsState } from "./ConversationsManage";
 
 const updateMessages = (
@@ -24,12 +24,14 @@ interface OptimisticMessage {
   text: string;
   replyToMessageId?: string | null;
   media?: MessageMedia[];
+  userRole: Roles;
 }
 
 const addOptimisticMessage = ({
   conversationId,
   text,
   replyToMessageId,
+  userRole,
   media,
 }: OptimisticMessage) => {
   const tempId = `tempMessageId:${Date.now()}`;
@@ -56,7 +58,7 @@ const addOptimisticMessage = ({
       conversationId,
       replyTo: replyMessage,
       media: media ?? undefined,
-      sender: currentUser,
+      sender: { ...currentUser, role: userRole, conversationId },
       createdAt: new Date().toISOString(),
       status: "sending",
       reactions: {},

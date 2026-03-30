@@ -2,22 +2,22 @@ import MenuContent from "@components/MenuConstructor/MenuContent/MenuContent";
 import Modal from "@components/Modal/Modal";
 import { useAppDispatch } from "@hooks/hooks";
 import { closeModal, popModal } from "@redux/global";
-import styles from "./WarningModal.module.css";
+import styles from "./Confirmation.module.css";
 import Button from "@components/Button/Button";
 
-interface IWarningModal {
+interface IConfirmation {
   title: string;
   message: string;
   onContinue: () => void;
   canGoBack?: boolean;
 }
 
-const WarningModal = ({
+const Confirmation = ({
   title,
   message,
   onContinue,
   canGoBack,
-}: IWarningModal) => {
+}: IConfirmation) => {
   const dispatch = useAppDispatch();
 
   return (
@@ -46,5 +46,5 @@ const WarningModal = ({
   );
 };
 
-export default WarningModal;
-export type { IWarningModal };
+export default Confirmation;
+export type { IConfirmation };

@@ -5,6 +5,8 @@
   overflow: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--c-border) transparent;
+
+  min-width: 300px !important;
 }
 
 .archivedHeader {
@@ -48,5 +50,11 @@
   & img {
     width: 100%;
     height: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .closed {
+    display: none !important;
   }
 }

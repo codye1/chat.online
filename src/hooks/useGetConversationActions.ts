@@ -96,59 +96,72 @@ const useGetConversationActions = ({
   };
 
   const handleDeleteConversation = async () => {
-    if (window.confirm("Are you sure you want to delete this conversation?")) {
-      document.body.classList.add("wait");
-      const result = await deleteConversation({
-        conversationId: conversation.id,
-      })
-        .unwrap()
-        .catch((error) => {
-          dispatch(
-            openModal({
-              type: "error",
-              title: "Failed to Delete Conversation",
-              message: getErorMessage(error) || "Unexpected error occurred.",
-            }),
-          );
+    dispatch(
+      openModal({
+        type: "confirmation",
+        title: "Delete Conversation",
+        message: "Are you sure you want to delete this conversation?",
+        onContinue: async () => {
+          document.body.classList.add("wait");
+          try {
+            const result = await deleteConversation({
+              conversationId: conversation.id,
+            }).unwrap();
 
-          return null;
-        });
+            if (!result || !result.success)
+              throw new Error("Failed to delete conversation");
 
-      if (!result) return;
+            deleteConversationFromState({
+              conversationId: conversation.id,
+            });
+            dispatch(closeModal());
+          } catch (error) {
+            dispatch(
+              openModal({
+                type: "error",
+                title: "Failed to Delete Conversation",
+                message: getErorMessage(error) || "Unexpected error occurred.",
+              }),
+            );
+          }
 
-      document.body.classList.remove("wait");
-      deleteConversationFromState({
-        conversationId: conversation.id,
-      });
-      dispatch(closeModal());
-    }
+          document.body.classList.remove("wait");
+        },
+      }),
+    );
   };
 
   const handleLeaveConversation = async () => {
-    if (window.confirm("Are you sure you want to leave this group?")) {
-      document.body.classList.add("wait");
-      const result = await leaveConversation({
-        conversationId: conversation.id,
-      })
-        .unwrap()
-        .catch((error) => {
-          dispatch(
-            openModal({
-              type: "error",
-              title: "Failed to Leave Conversation",
-              message: getErorMessage(error) || "Unexpected error occurred.",
-            }),
-          );
-          return null;
-        });
+    dispatch(
+      openModal({
+        type: "confirmation",
+        title: "Leave Conversation",
+        message: "Are you sure you want to leave this conversation?",
+        onContinue: async () => {
+          document.body.classList.add("wait");
+          try {
+            const result = await leaveConversation({
+              conversationId: conversation.id,
+            }).unwrap();
 
-      document.body.classList.remove("wait");
-      if (result?.success) {
-        deleteConversationFromState({
-          conversationId: conversation.id,
-        });
-      }
-    }
+            document.body.classList.remove("wait");
+            if (result?.success) {
+              deleteConversationFromState({
+                conversationId: conversation.id,
+              });
+            }
+          } catch (error) {
+            dispatch(
+              openModal({
+                type: "error",
+                title: "Failed to Leave Conversation",
+                message: getErorMessage(error) || "Unexpected error occurred.",
+              }),
+            );
+          }
+        },
+      }),
+    );
   };
 
   const handleAddParticipantToConversation = async ({
@@ -156,68 +169,66 @@ const useGetConversationActions = ({
   }: {
     participantIds: UserSearchPreview[];
   }) => {
-    const result = await addParticipantToConversation({
-      conversationId: conversation.id,
-      participantIds: participantIds.map((p) => p.id),
-    })
-      .unwrap()
-      .catch((error) => {
-        dispatch(
-          openModal({
-            type: "error",
-            title: "Failed to Add Participants",
-            message: getErorMessage(error) || "Unexpected error occurred.",
-          }),
-        );
+    try {
+      const result = await addParticipantToConversation({
+        conversationId: conversation.id,
+        participantIds: participantIds.map((p) => p.id),
+      }).unwrap();
 
-        return null;
-      });
+      if (result?.success) {
+        updateConversation(conversation.id, (prev) => {
+          if (prev.type === "GROUP") {
+            prev.participants.push(
+              ...participantIds.map((p) => {
+                return {
+                  ...p,
+                  conversationId: conversation.id,
+                  role: "PARTICIPANT" as const,
+                };
+              }),
+            );
+          }
+        });
 
-    if (result?.success) {
-      updateConversation(conversation.id, (prev) => {
-        if (prev.type === "GROUP") {
-          prev.participants.push(
-            ...participantIds.map((p) => {
-              return {
-                ...p,
-                conversationId: conversation.id,
-                role: "PARTICIPANT" as const,
-              };
-            }),
-          );
-        }
-      });
-
-      dispatch(closeModal());
+        dispatch(closeModal());
+      }
+    } catch (error) {
+      dispatch(
+        openModal({
+          type: "error",
+          title: "Failed to Add Participants",
+          message: getErorMessage(error) || "Unexpected error occurred.",
+        }),
+      );
     }
   };
 
   const handleRemoveParticipant = async (
     participant: UserPreviewAtConversation,
   ) => {
-    const result = await removeUserFromConversation({
-      conversationId: conversation.id,
-      userId: participant.id,
-    })
-      .unwrap()
-      .catch((err) => {
-        dispatch(
-          pushModal({
-            type: "error",
-            title: "Failed to remove user",
-            message: getErorMessage(err) || "Something went wrong",
-          }),
-        );
-      });
+    try {
+      const result = await removeUserFromConversation({
+        conversationId: conversation.id,
+        userId: participant.id,
+      }).unwrap();
 
-    if (result?.success) {
-      updateConversation(conversation.id, (prev) => {
-        if (prev.type === "GROUP") {
-          prev.participants = prev.participants.filter(
-            (p) => p.id !== participant.id,
-          );
-        }
-      });
+      if (result?.success) {
+        updateConversation(conversation.id, (prev) => {
+          if (prev.type === "GROUP") {
+            prev.participants = prev.participants.filter(
+              (p) => p.id !== participant.id,
+            );
+          }
+        });
+      }
+    } catch (error) {
+      dispatch(
+        pushModal({
+          type: "error",
+          title: "Failed to remove user",
+          message: getErorMessage(error) || "Something went wrong",
+        }),
+      );
     }
   };
 

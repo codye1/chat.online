@@ -41,6 +41,8 @@
   align-items: center;
   justify-content: center;
 
+  aspect-ratio: 16 / 9;
+
   & .image,
   & .video {
     width: 100%;

@@ -32,7 +32,7 @@
   display: flex;
   box-shadow: var(--shadow-s);
   flex-direction: column;
-  max-width: 50%;
+  max-width: 90%;
   object-fit: cover;
 
   & h3 {

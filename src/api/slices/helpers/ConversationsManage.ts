@@ -196,7 +196,7 @@ const upsertConversation = (conversation: Conversation) => {
   );
 };
 
-const deleteConversationFromState = async ({
+const deleteConversationFromState = ({
   conversationId,
 }: {
   conversationId: string;

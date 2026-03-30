@@ -14,11 +14,14 @@ const sendMessage = ({
   media?: MessageMedia[];
 }) => {
   if (text.length === 0) return;
+  const userRole = "PARTICIPANT"; // This will be used in the optimistic message to set the sender role, the real role will be set when the message is received from the server
+
   const tempId = addOptimisticMessage({
     conversationId,
     text,
     replyToMessageId,
     media,
+    userRole,
   });
 
   // If the conversationId starts with "tempId", it means the conversation is not created yet and we should send the message with recipientId instead of conversationId

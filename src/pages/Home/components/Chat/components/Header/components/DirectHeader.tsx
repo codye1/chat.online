@@ -1,6 +1,6 @@
 import socket from "@utils/socket/socket";
 import type { DirectConversation } from "@utils/types";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import headerStyles from "../Header.module.css";
 import getOnlineStatus from "@utils/helpers/getOnlineStatus";
 import { useAppDispatch } from "@hooks/hooks";
@@ -9,9 +9,10 @@ import { openModal } from "@redux/global";
 interface IDirectHeader {
   conversation: DirectConversation;
   className: string;
+  children?: ReactNode;
 }
 
-const DirectHeader = ({ conversation, className }: IDirectHeader) => {
+const DirectHeader = ({ conversation, className, children }: IDirectHeader) => {
   useEffect(() => {
     socket.emit("subscribe:lastSeenAt", conversation.otherParticipant.id);
     return () => {
@@ -32,6 +33,7 @@ const DirectHeader = ({ conversation, className }: IDirectHeader) => {
         )
       }
     >
+      {children}
       <span>
         <h1>{conversation.title}</h1>
         {conversation.activeUsers.length > 0 && (

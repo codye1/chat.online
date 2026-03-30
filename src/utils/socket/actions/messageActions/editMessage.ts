@@ -28,13 +28,14 @@ const editMessage = ({
             );
             if (mediaIndex !== -1) {
               message.media[mediaIndex] = replaceMedia.newMedia;
+              return;
             }
           }
-
           message.media.push(replaceMedia.newMedia);
-        } else {
-          message.media = [replaceMedia.newMedia];
+          return;
         }
+
+        message.media = [replaceMedia.newMedia];
       }
     }
   });

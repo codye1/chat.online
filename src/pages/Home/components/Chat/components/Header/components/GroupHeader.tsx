@@ -2,13 +2,15 @@ import type { GroupConversation } from "@utils/types";
 import headerStyles from "../Header.module.css";
 import { useAppDispatch } from "@hooks/hooks";
 import { openModal } from "@redux/global";
+import type { ReactNode } from "react";
 
 interface IGroupHeader {
   conversation: GroupConversation;
   className: string;
+  children?: ReactNode;
 }
 
-const GroupHeader = ({ conversation, className }: IGroupHeader) => {
+const GroupHeader = ({ conversation, className, children }: IGroupHeader) => {
   const dispatch = useAppDispatch();
 
   return (
@@ -20,6 +22,7 @@ const GroupHeader = ({ conversation, className }: IGroupHeader) => {
         );
       }}
     >
+      {children}
       <span>
         <h1>{conversation.title}</h1>
         {conversation.activeUsers.length > 0 && (

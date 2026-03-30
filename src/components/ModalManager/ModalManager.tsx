@@ -12,6 +12,7 @@ import OtherUserModal from "./Modals/OtherUserModal/OtherUserModal";
 import GroupInfo from "./Modals/GroupInfo/GroupInfo";
 import WarningModal from "./Modals/WarningModal/WarningModal";
 import AddParticipants from "./Modals/AddParticipants/AddParticipants";
+import Confirmation from "./Modals/Confirmation/Confirmation";
 
 const ModalManager = () => {
   const modalStack = useAppSelector((state) => state.global.modalStack);
@@ -80,6 +81,15 @@ const ModalManager = () => {
           conversation={modal.conversation}
           canGoBack={canGoBack}
           usersInConversation={modal.usersInConversation}
+        />
+      );
+    case "confirmation":
+      return (
+        <Confirmation
+          title={modal.title}
+          message={modal.message}
+          onContinue={modal.onContinue}
+          canGoBack={canGoBack}
         />
       );
     default:

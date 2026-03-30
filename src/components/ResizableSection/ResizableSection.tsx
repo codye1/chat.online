@@ -6,6 +6,7 @@ import clsx from "clsx";
 interface IResizableSection {
   children: ReactNode;
   maxWidth?: number;
+  defaultWidth?: number;
   minWidth?: number;
   className?: string;
 }
@@ -13,10 +14,13 @@ interface IResizableSection {
 const ResizableSection = ({
   children,
   maxWidth = vwToPx(100),
+  defaultWidth,
   minWidth = vwToPx(20),
   className,
 }: IResizableSection) => {
-  const [width, setWidth] = useState<number>(vwToPx(50));
+  const [width, setWidth] = useState<number>(
+    defaultWidth ?? (maxWidth + minWidth) / 2,
+  );
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -54,7 +58,11 @@ const ResizableSection = ({
   return (
     <section
       className={clsx(styles.resizableSection, className)}
-      style={{ width: `${width}px` }}
+      style={{
+        width: `${width}px`,
+        minWidth: `${minWidth}px`,
+        maxWidth: `${maxWidth}px`,
+      }}
     >
       {children}
       <div className={styles.resizer} onMouseDown={handleMouseDown}></div>

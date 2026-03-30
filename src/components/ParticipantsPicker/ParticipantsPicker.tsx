@@ -64,7 +64,10 @@ const ParticipantsPicker = ({
                   key={user.id}
                   className={styles.searchResult}
                   onClick={() => {
-                    if (!selectedUsers.find((u) => u.id === user.id)) {
+                    if (
+                      !selectedUsers.find((u) => u.id === user.id) ||
+                      !usersInConversation?.find((u) => u.id === user.id)
+                    ) {
                       onSelectedUsersChange([...selectedUsers, user]);
                     }
                   }}

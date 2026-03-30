@@ -12,9 +12,14 @@ import NavigationDrawer from "../Sidebar/components/NavigationDrawer/NavigationD
 import back from "@assets/back.svg";
 import ArchivedConversations from "./components/ArchivedConversations/ArchivedConversations";
 import useDebounce from "@hooks/useDebounce";
+import { useAppSelector } from "@hooks/hooks";
+import clsx from "clsx";
 export type views = "CONVERSATIONS" | "SEARCH" | "ARCHIVED";
 
 const ConversationsList = () => {
+  const conversationListOpen = useAppSelector(
+    (state) => state.global.conversationsListOpen,
+  );
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -38,8 +43,11 @@ const ConversationsList = () => {
 
   return (
     <ResizableSection
-      maxWidth={vwToPx(65)}
-      className={styles.conversationsList}
+      maxWidth={vwToPx(35)}
+      className={clsx(
+        styles.conversationsList,
+        !conversationListOpen && styles.closed,
+      )}
     >
       {view === "ARCHIVED" ? (
         <div

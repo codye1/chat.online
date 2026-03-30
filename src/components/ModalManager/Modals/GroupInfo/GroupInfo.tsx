@@ -144,7 +144,9 @@ const GroupInfo = ({ initialConversation }: IGroupInfo) => {
                   }
                 });
                 setCanLoadMoreParticipants(data.hasMore);
+                return;
               }
+              setCanLoadMoreParticipants(false);
             }}
             hasMore={canLoadMoreParticipants}
             className={styles.participantsList}

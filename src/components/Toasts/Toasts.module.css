@@ -1,0 +1,37 @@
+.toasts {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.toast {
+  background-color: var(--c-foreground);
+  font-size: var(--text-lg);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-m);
+}
+
+.closeButton {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+
+  background: none;
+  border: none;
+
+  margin-left: auto;
+}
+
+.icon {
+  width: 25px;
+  height: 25px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+}

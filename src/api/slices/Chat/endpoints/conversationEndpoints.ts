@@ -195,7 +195,10 @@ const buildConversationEndpoints = (builder: Builder) => ({
     }),
   }),
 
-  deleteConversation: builder.mutation<void, { conversationId: string }>({
+  deleteConversation: builder.mutation<
+    { success: boolean },
+    { conversationId: string }
+  >({
     query: ({ conversationId }) => ({
       url: `chat/conversations/${conversationId}`,
       method: "DELETE",

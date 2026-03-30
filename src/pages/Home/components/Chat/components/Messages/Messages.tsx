@@ -45,7 +45,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
       {data && (
         <VList
           items={data.items}
-          itemsFetching={isFetching}
+          itemsFetching={isFetching || isLoading}
           listId={conversation.id}
           hasMoreUp={!!data?.hasMoreUp}
           hasMoreDown={!!data?.hasMoreDown}

@@ -26,10 +26,16 @@ const OtherUserModal = ({ userPreview, canGoBack }: IOtherUserModal) => {
     refetchOnMountOrArgChange: true,
   });
 
-  const { data: conversation } = useGetConversationQuery({
-    recipientId: null,
-    conversationId: data?.directConversationId || null,
-  });
+  const { data: conversation } = useGetConversationQuery(
+    {
+      recipientId: null,
+      conversationId: data?.directConversationId || null,
+    },
+    {
+      skip: !data?.directConversationId,
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
   return (
     <Modal
