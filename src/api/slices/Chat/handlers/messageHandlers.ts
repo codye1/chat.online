@@ -16,7 +16,7 @@ const onNewMessage = (message: Message) => {
   const { getState } = store;
 
   const state = getState() as RootState;
-  const conversationId = state.global.conversationId;
+  const openedConversationId = state.global.conversationId;
   const conversationsState = getConversationsState();
 
   const conversation = conversationsState?.byId[message.conversationId];
@@ -35,19 +35,6 @@ const onNewMessage = (message: Message) => {
 
       if (state.auth.user.id !== message.sender.id) {
         convo.unreadMessages += 1;
-
-        store.dispatch(
-          addToastWithTimeout({
-            id: crypto.randomUUID(),
-            type: "newMessage",
-            newMessage: {
-              sender: getDisplayName(message.sender),
-              text: message.text,
-              conversationId: message.conversationId,
-            },
-            duration: 3000,
-          }),
-        );
       }
     }
   });
@@ -61,10 +48,25 @@ const onNewMessage = (message: Message) => {
     }
   });
 
-  if (conversationId !== message.conversationId) {
+  if (openedConversationId !== message.conversationId) {
     updateMessages(message.conversationId, (messages) => {
       messages.hasMoreDown = true;
     });
+
+    if (state.auth.user.id !== message.sender.id) {
+      store.dispatch(
+        addToastWithTimeout({
+          id: crypto.randomUUID(),
+          type: "newMessage",
+          newMessage: {
+            sender: getDisplayName(message.sender),
+            text: message.text,
+            conversationId: message.conversationId,
+          },
+          duration: 3000,
+        }),
+      );
+    }
     return;
   }
   updateMessages(message.conversationId, (messages) => {
