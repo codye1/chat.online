@@ -57,7 +57,6 @@ const sendMessage = ({
         replyToMessageId,
         media,
         tempId,
-        throwError: true,
       },
       errorHandler.bind(null, { conversationId, tempId }),
     );
@@ -75,8 +74,6 @@ const errorHandler = (
 ) => {
   const { error } = data;
   if (error) {
-    console.log("error:", error.message);
-
     updateMessages(conversationId, (messages) => {
       const message = messages.items.find((msg) => msg.id === tempId);
       if (message) {

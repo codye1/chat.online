@@ -20,16 +20,14 @@ const editMessage = ({
   newText,
   replaceMedia,
 }: EditMessageParams) => {
-  let previousText: string | null = null;
+  let previousText: string | undefined;
   let previousMedia: MessageMedia[] | undefined;
-  let previousStatus: "SENDING" | "SENT" | "FAILED" | null = null;
 
   updateMessages(conversationId, (messages) => {
     const message = messages.items.find((msg) => msg.id === messageId);
     if (message) {
       previousText = message.text;
       previousMedia = message.media?.map((media) => ({ ...media }));
-      previousStatus = message.status;
 
       message.text = newText;
       message.status = "SENDING";
@@ -54,8 +52,6 @@ const editMessage = ({
     }
   });
 
-  if (previousText === null || previousStatus === null) return;
-
   socket.emit(
     "message:edit",
     {
@@ -70,7 +66,6 @@ const editMessage = ({
       messageId,
       previousText,
       previousMedia,
-      previousStatus,
     }),
   );
 };
@@ -78,9 +73,8 @@ const editMessage = ({
 interface ErrorHandlerParams {
   conversationId: string;
   messageId: string;
-  previousText: string;
+  previousText?: string;
   previousMedia?: MessageMedia[];
-  previousStatus: "SENDING" | "SENT" | "FAILED";
 }
 
 const errorHandler = (
@@ -89,21 +83,21 @@ const errorHandler = (
     messageId,
     previousText,
     previousMedia,
-    previousStatus,
   }: ErrorHandlerParams,
   data: { error: SocketError },
 ) => {
   const { error } = data;
   if (error) {
-    updateMessages(conversationId, (messages) => {
-      const message = messages.items.find((msg) => msg.id === messageId);
+    if (previousText) {
+      updateMessages(conversationId, (messages) => {
+        const message = messages.items.find((msg) => msg.id === messageId);
 
-      if (message) {
-        message.text = previousText;
-        message.media = previousMedia;
-        message.status = previousStatus;
-      }
-    });
+        if (message) {
+          message.text = previousText;
+          message.media = previousMedia;
+        }
+      });
+    }
 
     store.dispatch(
       addToast({

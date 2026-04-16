@@ -6,7 +6,7 @@ import socket from "@utils/socket/socket";
 import type { Message, SocketError } from "@utils/types";
 
 const deleteMessage = (messageId: string, conversationId: string) => {
-  let deletedMessage: Message | null = null;
+  let optimisticDeletedMessage: Message | undefined;
   let deletedMessageIndex = -1;
 
   updateMessages(conversationId, (messages) => {
@@ -15,18 +15,18 @@ const deleteMessage = (messageId: string, conversationId: string) => {
     );
     if (deletedMessageIndex === -1) return;
 
-    deletedMessage = current(messages.items[deletedMessageIndex]) as Message;
+    optimisticDeletedMessage = current(
+      messages.items[deletedMessageIndex],
+    ) as Message;
     messages.items.splice(deletedMessageIndex, 1);
   });
-
-  if (!deletedMessage) return;
 
   socket.emit(
     "message:delete",
     { messageId, throwError: true },
     errorHandler.bind(null, {
       conversationId,
-      deletedMessage,
+      optimisticDeletedMessage,
       deletedMessageIndex,
     }),
   );
@@ -34,28 +34,36 @@ const deleteMessage = (messageId: string, conversationId: string) => {
 
 interface ErrorHandlerParams {
   conversationId: string;
-  deletedMessage: Message;
+  optimisticDeletedMessage?: Message;
   deletedMessageIndex: number;
 }
 
 const errorHandler = (
-  { conversationId, deletedMessage, deletedMessageIndex }: ErrorHandlerParams,
+  {
+    conversationId,
+    optimisticDeletedMessage,
+    deletedMessageIndex,
+  }: ErrorHandlerParams,
   data: { error: SocketError },
 ) => {
   const { error } = data;
   if (error) {
-    updateMessages(conversationId, (messages) => {
-      const exists = messages.items.some((msg) => msg.id === deletedMessage.id);
+    if (optimisticDeletedMessage) {
+      updateMessages(conversationId, (messages) => {
+        const exists = messages.items.some(
+          (msg) => msg.id === optimisticDeletedMessage.id,
+        );
 
-      if (exists) return;
+        if (exists) return;
 
-      const insertIndex = Math.max(
-        0,
-        Math.min(deletedMessageIndex, messages.items.length),
-      );
+        const insertIndex = Math.max(
+          0,
+          Math.min(deletedMessageIndex, messages.items.length),
+        );
 
-      messages.items.splice(insertIndex, 0, deletedMessage);
-    });
+        messages.items.splice(insertIndex, 0, optimisticDeletedMessage);
+      });
+    }
 
     store.dispatch(
       addToast({

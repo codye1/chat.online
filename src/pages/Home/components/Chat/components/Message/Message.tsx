@@ -120,7 +120,7 @@ const Message = ({
                   minute: "2-digit",
                 })}
               </span>
-              {isSentByCurrentUser && message.status == "SENT" && (
+              {isSentByCurrentUser && message.status === "SENT" && (
                 <img
                   className={clsx(styles.check, { [styles.read]: read })}
                   src={Check}
@@ -143,7 +143,7 @@ const Message = ({
           />
         </div>
       </div>
-      {showContextMenu && message.status == "SENT" && (
+      {showContextMenu && message.status === "SENT" && (
         <ContextMenu
           isOpen={showContextMenu}
           onClose={() => setShowContextMenu(false)}

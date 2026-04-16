@@ -17,7 +17,7 @@ const addReaction = ({
   conversationId,
 }: AddReactionParams) => {
   const currentUser = store.getState().auth.user;
-  let previousReactions: GroupedReactions | null = null;
+  let previousReactions: GroupedReactions | undefined;
 
   updateMessages(conversationId, (messages) => {
     if (!messages?.items) return;
@@ -49,8 +49,6 @@ const addReaction = ({
     message.reactions[content].isActive = true;
   });
 
-  if (!previousReactions) return;
-
   socket.emit(
     "reaction:add",
     { messageId, content, throwError: true },
@@ -65,7 +63,7 @@ const addReaction = ({
 interface ErrorHandlerParams {
   conversationId: string;
   messageId: string;
-  previousReactions: GroupedReactions;
+  previousReactions?: GroupedReactions;
 }
 
 const errorHandler = (
@@ -75,12 +73,14 @@ const errorHandler = (
   const { error } = data;
   if (!error) return;
 
-  updateMessages(conversationId, (messages) => {
-    const message = messages.items.find((msg) => msg.id === messageId);
-    if (!message) return;
+  if (previousReactions) {
+    updateMessages(conversationId, (messages) => {
+      const message = messages.items.find((msg) => msg.id === messageId);
+      if (!message) return;
 
-    message.reactions = previousReactions;
-  });
+      message.reactions = previousReactions;
+    });
+  }
 
   store.dispatch(
     addToast({
