@@ -54,7 +54,7 @@ interface MessageMedia {
 interface Message {
   id: string;
   text: string;
-  status: "sending" | "sent" | "failed";
+  status: "SENDING" | "SENT" | "FAILED";
   media?: MessageMedia[];
   conversationId: string;
   sender: UserPreviewAtConversation;
@@ -155,6 +155,10 @@ interface SearchResponse {
   global: GlobalSearchItem[];
 }
 
+interface SocketError {
+  message: string;
+}
+
 export type {
   User,
   UserPreview,
@@ -178,4 +182,5 @@ export type {
   EditableConversationFields,
   MessageMedia,
   Roles,
+  SocketError,
 };
