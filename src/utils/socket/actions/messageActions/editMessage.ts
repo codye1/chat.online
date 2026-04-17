@@ -1,13 +1,10 @@
 import { updateMessages } from "@api/slices/helpers/MessagesManage";
+import { addToast } from "@redux/global";
+import store from "@redux/store";
 import socket from "@utils/socket/socket";
-import type { MessageMedia } from "@utils/types";
+import type { MessageMedia, SocketError } from "@utils/types";
 
-const editMessage = ({
-  messageId,
-  conversationId,
-  newText,
-  replaceMedia,
-}: {
+interface EditMessageParams {
   messageId: string;
   conversationId: string;
   newText: string;
@@ -15,11 +12,26 @@ const editMessage = ({
     oldMediaId?: string;
     newMedia: MessageMedia;
   };
-}) => {
+}
+
+const editMessage = ({
+  messageId,
+  conversationId,
+  newText,
+  replaceMedia,
+}: EditMessageParams) => {
+  let previousText: string | undefined;
+  let previousMedia: MessageMedia[] | undefined;
+
   updateMessages(conversationId, (messages) => {
     const message = messages.items.find((msg) => msg.id === messageId);
     if (message) {
+      previousText = message.text;
+      previousMedia = message.media?.map((media) => ({ ...media }));
+
       message.text = newText;
+      message.status = "SENDING";
+
       if (replaceMedia) {
         if (message.media) {
           if (replaceMedia.oldMediaId) {
@@ -40,12 +52,63 @@ const editMessage = ({
     }
   });
 
-  socket.emit("message:edit", {
-    messageId,
+  socket.emit(
+    "message:edit",
+    {
+      messageId,
+      conversationId,
+      newText,
+      replaceMedia,
+      throwError: true,
+    },
+    errorHandler.bind(null, {
+      conversationId,
+      messageId,
+      previousText,
+      previousMedia,
+    }),
+  );
+};
+
+interface ErrorHandlerParams {
+  conversationId: string;
+  messageId: string;
+  previousText?: string;
+  previousMedia?: MessageMedia[];
+}
+
+const errorHandler = (
+  {
     conversationId,
-    newText,
-    replaceMedia,
-  });
+    messageId,
+    previousText,
+    previousMedia,
+  }: ErrorHandlerParams,
+  data: { error: SocketError },
+) => {
+  const { error } = data;
+  if (error) {
+    if (previousText) {
+      updateMessages(conversationId, (messages) => {
+        const message = messages.items.find((msg) => msg.id === messageId);
+
+        if (message) {
+          message.text = previousText;
+          message.media = previousMedia;
+        }
+      });
+    }
+
+    store.dispatch(
+      addToast({
+        id: crypto.randomUUID(),
+        type: "error",
+        message: "Failed to edit the message. Please try again.",
+        from: "editMessage",
+        duration: 5000,
+      }),
+    );
+  }
 };
 
 export default editMessage;

@@ -11,6 +11,7 @@ import MessageContextMenu from "./components/MessageContextMenu/MessageContextMe
 import Avatar from "@components/Avatar/Avatar";
 import { useAppDispatch } from "@hooks/hooks";
 import { openModal } from "@redux/global";
+import errorIcon from "@assets/error.svg";
 
 export interface IMessage {
   message: MessageType;
@@ -119,11 +120,18 @@ const Message = ({
                   minute: "2-digit",
                 })}
               </span>
-              {isSentByCurrentUser && message.status !== "sending" && (
+              {isSentByCurrentUser && message.status === "SENT" && (
                 <img
                   className={clsx(styles.check, { [styles.read]: read })}
                   src={Check}
                   alt=""
+                />
+              )}
+              {isSentByCurrentUser && message.status === "FAILED" && (
+                <img
+                  className={styles.errorIcon}
+                  src={errorIcon}
+                  alt="Failed to send"
                 />
               )}
             </div>
@@ -135,7 +143,7 @@ const Message = ({
           />
         </div>
       </div>
-      {showContextMenu && message.status !== "sending" && (
+      {showContextMenu && message.status === "SENT" && (
         <ContextMenu
           isOpen={showContextMenu}
           onClose={() => setShowContextMenu(false)}

@@ -71,6 +71,11 @@
   opacity: 0.7;
 }
 
+.errorIcon {
+  width: 16px;
+  height: 16px;
+}
+
 .check {
   width: 16px;
   height: 16px;

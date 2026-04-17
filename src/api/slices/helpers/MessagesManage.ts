@@ -60,7 +60,7 @@ const addOptimisticMessage = ({
       media: media ?? undefined,
       sender: { ...currentUser, role: userRole, conversationId },
       createdAt: new Date().toISOString(),
-      status: "sending",
+      status: "SENDING",
       reactions: {},
     });
   });
