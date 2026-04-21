@@ -1,0 +1,21 @@
+
+.connectionStatus {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  bottom: 20px;
+  left: 20px;
+  background-color: var(--c-dark);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+
+  gap: 10px;
+
+  & button {
+    color: var(--c-link);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+}

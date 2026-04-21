@@ -2,6 +2,8 @@ import { BrowserRouter } from "react-router-dom";
 import Routing from "./router/routing";
 import { useRefreshMutation } from "@api/slices/authSlice";
 import { useEffect, useRef } from "react";
+import Toasts from "@components/Toasts/Toasts";
+import ModalManager from "@components/ModalManager/ModalManager";
 
 function App() {
   const [refreshToken] = useRefreshMutation();
@@ -17,6 +19,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routing />
+      <ModalManager />
+      <Toasts />
     </BrowserRouter>
   );
 }
