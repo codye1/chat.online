@@ -6,9 +6,9 @@ import connectToConversation from "./actions/conversationActions/connectToConver
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-const SOCKET_RECONNECTION_ATTEMPTS = Number.POSITIVE_INFINITY;
+const SOCKET_RECONNECTION_ATTEMPTS = 10;
 const SOCKET_RECONNECTION_DELAY = 1000;
-const SOCKET_RECONNECTION_DELAY_MAX = Number.POSITIVE_INFINITY;
+const SOCKET_RECONNECTION_DELAY_MAX = 30000;
 
 const socket: Socket = io(API_BASE_URL, {
   autoConnect: false,

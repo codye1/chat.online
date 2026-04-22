@@ -16,8 +16,9 @@ const SocketConnection = () => {
         <Spinner />
         {reconnectAttempts > 0 && (
           <p>
-            {reconnectAttempts} Reconnecting in{" "}
-            {secondsUntilNextReconnectAttempt}s
+            {reconnectAttempts}
+            {secondsUntilNextReconnectAttempt !== null &&
+              ` - next attempt in ${secondsUntilNextReconnectAttempt}s`}
           </p>
         )}
         <button onClick={reconnectNow}>Try now</button>

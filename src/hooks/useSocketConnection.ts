@@ -42,8 +42,17 @@ export const useSocketConnection = () => {
     const startReconnectCountdown = (delayMs: number) => {
       clearReconnectCountdown();
 
+      if (!Number.isFinite(delayMs)) {
+        setSecondsUntilNextReconnectAttempt(null);
+        return;
+      }
+
       const initialSeconds = Math.ceil(delayMs / 1000);
       setSecondsUntilNextReconnectAttempt(initialSeconds);
+
+      if (initialSeconds <= 0) {
+        return;
+      }
 
       reconnectCountdownIntervalRef.current = window.setInterval(() => {
         setSecondsUntilNextReconnectAttempt((currentSeconds) => {
@@ -74,8 +83,10 @@ export const useSocketConnection = () => {
         setReconnectAttempts(attempt);
         setLastReconnectAttemptAt(new Date());
 
+        const backoffAttempt = Math.max(attempt - 1, 0);
+
         const nextReconnectDelay = Math.min(
-          SOCKET_RECONNECTION_DELAY * 2 ** attempt,
+          SOCKET_RECONNECTION_DELAY * 2 ** backoffAttempt,
           SOCKET_RECONNECTION_DELAY_MAX,
         );
 
