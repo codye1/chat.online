@@ -6,6 +6,10 @@ import connectToConversation from "./actions/conversationActions/connectToConver
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
+const SOCKET_RECONNECTION_ATTEMPTS = 10;
+const SOCKET_RECONNECTION_DELAY = 1000;
+const SOCKET_RECONNECTION_DELAY_MAX = 30000;
+
 const socket: Socket = io(API_BASE_URL, {
   autoConnect: false,
   withCredentials: true,
@@ -13,9 +17,10 @@ const socket: Socket = io(API_BASE_URL, {
     token: localStorage.getItem("token") || undefined,
   },
   reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
+  reconnectionAttempts: SOCKET_RECONNECTION_ATTEMPTS,
+  reconnectionDelay: SOCKET_RECONNECTION_DELAY,
+  reconnectionDelayMax: SOCKET_RECONNECTION_DELAY_MAX,
+  randomizationFactor: 0,
   timeout: 20000,
 });
 
@@ -33,6 +38,7 @@ interface SocketListenerCallbacks {
   onConnect?: () => void;
   onDisconnect?: () => void;
   onConnectError?: (error: Error) => void;
+  onReconnectAttempt?: (attempt: number) => void;
 }
 
 let pingInterval: number | null = null;
@@ -112,6 +118,7 @@ const initializeSocketListeners = (
   const onReconnectAttempt = (attempt: number) => {
     console.log(`Reconnection attempt ${attempt}`);
     syncSocketAuthorizationFromStorage();
+    callbacks?.onReconnectAttempt?.(attempt);
   };
 
   const onReconnectFailed = () => {
@@ -146,6 +153,9 @@ const initializeSocketListeners = (
 
 export default socket;
 export {
+  SOCKET_RECONNECTION_ATTEMPTS,
+  SOCKET_RECONNECTION_DELAY,
+  SOCKET_RECONNECTION_DELAY_MAX,
   setSocketAuthorization,
   initializeSocketListeners,
   syncSocketAuthorizationFromStorage,
