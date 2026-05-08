@@ -44,6 +44,7 @@ export const {
   useLeaveConversationMutation,
   useGetConversationParticipantsMutation,
   useAddParticipantToConversationMutation,
+  useUpdateFolderPositionMutation,
 } = chatSlice;
 
 const DEFAULT_CONVERSATIONS_STATE: ConversationsState = {

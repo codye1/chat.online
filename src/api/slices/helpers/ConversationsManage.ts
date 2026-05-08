@@ -43,6 +43,8 @@ const updatePinnedPositions = async (
   folderId: string,
   updates: { conversationId: string; newPinnedPosition: number | null }[],
 ) => {
+  console.log("updating");
+
   updateConversationsState((state) => {
     let pinned: string[] | undefined;
     let unpinned: string[] | undefined;

@@ -1,17 +1,16 @@
 import type { LiHTMLAttributes } from "react";
+import { forwardRef } from "react";
 import styles from "./ListItem.module.css";
 import clsx from "clsx";
 
-const ListItem = ({
-  children,
-  className,
-  ...props
-}: LiHTMLAttributes<HTMLLIElement>) => {
-  return (
-    <li {...props} className={clsx(styles.item, className)}>
-      {children}
-    </li>
-  );
-};
+const ListItem = forwardRef<HTMLLIElement, LiHTMLAttributes<HTMLLIElement>>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <li ref={ref} {...props} className={clsx(styles.item, className)}>
+        {children}
+      </li>
+    );
+  },
+);
 
 export default ListItem;

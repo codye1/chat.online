@@ -1,15 +1,24 @@
 import clsx from "clsx";
 import styles from "./PreviewItem.module.css";
 import Avatar from "@components/Avatar/Avatar";
-import { Children, isValidElement, useState, type ReactNode } from "react";
+import {
+  Children,
+  isValidElement,
+  useCallback,
+  useState,
+  type LiHTMLAttributes,
+  type ReactNode,
+  type Ref,
+} from "react";
 import ContextMenu, {
   ContextMenuSlot,
 } from "@components/ContextMenu/ContextMenu";
 import pinIcon from "@assets/pin.svg";
 import ListItem from "@components/ListItem/ListItem";
 import ListItemInfo from "@components/ListItem/ListItemInfo";
+import { useSortable } from "@dnd-kit/react/sortable";
 
-interface IPreviewItem {
+interface IPreviewItem extends LiHTMLAttributes<HTMLLIElement> {
   avatarUrl: string | null;
 
   title: string;
@@ -25,9 +34,11 @@ interface IPreviewItem {
   isActive?: boolean;
   isArchived?: boolean;
   children?: ReactNode;
+  listItemProps?: LiHTMLAttributes<HTMLLIElement>;
+  listItemRef?: Ref<HTMLLIElement>;
 }
 
-const PreviewItem = ({
+const PreviewItemBase = ({
   avatarUrl,
   title,
   description,
@@ -38,6 +49,8 @@ const PreviewItem = ({
   isPinned,
   isMuted,
   children,
+  listItemProps,
+  listItemRef,
 }: IPreviewItem) => {
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({
@@ -47,6 +60,7 @@ const PreviewItem = ({
 
   return (
     <ListItem
+      ref={listItemRef}
       className={clsx({ [styles.active]: isActive })}
       onClick={onClick}
       onContextMenu={(el) => {
@@ -59,6 +73,7 @@ const PreviewItem = ({
         setContextMenuPosition({ x: el.clientX, y: el.clientY });
       }}
       onMouseDown={onMouseDown}
+      {...listItemProps}
     >
       <Avatar avatarUrl={avatarUrl} />
       <ListItemInfo title={title} subtitle={description} />
@@ -109,5 +124,40 @@ const PreviewItem = ({
     </ListItem>
   );
 };
+
+interface IPreviewItemSortable extends IPreviewItem {
+  id: string;
+  index: number;
+  group?: string;
+}
+
+const PreviewItemSortable = ({
+  id,
+  index,
+  group,
+  ...props
+}: IPreviewItemSortable) => {
+  const { ref, sourceRef, targetRef } = useSortable({ id, index, group });
+  const setRefs = useCallback(
+    (element: Element | null) => {
+      ref(element);
+      sourceRef(element);
+      targetRef(element);
+    },
+    [ref, sourceRef, targetRef],
+  );
+
+  return (
+    <PreviewItemBase
+      {...props}
+      listItemRef={setRefs}
+      listItemProps={props.listItemProps}
+    />
+  );
+};
+
+const PreviewItem = Object.assign(PreviewItemBase, {
+  Sortable: PreviewItemSortable,
+});
 
 export default PreviewItem;

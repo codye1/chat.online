@@ -70,6 +70,17 @@ const buildFolderEndpoints = (builder: Builder) => ({
       method: "DELETE",
     }),
   }),
+
+  updateFolderPosition: builder.mutation<
+    void,
+    { folderId: string; position: number }
+  >({
+    query: ({ folderId, position }) => ({
+      url: `chat/folders/${folderId}/position`,
+      method: "PATCH",
+      body: { position },
+    }),
+  }),
 });
 
 export default buildFolderEndpoints;
