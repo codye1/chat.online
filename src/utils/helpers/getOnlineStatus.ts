@@ -1,4 +1,6 @@
 const getOnlineStatus = (lastSeenAt: string | null | undefined): string => {
+  console.log(lastSeenAt);
+
   if (!lastSeenAt) return "last seen a long time ago";
 
   const lastSeenDate = new Date(lastSeenAt);

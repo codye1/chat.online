@@ -59,6 +59,7 @@ const buildConversationEndpoints = (builder: Builder) => ({
         const isTemp = data.id.startsWith("tempId");
 
         dispatch(setConversation({ conversationId: data.id }));
+        console.log(data);
 
         if (isTemp) {
           upsertConversation(data);
