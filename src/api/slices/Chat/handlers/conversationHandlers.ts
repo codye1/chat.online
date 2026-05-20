@@ -4,6 +4,7 @@ import {
   updateConversationsState,
   upsertConversation,
 } from "@api/slices/helpers/ConversationsManage";
+import { getMessagesState } from "@api/slices/helpers/MessagesManage";
 import { setConversation } from "@redux/global";
 import type { RootState } from "@redux/store";
 import store from "@redux/store";
@@ -67,6 +68,27 @@ interface CreateOnLastSeenAtUpdateData {
 const onNewConversation = (data: CreateOnLastSeenAtUpdateData) => {
   const { conversation, recipientId, initiator, firstMessage } = data;
   const { dispatch, getState } = store;
+  const state = getState() as RootState;
+  const selectedConversationId = state.global.conversationId;
+  const isTempSelected = selectedConversationId?.startsWith("tempId");
+  const tempRecipientId = selectedConversationId?.split(":")[1];
+  const shouldReplaceTempConversation =
+    !!isTempSelected &&
+    (tempRecipientId === recipientId || tempRecipientId === initiator);
+  const tempMessages =
+    shouldReplaceTempConversation && selectedConversationId
+      ? getMessagesState(selectedConversationId)
+      : null;
+  const migratedMessages =
+    tempMessages?.items.map((message) => ({
+      ...message,
+      status: "SENT" as const,
+      conversationId: conversation.id,
+      sender: {
+        ...message.sender,
+        conversationId: conversation.id,
+      },
+    })) ?? [];
 
   connectToConversation([conversation.id]);
   updateConversationsState((draft) => {
@@ -75,16 +97,17 @@ const onNewConversation = (data: CreateOnLastSeenAtUpdateData) => {
   });
   upsertConversation(conversation);
   upsertMessages(conversation.id, {
-    items: firstMessage ? [firstMessage] : [],
+    items: migratedMessages.length
+      ? migratedMessages
+      : firstMessage
+        ? [firstMessage]
+        : [],
     hasMoreUp: false,
     hasMoreDown: false,
-    fromUser: false,
+    fromUser: migratedMessages.length > 0,
   });
 
-  const state = getState() as RootState;
-  const isTempSelected = state.global.conversationId?.startsWith("tempId");
-  const tempId = state.global.conversationId?.split(":")[1];
-  if (isTempSelected && (tempId === recipientId || tempId === initiator)) {
+  if (shouldReplaceTempConversation) {
     dispatch(setConversation({ conversationId: conversation.id }));
   }
 };

@@ -78,4 +78,12 @@ const getMessages = (conversationId: string) => {
 
   return messagesData.items;
 };
-export { updateMessages, addOptimisticMessage, getMessages };
+
+const getMessagesState = (conversationId: string) => {
+  const state = store.getState() as RootState;
+  return chatSlice.endpoints.getMessages.select({
+    conversationId,
+  })(state)?.data;
+};
+
+export { updateMessages, addOptimisticMessage, getMessages, getMessagesState };

@@ -42,7 +42,7 @@ const DirectHeader = ({ conversation, className, children }: IDirectHeader) => {
           </h2>
         )}
         {!conversation.activeUsers?.length && (
-          <h2>{getOnlineStatus(conversation.lastSeenAt)}</h2>
+          <h2>{getOnlineStatus(conversation.otherParticipant.lastSeenAt)}</h2>
         )}
       </span>
     </header>

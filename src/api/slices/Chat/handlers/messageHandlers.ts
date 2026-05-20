@@ -79,12 +79,34 @@ const onNewMessage = (message: Message) => {
 
 const onSentMessage = (data: { tempId: string; message: Message }) => {
   const { tempId, message } = data;
+  const state = store.getState() as RootState;
 
   updateMessages(message.conversationId, (messages) => {
     const index = messages.items.findIndex((m) => m.id === tempId);
     if (index !== -1) {
-      Object.assign(messages.items[index], message, { status: "sent" });
+      Object.assign(messages.items[index], message, { status: "SENT" });
+      return;
     }
+
+    const alreadyExists = messages.items.some((m) => m.id === message.id);
+    if (!alreadyExists) {
+      messages.items.push({
+        ...message,
+        status: "SENT",
+      });
+      messages.fromUser = message.sender.id === state.auth.user.id;
+    }
+  });
+
+  updateConversationsState((draft) => {
+    const conversation = draft.byId[message.conversationId];
+    if (conversation) {
+      conversation.lastMessage = message;
+    }
+  });
+
+  updateConversation(message.conversationId, (conversation) => {
+    conversation.lastMessage = message;
   });
 };
 

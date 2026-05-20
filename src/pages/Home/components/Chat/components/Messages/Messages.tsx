@@ -109,7 +109,7 @@ const Messages = ({ conversation }: { conversation: Conversation }) => {
                 isSentByCurrentUser={message.sender.id === user.id}
                 ref={(el) => {
                   if (
-                    message.status !== "sending" &&
+                    message.status !== "SENDING" &&
                     message.sender.id !== user.id
                   ) {
                     trackUnreadMessageRef(el, message);
